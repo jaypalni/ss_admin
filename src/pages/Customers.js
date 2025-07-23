@@ -209,17 +209,6 @@ function Customers() {
       ),
     },
     {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-      render: (phone) => (
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <FaPhone style={{ marginRight: 8, color: "#666" }} />
-          {phone}
-        </div>
-      ),
-    },
-    {
       title: "Type",
       dataIndex: "customerType",
       key: "customerType",
