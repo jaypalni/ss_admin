@@ -1,0 +1,75 @@
+.logo-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+}
+
+.ssblue-logo {
+  margin-top: 35px;
+  margin-left: 15px;
+  width: 135px;
+  height: 135px;
+  object-fit: contain;
+}
+
+
+.sidebar-menu {
+  border-right: none;
+  margin-top: 35px;
+}
+
+.message-badge {
+  float: right;
+  background: #6c63ff;
+  color: white;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.header-section {
+  background: #fff;
+  display: flex;
+  justify-content: flex-end;  
+  align-items: center;
+  padding: 0 24px;
+  height: 85px;
+}
+
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 12px; 
+}
+
+
+.profile-details {
+  font-size: 12px;
+  color: gray;
+}
+
+.profile-details span {
+  font-weight: bold;
+  color: #000;
+}
+
+.content-section {
+  margin: 24px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.card-growth.up {
+  color: green;
+}
+
+.card-growth.down {
+  color: red;
+}
