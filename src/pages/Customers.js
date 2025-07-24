@@ -1,22 +1,33 @@
 import React, { useState } from "react";
-import { 
-  Table, 
-  Avatar, 
-  Button, 
-  Space, 
-  Tag, 
-  Modal, 
-  Form, 
-  Switch, 
-  message, 
+import {
+  Table,
+  Avatar,
+  Button,
+  Space,
+  Tag,
+  Modal,
+  Form,
+  Switch,
+  message,
   Popconfirm,
   Descriptions,
   Divider,
   Typography,
   Select,
-  Tabs
+  Tabs,
 } from "antd";
-import { FaEdit, FaTrash, FaEye, FaUser, FaEnvelope, FaPhone, FaCheckCircle, FaTimesCircle, FaCalendar, FaMapMarkerAlt } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaCalendar,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -39,6 +50,7 @@ export const customerMockData = [
     preferences: ["Electronics", "Books", "Fashion"],
     banned: false,
     reported: false,
+    verified1: false,
   },
   {
     key: "2",
@@ -57,6 +69,7 @@ export const customerMockData = [
     preferences: ["Sports", "Outdoor"],
     banned: true,
     reported: false,
+    verified1: false,
   },
   {
     key: "3",
@@ -75,6 +88,7 @@ export const customerMockData = [
     preferences: ["Home & Garden", "Kitchen", "Beauty"],
     banned: false,
     reported: true,
+    verified1: false,
   },
   {
     key: "4",
@@ -93,6 +107,7 @@ export const customerMockData = [
     preferences: ["Technology", "Gaming"],
     banned: false,
     reported: false,
+    verified1: false,
   },
   {
     key: "5",
@@ -111,7 +126,27 @@ export const customerMockData = [
     preferences: ["Fashion", "Beauty", "Jewelry"],
     banned: false,
     reported: true,
-  }
+    verified1: false,
+  },
+  {
+    key: "6",
+    name: "Emma Garcia",
+    email: "emma.garcia@example.com",
+    phone: "+1-555-0105",
+    verified: true,
+    customerType: "Dealer",
+    avatar: "https://via.placeholder.com/40",
+    address: "654 Maple Dr, Seattle, WA 98101",
+    joinDate: "2023-02-28",
+    buyCount: 10,
+    sellCount: 31,
+    carsBought: ["Volkswagen Passat", "Subaru Impreza"],
+    carsSold: ["Toyota Corolla", "Honda Civic", "Ford Fiesta"],
+    preferences: ["Fashion", "Beauty", "Jewelry"],
+    banned: false,
+    reported: false,
+    verified1: true,
+  },
 ];
 
 function Customers() {
@@ -129,6 +164,8 @@ function Customers() {
     filteredCustomers = customers.filter((c) => c.banned);
   } else if (activeTab === "reported") {
     filteredCustomers = customers.filter((c) => c.reported);
+  } else if (activeTab === "verified1") {
+    filteredCustomers = customers.filter((c) => c.verified);
   }
 
   // Handle edit customer verification
@@ -149,14 +186,14 @@ function Customers() {
 
   // Handle delete customer
   const handleDelete = (record) => {
-    setCustomers(customers.filter(customer => customer.key !== record.key));
-    message.success('Customer deleted successfully');
+    setCustomers(customers.filter((customer) => customer.key !== record.key));
+    message.success("Customer deleted successfully");
   };
 
   // Handle edit form submission
   const handleEditSubmit = (values) => {
-    const updatedCustomers = customers.map(customer => 
-      customer.key === selectedCustomer.key 
+    const updatedCustomers = customers.map((customer) =>
+      customer.key === selectedCustomer.key
         ? { ...customer, verified: values.verified, banned: values.banned }
         : customer
     );
@@ -164,7 +201,7 @@ function Customers() {
     setEditModalVisible(false);
     setSelectedCustomer(null);
     editForm.resetFields();
-    message.success('Customer information updated successfully');
+    message.success("Customer information updated successfully");
   };
 
   const columns = [
@@ -304,6 +341,7 @@ function Customers() {
                 { key: "all", label: "All" },
                 { key: "banned", label: "Banned" },
                 { key: "reported", label: "Reported" },
+                { key: "verified1", label: "Verified" },
               ]}
             />
             <Table
@@ -330,53 +368,59 @@ function Customers() {
       >
         {selectedCustomer && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-              <Avatar 
-                src={selectedCustomer.avatar} 
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "24px",
+              }}
+            >
+              <Avatar
+                src={selectedCustomer.avatar}
                 size={48}
-                style={{ marginRight: '16px' }}
+                style={{ marginRight: "16px" }}
               >
                 {selectedCustomer.name.charAt(0)}
               </Avatar>
               <div>
                 <h4 style={{ margin: 0 }}>{selectedCustomer.name}</h4>
-                <p style={{ margin: 0, color: '#666' }}>{selectedCustomer.email}</p>
+                <p style={{ margin: 0, color: "#666" }}>
+                  {selectedCustomer.email}
+                </p>
               </div>
             </div>
 
-            <Form
-              form={editForm}
-              layout="vertical"
-              onFinish={handleEditSubmit}
-            >
+            <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
               <Form.Item
                 name="verified"
                 label="Verification Status"
-                rules={[{ required: true, message: 'Please set verification status' }]}
-                style={{ width: '100%' }}
+                rules={[
+                  { required: true, message: "Please set verification status" },
+                ]}
+                style={{ width: "100%" }}
               >
-                <Switch 
-                  checkedChildren="Verified" 
+                <Switch
+                  checkedChildren="Verified"
                   unCheckedChildren="Not Verified"
-                  style={{ width: '120px' }}
+                  style={{ width: "120px" }}
                 />
               </Form.Item>
               <Form.Item
                 name="banned"
                 label="Ban User"
                 valuePropName="checked"
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               >
-                <Switch 
-                  checkedChildren="Banned" 
+                <Switch
+                  checkedChildren="Banned"
                   unCheckedChildren="Not Banned"
-                  style={{ width: '120px' }}
+                  style={{ width: "120px" }}
                 />
               </Form.Item>
 
-              <div style={{ textAlign: 'right', marginTop: '24px' }}>
+              <div style={{ textAlign: "right", marginTop: "24px" }}>
                 <Space>
-                  <Button 
+                  <Button
                     onClick={() => {
                       setEditModalVisible(false);
                       setSelectedCustomer(null);
@@ -404,66 +448,84 @@ function Customers() {
           setSelectedCustomer(null);
         }}
         footer={[
-          <Button 
-            key="close" 
+          <Button
+            key="close"
             onClick={() => {
               setViewModalVisible(false);
               setSelectedCustomer(null);
             }}
           >
             Close
-          </Button>
+          </Button>,
         ]}
         width={800}
       >
         {selectedCustomer && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-              <Avatar 
-                src={selectedCustomer.avatar} 
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "24px",
+              }}
+            >
+              <Avatar
+                src={selectedCustomer.avatar}
                 size={64}
-                style={{ marginRight: '16px' }}
+                style={{ marginRight: "16px" }}
               >
                 {selectedCustomer.name.charAt(0)}
               </Avatar>
               <div>
                 <h3 style={{ margin: 0 }}>{selectedCustomer.name}</h3>
-                <p style={{ margin: 0, color: '#666' }}>{selectedCustomer.email}</p>
+                <p style={{ margin: 0, color: "#666" }}>
+                  {selectedCustomer.email}
+                </p>
               </div>
             </div>
 
             <Descriptions bordered column={2}>
               <Descriptions.Item label="Phone" span={1}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <FaPhone style={{ marginRight: '8px', color: '#666' }} />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <FaPhone style={{ marginRight: "8px", color: "#666" }} />
                   {selectedCustomer.phone}
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Customer Type" span={1}>
-                <Tag color={
-                  selectedCustomer.customerType === "User" ? "blue" : "purple"
-                }>
+                <Tag
+                  color={
+                    selectedCustomer.customerType === "User" ? "blue" : "purple"
+                  }
+                >
                   {selectedCustomer.customerType}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Verification Status" span={1}>
                 <Tag color={selectedCustomer.verified ? "green" : "orange"}>
                   {selectedCustomer.verified ? (
-                    <span><FaCheckCircle style={{ marginRight: '4px' }} />Verified</span>
+                    <span>
+                      <FaCheckCircle style={{ marginRight: "4px" }} />
+                      Verified
+                    </span>
                   ) : (
-                    <span><FaTimesCircle style={{ marginRight: '4px' }} />Not Verified</span>
+                    <span>
+                      <FaTimesCircle style={{ marginRight: "4px" }} />
+                      Not Verified
+                    </span>
                   )}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Address" span={2}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <FaMapMarkerAlt style={{ marginRight: '8px', color: '#666' }} />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <FaMapMarkerAlt
+                    style={{ marginRight: "8px", color: "#666" }}
+                  />
                   {selectedCustomer.address}
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Join Date" span={1}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <FaCalendar style={{ marginRight: '8px', color: '#666' }} />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <FaCalendar style={{ marginRight: "8px", color: "#666" }} />
                   {selectedCustomer.joinDate}
                 </div>
               </Descriptions.Item>
@@ -479,12 +541,14 @@ function Customers() {
 
             <Descriptions bordered column={2} style={{ marginTop: 24 }}>
               <Descriptions.Item label="Cars Bought" span={2}>
-                {selectedCustomer.carsBought && selectedCustomer.carsBought.length > 0
+                {selectedCustomer.carsBought &&
+                selectedCustomer.carsBought.length > 0
                   ? selectedCustomer.carsBought.join(", ")
                   : "No cars bought"}
               </Descriptions.Item>
               <Descriptions.Item label="Cars Sold" span={2}>
-                {selectedCustomer.carsSold && selectedCustomer.carsSold.length > 0
+                {selectedCustomer.carsSold &&
+                selectedCustomer.carsSold.length > 0
                   ? selectedCustomer.carsSold.join(", ")
                   : "No cars sold"}
               </Descriptions.Item>
@@ -494,9 +558,11 @@ function Customers() {
 
             <div>
               <h4>Preferences</h4>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {selectedCustomer.preferences.map((preference, index) => (
-                  <Tag key={index} color="blue">{preference}</Tag>
+                  <Tag key={index} color="blue">
+                    {preference}
+                  </Tag>
                 ))}
               </div>
             </div>
@@ -507,4 +573,4 @@ function Customers() {
   );
 }
 
-export default Customers; 
+export default Customers;

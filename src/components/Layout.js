@@ -17,6 +17,7 @@ import {
   FaUserCircle,
   FaBell,
   FaSearch,
+  FaCloud,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../assets/styles/layout.css";
@@ -103,6 +104,26 @@ function AppLayout({ children }) {
       key: "/settings",
       icon: <FaCog />,
       label: "Settings",
+    },
+    {
+      key: "/content",
+      icon: <FaCloud />,
+      label: "Content",
+      hasDropdown: true,
+      children: [
+        {
+          key: "/content/websitecontent",
+          label: "Website content",
+        },
+        {
+          key: "/content/managecountry",
+          label: "Manage Country",
+        },
+        {
+          key: "/content/bannermanagement",
+          label: "Banner management",
+        },
+      ],
     },
   ];
 

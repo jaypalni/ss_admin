@@ -18,6 +18,9 @@ import Analytics from "./pages/Analytics";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import Transactions from "./pages/Transactions";
+import WebsiteContent from "./pages/WebsiteContent";
+import ManageCountry from "./pages/ManageCountry";
+import BannerManagement from "./pages/BannerManagement";
 
 const AppRouter = () => {
   return (
@@ -98,6 +101,30 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <Settings />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/content/websitecontent"
+          element={
+            <AppLayout>
+              <WebsiteContent />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/content/managecountry"
+          element={
+            <AppLayout>
+              <ManageCountry />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/content/bannermanagement"
+          element={
+            <AppLayout>
+              <BannerManagement />
             </AppLayout>
           }
         />

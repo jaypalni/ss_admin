@@ -31,7 +31,7 @@ const LoginScreen = () => {
 
     if (hasError) return;
 
-    if (!email.endsWith("@SouqSayarat.com")) {
+    if (email.endsWith("@SouqSayarat.com")) {
       setEmailErrorMsg("Email must end with '@SouqSayarat.com'.");
       return;
     }
