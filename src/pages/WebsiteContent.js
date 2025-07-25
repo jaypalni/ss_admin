@@ -57,20 +57,24 @@ function WebsiteContent() {
             />
 
             {activeTab === "faqs" && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  marginBottom: "16px",
-                }}
+              <Card
+                bordered
+                title={
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>Frequently Asked Questions</span>
+                    <Button type="primary" onClick={handleAddClick}>
+                      + Add
+                    </Button>
+                  </div>
+                }
+                style={{ marginBottom: "16px" }}
               >
-                <Button type="primary" onClick={handleAddClick}>
-                  + Add
-                </Button>
-              </div>
-            )}
-            {activeTab === "faqs" && (
-              <Card title="Frequently Asked Questions" bordered>
                 <ul style={{ paddingLeft: "20px" }}>
                   {faqs.map((faq, index) => (
                     <li key={index} style={{ marginBottom: "16px" }}>
@@ -83,7 +87,24 @@ function WebsiteContent() {
             )}
 
             {activeTab === "privacy" && (
-              <Card title="Privacy Policy" bordered>
+              <Card
+                bordered
+                title={
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>Privacy Policy</span>
+                    <Button type="primary" onClick={handleAddClick}>
+                      + Add
+                    </Button>
+                  </div>
+                }
+                style={{ marginBottom: "16px" }}
+              >
                 <ul style={{ paddingLeft: "20px" }}>
                   <li style={{ marginBottom: "12px" }}>
                     We collect personal data to improve user experience.
@@ -100,7 +121,24 @@ function WebsiteContent() {
             )}
 
             {activeTab === "terms" && (
-              <Card title="Terms & Conditions" bordered>
+              <Card
+                bordered
+                title={
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>Terms & Conditions</span>
+                    <Button type="primary" onClick={handleAddClick}>
+                      + Add
+                    </Button>
+                  </div>
+                }
+                style={{ marginBottom: "16px" }}
+              >
                 <ul style={{ paddingLeft: "20px" }}>
                   <li style={{ marginBottom: "12px" }}>
                     We collect personal data to improve user experience.
@@ -117,7 +155,17 @@ function WebsiteContent() {
             )}
 
             <Modal
-              title="Add FAQ"
+              title={
+                activeTab === "faqs"
+                  ? "Add FAQ"
+                  : activeTab === "privacy"
+                  ? "Add Privacy Policy"
+                  : activeTab === "terms"
+                  ? "Add Terms & Conditions"
+                  : activeTab === "blogs"
+                  ? "Add Blog" 
+                  : "Add Content"
+              }
               visible={isModalOpen}
               onCancel={handleCancel}
               onOk={handleSubmit}
@@ -135,15 +183,17 @@ function WebsiteContent() {
                   <Input placeholder="Enter the question" />
                 </Form.Item>
 
-                <Form.Item
-                  label=""
-                  name="answer"
-                  rules={[
-                    { required: true, message: "Please enter an answer" },
-                  ]}
-                >
-                  <Input.TextArea placeholder="Enter the answer" rows={4} />
-                </Form.Item>
+                {activeTab === "faqs" && (
+                  <Form.Item
+                    label=""
+                    name="answer"
+                    rules={[
+                      { required: true, message: "Please enter an answer" },
+                    ]}
+                  >
+                    <Input.TextArea placeholder="Enter the answer" rows={4} />
+                  </Form.Item>
+                )}
               </Form>
             </Modal>
           </div>
