@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Table, Avatar, Button, Modal, Switch, Carousel } from "antd";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import moment from "moment";
+import CarDetails from "../components/cardetails";
+import { useNavigate } from "react-router-dom";
 
 const getInitials = (firstName = "", lastName = "") => {
   return `${firstName.charAt(0) || ""}${
@@ -10,6 +12,8 @@ const getInitials = (firstName = "", lastName = "") => {
 };
 
 function BestCars() {
+  const navigate = useNavigate();
+
   const [userDetailsModalVisible, setUserDetailsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -31,6 +35,7 @@ function BestCars() {
     setSelectedCar(record);
     setIsBestCar(false); // reset toggle when opening
     setCarDetailsModalVisible(true);
+    navigate(`/bestcars/${record.key}/CarDetails`);
   };
 
   const closeCarDetailsModal = () => {
@@ -325,131 +330,7 @@ function BestCars() {
       </Modal>
 
       {/* Car Details Modal */}
-      <Modal
-        open={carDetailsModalVisible}
-        onCancel={closeCarDetailsModal}
-        footer={null}
-        centered
-        width={900}
-      >
-        {selectedCar && (
-          <div style={{ fontFamily: "Arial, sans-serif" }}>
-            {/* Image */}
-            <Carousel autoplay>
-              {selectedCar.carImages?.map((image, index) => (
-                <div key={index}>
-                  <img
-                    src={image}
-                    alt={`Car Image ${index + 1}`}
-                    style={{
-                      width: "100%",
-                      height: "250px",
-                      objectFit: "cover",
-                      borderRadius: 10,
-                    }}
-                  />
-                </div>
-              ))}
-            </Carousel>
-
-            {/* Header Info */}
-            <h2 style={{ marginBottom: 5 }}>{selectedCar.carmakemodel}</h2>
-            <p style={{ color: "#888", marginBottom: 20 }}>
-              {selectedCar.carDescription}
-            </p>
-
-            {/* Top Summary Grid */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 20,
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={summaryBoxStyle}>
-                <div style={summaryTitleStyle}>Year</div>
-                <div style={summaryValueStyle}>2021</div>
-              </div>
-              <div style={summaryBoxStyle}>
-                <div style={summaryTitleStyle}>Fuel Type</div>
-                <div style={summaryValueStyle}>Petrol</div>
-              </div>
-              <div style={summaryBoxStyle}>
-                <div style={summaryTitleStyle}>Condition</div>
-                <div style={summaryValueStyle}>New</div>
-              </div>
-              <div style={summaryBoxStyle}>
-                <div style={summaryTitleStyle}>Kilometers</div>
-                <div style={summaryValueStyle}>59,000</div>
-              </div>
-            </div>
-
-            {/* Car Information & Additional Details */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ width: "48%" }}>
-                <h3>Car Informations</h3>
-                <table style={tableStyle}>
-                  <tbody>
-                    {renderRow("Body Type", "Wagon")}
-                    {renderRow("Regional Specs", "US Specs")}
-                    {renderRow("Door Count", "4")}
-                    {renderRow("Number of Seats", "5")}
-                    {renderRow("Version", "B200")}
-                  </tbody>
-                </table>
-              </div>
-
-              <div style={{ width: "48%" }}>
-                <h3>Additional Details</h3>
-                <table style={tableStyle}>
-                  <tbody>
-                    {renderRow("Engine CC", "1600")}
-                    {renderRow("Number of Cylinders", "4")}
-                    {renderRow("Consumption (1/100 km)", "20")}
-                    {renderRow("Transmission", "Automatic")}
-                    {renderRow("Drive Type", "Front Wheel Drive")}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Best Car Switch */}
-            <div
-              style={{
-                background: "#f9f9f9",
-                borderRadius: 8,
-                padding: 16,
-                marginTop: 20,
-              }}
-            >
-              <span style={{ fontWeight: 600, marginRight: 10 }}>
-                Select as Best Car:
-              </span>
-              <Switch
-                checked={isBestCar}
-                onChange={(checked) => setIsBestCar(checked)}
-              />
-            </div>
-
-            {/* Close Button */}
-            <Button
-              type="primary"
-              block
-              style={{ marginTop: 20 }}
-              onClick={closeCarDetailsModal}
-            >
-              Close
-            </Button>
-          </div>
-        )}
-      </Modal>
+      <CarDetails />
     </div>
   );
 }

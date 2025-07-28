@@ -148,12 +148,12 @@ function WebsiteContent() {
                     consent.
                   </li>
                   <li style={{ marginBottom: "12px" }}>
-                    You can request data deletion at any time.
+                    You can request data deletion at any time. 
                   </li>
                 </ul>
               </Card>
             )}
-
+ 
             <Modal
               title={
                 activeTab === "faqs"
