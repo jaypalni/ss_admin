@@ -22,6 +22,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import "../assets/styles/layout.css";
 import { IoCarSharp } from "react-icons/io5";
+import { MdSubscriptions } from "react-icons/md";
 
 const { Header, Sider, Content } = Layout;
 
@@ -84,6 +85,11 @@ function AppLayout({ children }) {
       key: "/transactions",
       icon: <FaFileAlt />, // You can use a different icon if you prefer
       label: "Transactions",
+    },
+    {
+      key: "/subcriptions",
+      icon: <MdSubscriptions />,
+      label: "Subcriptions",
     },
     {
       key: "/documents",

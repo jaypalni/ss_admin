@@ -21,6 +21,8 @@ import Transactions from "./pages/Transactions";
 import WebsiteContent from "./pages/WebsiteContent";
 import ManageCountry from "./pages/ManageCountry";
 import BannerManagement from "./pages/BannerManagement";
+import CarDetails from "./components/cardetails";
+import Subcriptions from "./pages/subcriptions";
 
 const AppRouter = () => {
   return (
@@ -64,11 +66,21 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
+        <Route path="/bestcars/:car_id/CarDetails" element={<CarDetails />} />
+
         <Route
           path="/transactions"
           element={
             <AppLayout>
               <Transactions />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/subcriptions"
+          element={
+            <AppLayout>
+              <Subcriptions />
             </AppLayout>
           }
         />
