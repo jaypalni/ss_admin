@@ -83,7 +83,7 @@ function AppLayout({ children }) {
     },
     {
       key: "/transactions",
-      icon: <FaFileAlt />, // You can use a different icon if you prefer
+      icon: <FaFileAlt />,
       label: "Transactions",
     },
     {

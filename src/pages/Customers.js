@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import CustomerDetails from "../components/customerdetails";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   Avatar,
@@ -50,7 +52,6 @@ export const customerMockData = [
     preferences: ["Electronics", "Books", "Fashion"],
     banned: false,
     reported: false,
-    verified1: false,
   },
   {
     key: "2",
@@ -69,7 +70,6 @@ export const customerMockData = [
     preferences: ["Sports", "Outdoor"],
     banned: true,
     reported: false,
-    verified1: false,
   },
   {
     key: "3",
@@ -88,7 +88,6 @@ export const customerMockData = [
     preferences: ["Home & Garden", "Kitchen", "Beauty"],
     banned: false,
     reported: true,
-    verified1: false,
   },
   {
     key: "4",
@@ -107,7 +106,6 @@ export const customerMockData = [
     preferences: ["Technology", "Gaming"],
     banned: false,
     reported: false,
-    verified1: false,
   },
   {
     key: "5",
@@ -126,30 +124,11 @@ export const customerMockData = [
     preferences: ["Fashion", "Beauty", "Jewelry"],
     banned: false,
     reported: true,
-    verified1: false,
-  },
-  {
-    key: "6",
-    name: "Emma Garcia",
-    email: "emma.garcia@example.com",
-    phone: "+1-555-0105",
-    verified: true,
-    customerType: "Dealer",
-    avatar: "https://via.placeholder.com/40",
-    address: "654 Maple Dr, Seattle, WA 98101",
-    joinDate: "2023-02-28",
-    buyCount: 10,
-    sellCount: 31,
-    carsBought: ["Volkswagen Passat", "Subaru Impreza"],
-    carsSold: ["Toyota Corolla", "Honda Civic", "Ford Fiesta"],
-    preferences: ["Fashion", "Beauty", "Jewelry"],
-    banned: false,
-    reported: false,
-    verified1: true,
   },
 ];
 
 function Customers() {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState(customerMockData);
 
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -164,8 +143,6 @@ function Customers() {
     filteredCustomers = customers.filter((c) => c.banned);
   } else if (activeTab === "reported") {
     filteredCustomers = customers.filter((c) => c.reported);
-  } else if (activeTab === "verified1") {
-    filteredCustomers = customers.filter((c) => c.verified);
   }
 
   // Handle edit customer verification
@@ -216,21 +193,10 @@ function Customers() {
           </Avatar>
           <div>
             <div style={{ fontWeight: 500 }}>{text}</div>
-            {/* <div style={{ fontSize: "12px", color: "#666" }}>
+            <div style={{ fontSize: "12px", color: "#666" }}>
               {record.email}
-            </div> */}
+            </div>
           </div>
-        </div>
-      ),
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      render: (email, record) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{email}</div>
-          {/* <div style={{ fontSize: "12px", color: "#666" }}>{record.email}</div> */}
         </div>
       ),
     },
@@ -284,6 +250,18 @@ function Customers() {
       ),
     },
     {
+      title: "Buy Count",
+      dataIndex: "buyCount",
+      key: "buyCount",
+      render: (count) => <Text strong>{count}</Text>,
+    },
+    {
+      title: "Sell Count",
+      dataIndex: "sellCount",
+      key: "sellCount",
+      render: (count) => <Text strong>{count}</Text>,
+    },
+    {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
@@ -292,7 +270,8 @@ function Customers() {
             type="text"
             icon={<FaEye />}
             size="small"
-            onClick={() => handleView(record)}
+            // onClick={() => handleView(record)}
+            onClick={() => navigate(`/customerdetails/${record.key}`)}
             title="View Details"
           />
           <Button
@@ -341,7 +320,6 @@ function Customers() {
                 { key: "all", label: "All" },
                 { key: "banned", label: "Banned" },
                 { key: "reported", label: "Reported" },
-                { key: "verified1", label: "Verified" },
               ]}
             />
             <Table

@@ -23,6 +23,7 @@ import ManageCountry from "./pages/ManageCountry";
 import BannerManagement from "./pages/BannerManagement";
 import CarDetails from "./components/cardetails";
 import Subcriptions from "./pages/subcriptions";
+import CustomerDetails from "./components/customerdetails";
 
 const AppRouter = () => {
   return (
@@ -81,6 +82,22 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <Subcriptions />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/CustomerDetails/:id"
+          element={
+            <AppLayout>
+              <CustomerDetails />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/bestcars/:car_id/CarDetails"
+          element={
+            <AppLayout>
+              <CarDetails />
             </AppLayout>
           }
         />
