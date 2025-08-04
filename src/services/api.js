@@ -1,5 +1,5 @@
 import axios from "axios";
- import API_CONFIG from "../config/api.config";
+import API_CONFIG from "../config/api.config";
 
 //Validate base URL
 if (!API_CONFIG.BASE_URL) {
@@ -10,7 +10,7 @@ if (!API_CONFIG.BASE_URL) {
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: "API_CONFIG.BASE_URL",
+  baseURL: API_CONFIG.BASE_URL,
   headers: {
     "Content-Type": "application/json",
     //"Content-Type": "multipart/form-data",
@@ -76,14 +76,32 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (credentials) =>
     api.post("API_CONFIG.ENDPOINTS.AUTH.LOGIN", credentials),
-
 };
 
-
-// User APIs
+// Customer APIs
 export const userAPI = {
   adminGetUserSummary: (id) =>
-    api.post(API_CONFIG.ENDPOINTS.USER.ADMIN_GET_USER_SUMMARY(id )),
+    api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_GET_USER_SUMMARY(id)),
+  adminCustomers: () => api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS),
+  adminCustomersReported: () =>
+    api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_REPORTED),
+  adminCustomersBanned: () =>
+    api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_BANNED),
+  adminCustomersReportedFlag: (id) =>
+    api.put(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_REPORTED_FLAG(id)),
+  adminCustomersWatchlist: () =>
+    api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_WATCHLIST),
+
+  userprofile: () => api.get(API_CONFIG.ENDPOINTS.USER.USER_PROFILE),
 };
+
+export const loginApi = {
+  login: (credentials) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMIN_LOGIN, credentials),
+  logout: () => api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMIN_LOGOUT),
+  createsubadmin: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATE_SUBADMIN, body),
+};
+export const bestcarAPI = {};
 
 export default api;

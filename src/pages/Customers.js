@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CustomerDetails from "../components/customerdetails";
 import { useNavigate } from "react-router-dom";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import axios from "axios";
 import {
   Table,
   Avatar,
@@ -29,120 +31,60 @@ import {
   FaTimesCircle,
   FaCalendar,
   FaMapMarkerAlt,
+  FaClock,
+  FaWalking,
 } from "react-icons/fa";
+import { userAPI } from "../services/api";
 
 const { Text } = Typography;
 const { Option } = Select;
 
-export const customerMockData = [
-  {
-    key: "1",
-    name: "Alice Johnson",
-    email: "alice.johnson@example.com",
-    phone: "+1-555-0101",
-    verified: true,
-    customerType: "User",
-    avatar: "https://via.placeholder.com/40",
-    address: "123 Main St, New York, NY 10001",
-    joinDate: "2023-01-15",
-    buyCount: 15,
-    sellCount: 2,
-    carsBought: ["Toyota Camry", "Honda Accord", "Ford Focus"],
-    carsSold: ["Mazda 3", "Hyundai Elantra"],
-    preferences: ["Electronics", "Books", "Fashion"],
-    banned: false,
-    reported: false,
-  },
-  {
-    key: "2",
-    name: "Bob Wilson",
-    email: "bob.wilson@example.com",
-    phone: "+1-555-0102",
-    verified: false,
-    customerType: "User",
-    avatar: "https://via.placeholder.com/40",
-    address: "456 Oak Ave, Los Angeles, CA 90210",
-    joinDate: "2023-03-20",
-    buyCount: 8,
-    sellCount: 0,
-    carsBought: ["Chevrolet Malibu", "Nissan Altima"],
-    carsSold: [],
-    preferences: ["Sports", "Outdoor"],
-    banned: true,
-    reported: false,
-  },
-  {
-    key: "3",
-    name: "Carol Davis",
-    email: "carol.davis@example.com",
-    phone: "+1-555-0103",
-    verified: true,
-    customerType: "Dealer",
-    avatar: "https://via.placeholder.com/40",
-    address: "789 Pine St, Chicago, IL 60601",
-    joinDate: "2023-06-10",
-    buyCount: 5,
-    sellCount: 23,
-    carsBought: ["BMW 3 Series", "Audi A4"],
-    carsSold: ["Mercedes C-Class", "Lexus IS", "Tesla Model 3"],
-    preferences: ["Home & Garden", "Kitchen", "Beauty"],
-    banned: false,
-    reported: true,
-  },
-  {
-    key: "4",
-    name: "David Brown",
-    email: "david.brown@example.com",
-    phone: "+1-555-0104",
-    verified: false,
-    customerType: "User",
-    avatar: "https://via.placeholder.com/40",
-    address: "321 Elm St, Miami, FL 33101",
-    joinDate: "2023-08-15",
-    buyCount: 5,
-    sellCount: 0,
-    carsBought: ["Kia Optima"],
-    carsSold: [],
-    preferences: ["Technology", "Gaming"],
-    banned: false,
-    reported: false,
-  },
-  {
-    key: "5",
-    name: "Emma Garcia",
-    email: "emma.garcia@example.com",
-    phone: "+1-555-0105",
-    verified: true,
-    customerType: "Dealer",
-    avatar: "https://via.placeholder.com/40",
-    address: "654 Maple Dr, Seattle, WA 98101",
-    joinDate: "2023-02-28",
-    buyCount: 10,
-    sellCount: 31,
-    carsBought: ["Volkswagen Passat", "Subaru Impreza"],
-    carsSold: ["Toyota Corolla", "Honda Civic", "Ford Fiesta"],
-    preferences: ["Fashion", "Beauty", "Jewelry"],
-    banned: false,
-    reported: true,
-  },
-];
-
 function Customers() {
   const navigate = useNavigate();
-  const [customers, setCustomers] = useState(customerMockData);
-
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customersData, setCustomersData] = useState([]);
+  const [customersReportedData, setCustomersReportedData] = useState([]);
+  const [customersBannedData, setCustomersBannedData] = useState([]);
+  const [customersWatchListData, setCustomersWatchListData] = useState([]);
+  const [reportedFlag, setReportedFlag] = useState([]);
   const [editForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState("all");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchCustomersData();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "reported") {
+      fetchCustomersReportedData();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === "banned") {
+      fetchCustomersBannedData();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === "watchlist") {
+      fetchCustomersWatchListData();
+    }
+  }, [activeTab]);
 
   // Filter customers based on tab
-  let filteredCustomers = customers;
+  let filteredCustomers;
   if (activeTab === "banned") {
-    filteredCustomers = customers.filter((c) => c.banned);
+    filteredCustomers = customersBannedData;
   } else if (activeTab === "reported") {
-    filteredCustomers = customers.filter((c) => c.reported);
+    filteredCustomers = customersReportedData;
+  } else if (activeTab === "watchlist") {
+    filteredCustomers = customersWatchListData;
+  } else {
+    filteredCustomers = customersData;
   }
 
   // Handle edit customer verification
@@ -163,22 +105,181 @@ function Customers() {
 
   // Handle delete customer
   const handleDelete = (record) => {
-    setCustomers(customers.filter((customer) => customer.key !== record.key));
+    setCustomersData(
+      customersData.filter((customer) => customer.key !== record.key)
+    );
     message.success("Customer deleted successfully");
   };
 
   // Handle edit form submission
   const handleEditSubmit = (values) => {
-    const updatedCustomers = customers.map((customer) =>
+    const updatedCustomers = customersData.map((customer) =>
       customer.key === selectedCustomer.key
         ? { ...customer, verified: values.verified, banned: values.banned }
         : customer
     );
-    setCustomers(updatedCustomers);
+    setCustomersData(updatedCustomers);
     setEditModalVisible(false);
     setSelectedCustomer(null);
     editForm.resetFields();
     message.success("Customer information updated successfully");
+  };
+
+  const fetchCustomersData = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.adminCustomers();
+      const data1 = handleApiResponse(response);
+      console.log("API Response123:", data1?.data?.users);
+
+      if (data1?.data?.users) {
+        const formattedUsers = data1?.data?.users.map((user) => ({
+          key: user.id,
+          name: `${user.first_name} ${user.last_name}`,
+          email: user.email || "-",
+          phone: user.phone_number || "-",
+          customerType: user.user_type?.toLowerCase() || "individual",
+          verified: user.is_verified?.toLowerCase() || "pending",
+          buyCount: user.buy_count || 0,
+          sellCount: user.sold_count || 0,
+          avatar: user.avatar || null,
+          banned: user.banned || false,
+          reported: user.reported || false,
+          raw: user,
+        }));
+
+        setCustomersData(formattedUsers);
+      }
+
+      message.success(data1.message || "Fetched successfully");
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to load customers data");
+      setCustomersData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCustomersReportedData = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.adminCustomersReported();
+      const data1 = handleApiResponse(response);
+      console.log("API Response123:", data1?.data);
+
+      if (data1?.data) {
+        const formattedUsers = data1?.data.map((user) => ({
+          key: user.reported_user_id,
+          name: `${user.reporter_first_name} ${user.reporter_last_name}`,
+          email: user.reported_email || "-",
+          phone: user.reported_phone_number || "-",
+          customerType: user.reported_user_type?.toLowerCase() || "individual",
+          verified: user.reported_is_verified?.toLowerCase() || "pending",
+          buyCount: user.buy_count || 0,
+          sellCount: user.sold_count || 0,
+          avatar: user.avatar || null,
+          banned: user.banned || false,
+          reported: user.reported || false,
+          raw: user,
+        }));
+
+        setCustomersReportedData(formattedUsers);
+      }
+
+      message.success(data1.message || "Fetched successfully");
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to load customers data");
+      setCustomersReportedData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCustomersBannedData = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.adminCustomersBanned();
+      const data1 = handleApiResponse(response);
+      console.log("API Response123:", data1?.data?.users);
+
+      if (data1?.data?.users) {
+        const formattedUsers = data1?.data?.users.map((user) => ({
+          key: user.id,
+          name: `${user.first_name} ${user.last_name}`,
+          email: user.email || "-",
+          phone: user.phone_number || "-",
+          customerType: user.user_type?.toLowerCase() || "individual",
+          verified: user.is_verified?.toLowerCase() || "pending",
+          buyCount: user.buy_count || 0,
+          sellCount: user.sold_count || 0,
+          avatar: user.avatar || null,
+          banned: user.banned || false,
+          reported: user.reported || false,
+          raw: user,
+        }));
+
+        setCustomersBannedData(formattedUsers);
+      }
+
+      message.success(data1.message || "Fetched successfully");
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to load customers data");
+      setCustomersBannedData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCustomersReportedFlag = async (id) => {
+    try {
+      setLoading(true);
+      console.log("API ID:", id);
+      const response = await userAPI.adminCustomersReportedFlag(Number(id));
+      const cardetail = handleApiResponse(response);
+      console.log("API Response143:", cardetail);
+      if (cardetail) {
+        setReportedFlag(cardetail);
+      }
+      message.success(cardetail.message || "Saved successfully");
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to add customers data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCustomersWatchListData = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.adminCustomersWatchlist();
+      const data1 = handleApiResponse(response);
+      console.log("API Response143:", data1?.data);
+
+      if (data1?.data) {
+        const formattedUsers = data1?.data.map((user) => ({
+          key: user.id,
+          name: `${user.first_name} ${user.last_name}`,
+          email: user.email || "-",
+          phone: user.phone_number || "-",
+          customerType: user.user_type?.toLowerCase() || "individual",
+          verified: user.is_verified?.toLowerCase() || "pending",
+        }));
+
+        setCustomersWatchListData(formattedUsers);
+      }
+
+      message.success(data1.message || "Fetched successfully");
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to load watchlist data");
+      setCustomersWatchListData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns = [
@@ -220,10 +321,10 @@ function Customers() {
           switch (type) {
             case "User":
               return "blue";
-            case "Dealer":
+            case "dealer":
               return "purple";
             default:
-              return "default";
+              return "blue";
           }
         };
         return <Tag color={getTypeColor(type)}>{type}</Tag>;
@@ -233,21 +334,28 @@ function Customers() {
       title: "Verified",
       dataIndex: "verified",
       key: "verified",
-      render: (verified) => (
-        <Tag color={verified ? "green" : "orange"}>
-          {verified ? (
-            <span>
-              <FaCheckCircle style={{ marginRight: "4px" }} />
-              Verified
-            </span>
-          ) : (
-            <span>
-              <FaTimesCircle style={{ marginRight: "4px" }} />
-              Not Verified
-            </span>
-          )}
-        </Tag>
-      ),
+      render: (status) => {
+        const colorMap = {
+          verified: "green",
+          pending: "orange",
+          resubmission: "red",
+        };
+
+        const iconMap = {
+          verified: <FaCheckCircle style={{ marginRight: "4px" }} />,
+          pending: <FaClock style={{ marginRight: "4px" }} />,
+          resubmission: <FaTimesCircle style={{ marginRight: "4px" }} />,
+        };
+
+        const label = status?.toLowerCase?.();
+
+        return (
+          <Tag color={colorMap[label] || "default"}>
+            {iconMap[label] || null}
+            {label?.charAt(0).toUpperCase() + label?.slice(1) || "Unknown"}
+          </Tag>
+        );
+      },
     },
     {
       title: "Buy Count",
@@ -274,13 +382,23 @@ function Customers() {
             onClick={() => navigate(`/customerdetails/${record.key}`)}
             title="View Details"
           />
-          <Button
-            type="text"
-            icon={<FaEdit />}
-            size="small"
-            onClick={() => handleEdit(record)}
-            title="Edit Verification"
-          />
+          {activeTab === "reported" ? (
+            <Button
+              type="text"
+              icon={<FaWalking />}
+              size="small"
+              onClick={() => fetchCustomersReportedFlag(record.key)}
+              title="Reported Action"
+            />
+          ) : (
+            <Button
+              type="text"
+              icon={<FaEdit />}
+              size="small"
+              // onClick={() => handleEdit(record)}
+              title="Edit Verification"
+            />
+          )}
           <Popconfirm
             title="Delete Customer"
             description="Are you sure you want to delete this customer? This action cannot be undone."
@@ -320,6 +438,7 @@ function Customers() {
                 { key: "all", label: "All" },
                 { key: "banned", label: "Banned" },
                 { key: "reported", label: "Reported" },
+                { key: "watchlist", label: "Watchlist" },
               ]}
             />
             <Table

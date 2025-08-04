@@ -24,6 +24,8 @@ import BannerManagement from "./pages/BannerManagement";
 import CarDetails from "./components/cardetails";
 import Subcriptions from "./pages/subcriptions";
 import CustomerDetails from "./components/customerdetails";
+import Profile from "./components/profile";
+import CreateSubadmin from "./components/createsubadmin";
 
 const AppRouter = () => {
   return (
@@ -48,6 +50,22 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <Users />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <AppLayout>
+              <Profile />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/createsubadmin"
+          element={
+            <AppLayout>
+              <CreateSubadmin />
             </AppLayout>
           }
         />

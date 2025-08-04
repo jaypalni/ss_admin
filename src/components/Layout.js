@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Menu, Button, Avatar, Dropdown, Tooltip } from "antd";
+import { Layout, Menu, Button, Avatar, Dropdown, Tooltip, message } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -20,24 +20,27 @@ import {
   FaCloud,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import { RiAdminFill } from "react-icons/ri";
 import "../assets/styles/layout.css";
 import { IoCarSharp } from "react-icons/io5";
 import { MdSubscriptions } from "react-icons/md";
-
+import { loginApi, userAPI } from "../services/api";
 const { Header, Sider, Content } = Layout;
+// const superAdmin = Number(localStorage.getItem("isSuperAdmin"));
 
 function AppLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
-
   const handleMenuClick = (e) => {
     navigate(e.key);
   };
+  const superAdmin = Number(localStorage.getItem("isSuperAdmin"));
+  console.log("Superdamin", superAdmin);
 
   const userMenuItems = [
     {
@@ -45,6 +48,17 @@ function AppLayout({ children }) {
       icon: <FaUserCircle />,
       label: "Profile",
     },
+
+    ...(superAdmin === 1
+      ? [
+          {
+            key: "subadmin",
+            icon: <RiAdminFill />,
+            label: "Create Admin",
+          },
+        ]
+      : []),
+
     {
       key: "settings",
       icon: <FaCog />,
@@ -132,7 +146,6 @@ function AppLayout({ children }) {
       ],
     },
   ];
-
   // Create menu items with tooltips for collapsed state
   const menuItemsWithTooltips = sideMenuItems.map((item) => ({
     ...item,
@@ -145,7 +158,27 @@ function AppLayout({ children }) {
     ),
     label: collapsed ? "" : item.label,
   }));
-
+  // Profile API
+  // Logout API
+  const userlogoutAPI = async () => {
+    try {
+      console.log("API Call");
+      const response = await loginApi.logout();
+      const userData = response?.data || response;
+      if (response.status_code === 200 || userData.status_code === 200) {
+        message.success("Successfully Logged Out");
+        setLoading(false);
+        navigate("/");
+      } else {
+        message.error(userData?.error || "Logout failed");
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error during logout", error);
+      message.error("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  };
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Sidebar */}
@@ -174,7 +207,6 @@ function AppLayout({ children }) {
           className="sidebar-menu"
         />
       </Sider>
-
       <Layout>
         {/* Top Header */}
         <Header className="header">
@@ -197,20 +229,25 @@ function AppLayout({ children }) {
                 </div>
               </div>
             </div>
-
             <div className="d-flex align-items-center">
               <Button
                 type="text"
                 icon={<FaBell />}
                 className="notification-btn me-3"
               />
-
               <Dropdown
                 menu={{
                   items: userMenuItems,
                   onClick: ({ key }) => {
                     if (key === "logout") {
                       console.log("Logout clicked");
+                      userlogoutAPI();
+                    } else if (key === "profile") {
+                      console.log("Profile clicked");
+                      navigate("/profile");
+                    } else if (key === "subadmin") {
+                      console.log("Createadmin clicked");
+                      navigate("/createsubadmin");
                     }
                   },
                 }}
@@ -227,12 +264,10 @@ function AppLayout({ children }) {
             </div>
           </div>
         </Header>
-
         {/* Main Content */}
         <Content className="content">{children}</Content>
       </Layout>
     </Layout>
   );
 }
-
 export default AppLayout;

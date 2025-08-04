@@ -4,7 +4,24 @@ const API_CONFIG = {
   ENDPOINTS: {
     USER: {
       ADMIN_GET_USER_SUMMARY: (id) => `/api/users/summary/${id}`,
+      ADMIN_CUSTOMERS: "/api/admin/users/unverified",
+      ADMIN_CUSTOMERS_REPORTED: "/api/admin/reported-users",
+      ADMIN_CUSTOMERS_BANNED: "/api/admin/users/banned",
+      ADMIN_CUSTOMERS_REPORTED_FLAG: (id) =>
+        `/api/admin/reported-users/${id}/flag`,
+      ADMIN_CUSTOMERS_WATCHLIST: "/api/admin/watchlist",
+
+      USER_PROFILE: "/api/admin/profile",
     },
+
+    LOGIN: {
+      ADMIN_LOGIN: "/api/admin/login",
+      ADMIN_LOGOUT: "/api/admin/logout",
+      CREATE_SUBADMIN: "/api/admin/admins",
+      // CREATENEWPASSWORD: "api/admin/update-password-initial",
+    },
+
+    BESTCAR: {},
   },
 };
 
