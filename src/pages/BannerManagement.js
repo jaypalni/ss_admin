@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React from 'react'
 
 const BannerManagement = () => {
   return <div style={{ textAlign: "center",marginTop:"250px" }}>BannerManagement</div>;

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import CustomerDetails from "../components/customerdetails";
 import { useNavigate } from "react-router-dom";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
-import axios from "axios";
 import {
   Table,
   Avatar,
@@ -24,8 +22,6 @@ import {
   FaEdit,
   FaTrash,
   FaEye,
-  FaUser,
-  FaEnvelope,
   FaPhone,
   FaCheckCircle,
   FaTimesCircle,
@@ -37,7 +33,6 @@ import {
 import { userAPI } from "../services/api";
 
 const { Text } = Typography;
-const { Option } = Select;
 
 function Customers() {
   const navigate = useNavigate();
@@ -48,10 +43,10 @@ function Customers() {
   const [customersReportedData, setCustomersReportedData] = useState([]);
   const [customersBannedData, setCustomersBannedData] = useState([]);
   const [customersWatchListData, setCustomersWatchListData] = useState([]);
-  const [reportedFlag, setReportedFlag] = useState([]);
+  const [, setReportedFlag] = useState([]);
   const [editForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState("all");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   useEffect(() => {
     fetchCustomersData();
@@ -75,7 +70,6 @@ function Customers() {
     }
   }, [activeTab]);
 
-  // Filter customers based on tab
   let filteredCustomers;
   if (activeTab === "banned") {
     filteredCustomers = customersBannedData;
@@ -87,7 +81,6 @@ function Customers() {
     filteredCustomers = customersData;
   }
 
-  // Handle edit customer verification
   const handleEdit = (record) => {
     setSelectedCustomer(record);
     editForm.setFieldsValue({
@@ -97,13 +90,11 @@ function Customers() {
     setEditModalVisible(true);
   };
 
-  // Handle view customer details
   const handleView = (record) => {
     setSelectedCustomer(record);
     setViewModalVisible(true);
   };
 
-  // Handle delete customer
   const handleDelete = (record) => {
     setCustomersData(
       customersData.filter((customer) => customer.key !== record.key)
@@ -111,7 +102,7 @@ function Customers() {
     message.success("Customer deleted successfully");
   };
 
-  // Handle edit form submission
+
   const handleEditSubmit = (values) => {
     const updatedCustomers = customersData.map((customer) =>
       customer.key === selectedCustomer.key

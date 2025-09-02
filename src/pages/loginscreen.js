@@ -11,7 +11,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [emailerrormsg, setEmailErrorMsg] = useState("");
   const [passworderrormsg, setPasswordErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const handleLogin = () => {
     let hasError = false;
     setEmailErrorMsg("");
@@ -29,14 +29,6 @@ const LoginScreen = () => {
       setEmailErrorMsg("Email must end with '@souqsayarat.com'.");
       return;
     }
-    // const passwordRegex =
-    //   /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])(?=.*\d).+$/;
-    // if (!passwordRegex.test(password)) {
-    //   setPasswordErrorMsg(
-    //     "Password must contain at least one capital letter, one special character, and one number."
-    //   );
-    //   return;
-    // }
     const body = {
       email: email,
       password: password,

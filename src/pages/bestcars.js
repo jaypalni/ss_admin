@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Table, Avatar, Button, Modal, Switch, Carousel } from "antd";
-import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import moment from "moment";
 import CarDetails from "../components/cardetails";
 import { useNavigate } from "react-router-dom";
@@ -17,9 +16,9 @@ function BestCars() {
   const [userDetailsModalVisible, setUserDetailsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const [carDetailsModalVisible, setCarDetailsModalVisible] = useState(false);
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [isBestCar, setIsBestCar] = useState(false);
+  const [, setCarDetailsModalVisible] = useState(false);
+  const [, setSelectedCar] = useState(null);
+  const [, setIsBestCar] = useState(false);
 
   const handleNameClick = (record) => {
     setSelectedUser(record);

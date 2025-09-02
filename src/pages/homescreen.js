@@ -1,13 +1,11 @@
 import React from "react";
-import { Layout, Menu, Card, Avatar, Input, Button } from "antd";
+import { Layout, Menu, Card, Avatar, } from "antd";
 import {
   DashboardOutlined,
   CreditCardOutlined,
   UserOutlined,
   MessageOutlined,
-  SearchOutlined,
   BellOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import "../assets/styles/homescreen.css";
 import bluelogo_icon from "../assets/images/souqLogo_blue.svg";
