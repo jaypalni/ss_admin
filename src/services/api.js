@@ -91,6 +91,8 @@ export const userAPI = {
     api.put(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_REPORTED_FLAG(id)),
   adminCustomersWatchlist: () =>
     api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_WATCHLIST),
+  adminWatchListBanFlag: (id,body) =>
+    api.put(API_CONFIG.ENDPOINTS.USER.ADMIN_WATCHLIST_BANNED_FLAG(id),body),
 
   userprofile: () => api.get(API_CONFIG.ENDPOINTS.USER.USER_PROFILE),
 };

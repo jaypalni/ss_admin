@@ -10,6 +10,8 @@ const API_CONFIG = {
       ADMIN_CUSTOMERS_REPORTED_FLAG: (id) =>
         `/api/admin/reported-users/${id}/flag`,
       ADMIN_CUSTOMERS_WATCHLIST: "/api/admin/watchlist",
+      ADMIN_WATCHLIST_BANNED_FLAG: (id) =>
+        `/api/admin/users/${id}/ban`,
 
       USER_PROFILE: "/api/admin/profile",
     },

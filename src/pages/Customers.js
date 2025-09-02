@@ -17,6 +17,7 @@ import {
   Typography,
   Select,
   Tabs,
+  Input
 } from "antd";
 import {
   FaEdit,
@@ -47,6 +48,10 @@ function Customers() {
   const [editForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState("all");
   const [, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [selectedWatchlistCustomer, setSelectedWatchlistCustomer] = useState(null);
+
 
   useEffect(() => {
     fetchCustomersData();
@@ -234,6 +239,7 @@ function Customers() {
       if (cardetail) {
         setReportedFlag(cardetail);
       }
+      fetchCustomersReportedData()
       message.success(cardetail.message || "Saved successfully");
     } catch (error) {
       const errorData = handleApiError(error);
@@ -271,6 +277,39 @@ function Customers() {
     } finally {
       setLoading(false);
     }
+  };
+
+   const fetchCustomersBannedFlag = async (id,reason) => {
+    try {
+      setLoading(true);
+      console.log("API ID:", id);
+      const body =  {
+        reason : reason
+      }
+      const response = await userAPI.adminWatchListBanFlag(Number(id),body);
+      const cardetail = handleApiResponse(response);
+      console.log("API Response143:", cardetail);
+      if (cardetail) {
+        setReportedFlag(cardetail);
+      }
+      fetchCustomersWatchListData()
+      message.success(cardetail.message || "Saved successfully");
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to add customers data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showModal = (record) => {
+      setSelectedWatchlistCustomer(record);
+    setIsModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setReason("");
   };
 
   const columns = [
@@ -374,23 +413,62 @@ function Customers() {
             title="View Details"
           />
           {activeTab === "reported" ? (
-            <Button
-              type="text"
-              icon={<FaWalking />}
-              size="small"
-              onClick={() => fetchCustomersReportedFlag(record.key)}
-              title="Reported Action"
-            />
-          ) : (
-            <Button
-              type="text"
-              icon={<FaEdit />}
-              size="small"
-              // onClick={() => handleEdit(record)}
-              title="Edit Verification"
-            />
-          )}
-          <Popconfirm
+  <Button
+    type="text"
+    icon={<FaWalking />}
+    size="small"
+    onClick={() => fetchCustomersReportedFlag(record.key)}
+    title="Reported Action"
+  />
+) : activeTab === "watchlist" ? (
+  <Button
+    type="text"
+    icon={<FaWalking />}
+    size="small"
+    onClick={() => {
+    setSelectedWatchlistCustomer(record); 
+    setIsModalOpen(true);                
+  }}
+    title="WatchList Action"
+  />
+) : (
+  <Button
+    type="text"
+    //icon={<FaEdit />}
+    size="small"
+    // onClick={() => handleEdit(record)}
+    title="Edit Verification"
+  />
+)}
+
+  <Modal
+  title="Reported Comments"
+  open={isModalOpen}
+  onOk={() => {
+    if (selectedWatchlistCustomer) {
+      fetchCustomersBannedFlag(selectedWatchlistCustomer.key, reason);
+    }
+    setIsModalOpen(false);
+    setReason("");
+    setSelectedWatchlistCustomer(null); 
+  }}
+  onCancel={() => {
+    setIsModalOpen(false);
+    setReason("");
+    setSelectedWatchlistCustomer(null);
+  }}
+  okText="Submit"
+  cancelText="Cancel"
+>
+  <Input.TextArea
+    value={reason}
+    onChange={(e) => setReason(e.target.value)}
+    placeholder="Enter reason"
+    rows={4}
+  />
+</Modal>
+
+          {/* <Popconfirm
             title="Delete Customer"
             description="Are you sure you want to delete this customer? This action cannot be undone."
             onConfirm={() => handleDelete(record)}
@@ -405,7 +483,7 @@ function Customers() {
               danger
               title="Delete Customer"
             />
-          </Popconfirm>
+          </Popconfirm> */}
         </Space>
       ),
     },
@@ -657,6 +735,7 @@ function Customers() {
           </div>
         )}
       </Modal>
+
     </div>
   );
 }
