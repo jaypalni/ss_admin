@@ -10,18 +10,16 @@ import {
   Modal,
   Form,
   Switch,
+  Radio,
   message,
-  Popconfirm,
   Descriptions,
   Divider,
   Typography,
-  Select,
   Tabs,
-  Input
+  Input,
+  Row,Col
 } from "antd";
 import {
-  FaEdit,
-  FaTrash,
   FaEye,
   FaPhone,
   FaCheckCircle,
@@ -51,6 +49,7 @@ function Customers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [selectedWatchlistCustomer, setSelectedWatchlistCustomer] = useState(null);
+  const [radioValue, setRadioValue] = useState("");
 
 
   useEffect(() => {
@@ -85,27 +84,6 @@ function Customers() {
   } else {
     filteredCustomers = customersData;
   }
-
-  const handleEdit = (record) => {
-    setSelectedCustomer(record);
-    editForm.setFieldsValue({
-      verified: record.verified,
-      banned: record.banned,
-    });
-    setEditModalVisible(true);
-  };
-
-  const handleView = (record) => {
-    setSelectedCustomer(record);
-    setViewModalVisible(true);
-  };
-
-  const handleDelete = (record) => {
-    setCustomersData(
-      customersData.filter((customer) => customer.key !== record.key)
-    );
-    message.success("Customer deleted successfully");
-  };
 
 
   const handleEditSubmit = (values) => {
@@ -279,7 +257,7 @@ function Customers() {
     }
   };
 
-   const fetchCustomersBannedFlag = async (id,reason) => {
+  const fetchCustomersBannedFlag = async (id,reason) => {
     try {
       setLoading(true);
       console.log("API ID:", id);
@@ -300,16 +278,6 @@ function Customers() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const showModal = (record) => {
-      setSelectedWatchlistCustomer(record);
-    setIsModalOpen(true);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setReason("");
   };
 
   const columns = [
@@ -408,7 +376,6 @@ function Customers() {
             type="text"
             icon={<FaEye />}
             size="small"
-            // onClick={() => handleView(record)}
             onClick={() => navigate(`/customerdetails/${record.key}`)}
             title="View Details"
           />
@@ -499,17 +466,29 @@ function Customers() {
       <div className="content-body">
         <div className="card">
           <div className="card-body">
-            <Tabs
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              style={{ marginBottom: 16 }}
-              items={[
-                { key: "all", label: "All" },
-                { key: "banned", label: "Banned" },
-                { key: "reported", label: "Reported" },
-                { key: "watchlist", label: "Watchlist" },
-              ]}
-            />
+            <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+      <Col flex="auto">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            { key: "all", label: "All" },
+            { key: "banned", label: "Banned" },
+            { key: "reported", label: "Reported" },
+            { key: "watchlist", label: "Watchlist" },
+          ]}
+        />
+      </Col>
+      <Col style={{marginBottom:'10px',marginRight:'10px'}}>
+        <Radio.Group
+        onChange={(e) => setRadioValue(e.target.value)}
+        value={radioValue}
+      >
+        <Radio value="verified">Verified</Radio>
+        <Radio value="non_verified">Non Verified</Radio>
+      </Radio.Group>
+      </Col>
+    </Row>
             <Table
               columns={columns}
               dataSource={filteredCustomers}

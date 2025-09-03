@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Avatar, Button, Modal, Switch, Carousel } from "antd";
+import { Table, Avatar, Button, Modal } from "antd";
 import moment from "moment";
 import CarDetails from "../components/cardetails";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,7 @@ function BestCars() {
   const [, setCarDetailsModalVisible] = useState(false);
   const [, setSelectedCar] = useState(null);
   const [, setIsBestCar] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const handleNameClick = (record) => {
     setSelectedUser(record);
@@ -37,9 +38,12 @@ function BestCars() {
     navigate(`/bestcars/${record.key}/CarDetails`);
   };
 
-  const closeCarDetailsModal = () => {
-    setSelectedCar(null);
-    setCarDetailsModalVisible(false);
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys) => {
+      setSelectedRowKeys(newSelectedRowKeys);
+      console.log("Selected Row Keys: ", newSelectedRowKeys);
+    },
   };
 
   const columns = [
@@ -110,38 +114,6 @@ function BestCars() {
     },
   ];
 
-  const renderRow = (label, value) => (
-    <tr>
-      <td style={{ fontWeight: "bold", padding: "8px 4px" }}>{label}</td>
-      <td style={{ padding: "8px 4px" }}>{value}</td>
-    </tr>
-  );
-
-  const summaryBoxStyle = {
-    width: "23%",
-    border: "1px solid #e0e0e0",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    textAlign: "center",
-  };
-
-  const summaryTitleStyle = {
-    fontSize: "13px",
-    color: "#888",
-    marginBottom: 4,
-  };
-
-  const summaryValueStyle = {
-    fontWeight: 600,
-    fontSize: "16px",
-  };
-
-  // Table Styles
-  const tableStyle = {
-    width: "100%",
-    borderCollapse: "collapse",
-  };
 
   const data = [
     {
@@ -228,6 +200,10 @@ function BestCars() {
         <div className="card">
           <div className="card-body">
             <Table
+            rowSelection={{
+            type: "checkbox",
+            ...rowSelection,
+            }}
               columns={columns}
               dataSource={data}
               pagination={{ pageSize: 10 }}

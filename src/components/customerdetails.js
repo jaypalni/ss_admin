@@ -6,26 +6,29 @@ import {
   Tag,
   Avatar,
   Button,
-  Typography,
   message,
+  Radio,
+  Modal
 } from "antd";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import {
   FaPhone,
-  FaCheckCircle,
-  FaTimesCircle,
   FaCalendar,
   FaMapMarkerAlt,
 } from "react-icons/fa";
-
-const { Text } = Typography;
 
 function CustomerDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
+  const [radioValue, setRadioValue] = useState(null);
+  const [, setVerifiedFlag] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalText, setModalText] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
+  const [selectedRadio, setSelectedRadio] = useState(null);
 
   useEffect(() => {
     fetchCustomersIdData(id);
@@ -39,21 +42,69 @@ function CustomerDetails() {
 
       if (result?.data) {
         setCustomer(result.data);
-        console.log("Fetched data:", result.data);
+       const defaultStatus =
+        result.data.is_verified === "pending" ? "non_verified" : result.data.is_verified;
+
+      setRadioValue(defaultStatus);
       }
-      message.success(result.message || "Fetched successfully");
+      messageApi.open({ type: 'success', content: result.message});
     } catch (error) {
       const errorData = handleApiError(error);
-      message.error(errorData.message || "Failed to load customer data");
+      messageApi.open({ type: 'error', content: errorData});
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRadioChange = (e) => {
+    const selectedValue = e.target.value;
+    setSelectedRadio(selectedValue)
+
+    if (selectedValue === "verified") {
+      setModalText("Are you sure you want to verify the user?");
+      setIsModalVisible(true);
+    } else {
+      setModalText("Are you sure you want to reject the user?");
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleConfirm = async (id,value = null) => {
+    const statusToSend = value || selectedRadio;
+    setIsModalVisible(false);
+    setRadioValue(statusToSend);
+
+    const body = {
+     verification_status: statusToSend,
+    };
+    
+    try {
+        setLoading(true);
+        const response = await userAPI.adminVerifyUserData(Number(id),body);
+        const cardetail = handleApiResponse(response);
+        if (cardetail) {
+          setVerifiedFlag(cardetail);
+          setRadioValue(radioValue);
+          fetchCustomersIdData(cardetail.user.id)
+        }
+         messageApi.open({ type: 'success', content: cardetail.message});
+      } catch (error) {
+        const errorData = handleApiError(error);
+         messageApi.open({ type: 'error', content: errorData});
+      } finally {
+        setLoading(false);
+      }
+  };
+
+   const handleCancel = () => {
+    setIsModalVisible(false);
   };
 
   if (!customer) return <p>Loading customer details...</p>;
 
   return (
     <div className="content-wrapper" style={{ padding: "24px" }}>
+      {contextHolder}
       <Button onClick={() => navigate(-1)} style={{ marginBottom: 24 }}>
         ← Back
       </Button>
@@ -68,11 +119,50 @@ function CustomerDetails() {
         >
           {customer.name.charAt(0)}
         </Avatar>
-        <div>
-          <h2 style={{ margin: 0 }}>{customer.name}</h2>
-          <p style={{ margin: 0, color: "#666" }}>{customer.company_name}</p>
-        </div>
+
+
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+     width: "100%",
+  }}
+>
+  <div>
+    <h2 style={{ margin: 0 }}>{customer.name}</h2>
+    <p style={{ margin: 0, color: "#666" }}>{customer.company_name}</p>
+  </div>
+
+  <Radio.Group
+    onChange={handleRadioChange}
+        value={radioValue}
+      >
+    <Radio value="verified">
+        Verify
+      </Radio>
+      <Radio value="rejected" >
+        Reject
+      </Radio>
+       {customer.is_verified === "pending" && (
+        <Radio value="non_verified">Non Verified</Radio>
+       )}
+      
+  </Radio.Group>
+</div>
+
       </div>
+
+       <Modal
+        title="Confirmation"
+        visible={isModalVisible}
+        onOk={() => handleConfirm(id)}
+        onCancel={handleCancel}
+        okText="Confirm"
+        cancelText="Cancel"
+      >
+        <p>{modalText}</p>
+      </Modal>
 
       <Descriptions bordered column={2}>
         <Descriptions.Item label="Company Phone">
@@ -128,6 +218,15 @@ function CustomerDetails() {
             rel="noreferrer"
           >
             Instagram Profile
+          </a>
+        </Descriptions.Item>
+         <Descriptions.Item label="Document">
+          <a
+            href={customer.document}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Document
           </a>
         </Descriptions.Item>
       </Descriptions>

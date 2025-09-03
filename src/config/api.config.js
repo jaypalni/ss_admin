@@ -12,6 +12,8 @@ const API_CONFIG = {
       ADMIN_CUSTOMERS_WATCHLIST: "/api/admin/watchlist",
       ADMIN_WATCHLIST_BANNED_FLAG: (id) =>
         `/api/admin/users/${id}/ban`,
+      ADMIN_VERIFY_USER: (id) =>
+        `/api/admin/users/${id}/verification-status`,
 
       USER_PROFILE: "/api/admin/profile",
     },
