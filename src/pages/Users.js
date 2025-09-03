@@ -14,7 +14,7 @@ import {
   Descriptions,
   Divider
 } from "antd";
-import { FaEdit, FaTrash, FaEye, FaUser, FaEnvelope, FaShieldAlt, FaCalendar, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUser, FaEnvelope, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const { Option } = Select;
 
