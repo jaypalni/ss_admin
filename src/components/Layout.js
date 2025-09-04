@@ -31,6 +31,7 @@ const { Header, Sider, Content } = Layout;
 
 function AppLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
   const [, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -167,11 +168,11 @@ function AppLayout({ children }) {
       const response = await loginApi.logout();
       const userData = response?.data || response;
       if (response.status_code === 200 || userData.status_code === 200) {
-        message.success("Successfully Logged Out");
+         messageApi.open({ type: 'success', content: response.message });
         setLoading(false);
         navigate("/");
       } else {
-        message.error(userData?.error || "Logout failed");
+        messageApi.open({ type: 'success', content: userData.error });
         setLoading(false);
       }
     } catch (error) {
@@ -182,6 +183,7 @@ function AppLayout({ children }) {
   };
   return (
     <Layout style={{ minHeight: "100vh" }}>
+      {contextHolder}
       {/* Sidebar */}
       <Sider
         trigger={null}
@@ -242,7 +244,8 @@ function AppLayout({ children }) {
                   onClick: ({ key }) => {
                     if (key === "logout") {
                       console.log("Logout clicked");
-                      userlogoutAPI();
+                      navigate("/");
+                      //userlogoutAPI();
                     } else if (key === "profile") {
                       console.log("Profile clicked");
                       navigate("/profile");

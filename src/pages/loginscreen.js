@@ -11,7 +11,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [emailerrormsg, setEmailErrorMsg] = useState("");
   const [passworderrormsg, setPasswordErrorMsg] = useState("");
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const handleLogin = () => {
     let hasError = false;
     setEmailErrorMsg("");
@@ -109,8 +109,9 @@ const LoginScreen = () => {
             size="large"
             block
             onClick={handleLogin}
+            loading={loading} 
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </div>
         <div className="image-section">
