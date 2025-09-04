@@ -158,9 +158,12 @@ function CustomerDetails() {
     <Radio value="verified">
         Verify
       </Radio>
-      <Radio value="rejected" >
+       {customer.is_verified === "pending" && (
+        <Radio value="rejected" >
         Reject
       </Radio>
+       )}
+      
        {customer.is_verified === "pending" && (
         <Radio value="non_verified">Non Verified</Radio>
        )}
