@@ -52,27 +52,27 @@ function BestCars() {
       dataIndex: "name",
       key: "name",
      render: (text, record) => (
-  <div
-    role="button"
-    tabIndex={0}
-    onClick={() => handleNameClick(record)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter" || e.key === " ") handleNameClick(record);
-    }}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      color: "#5c53e8",
-      cursor: "pointer",
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-    onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
-  >
-    <Avatar src={record.avatar} style={{ marginRight: 8 }}>
-      {text.charAt(0)}
-    </Avatar>
-    <div style={{ fontWeight: 500 }}>{text}</div>
-  </div>
+ <button
+  onClick={() => handleNameClick(record)}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    color: "#5c53e8",
+    cursor: "pointer",
+    background: "none", // remove default button background
+    border: "none",     // remove default border
+    padding: 0,         // remove default padding
+    font: "inherit",    // inherit font styles
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+>
+  <Avatar src={record.avatar} style={{ marginRight: 8 }}>
+    {text.charAt(0)}
+  </Avatar>
+  <div style={{ fontWeight: 500 }}>{text}</div>
+</button>
+
 )
 
     },
@@ -81,30 +81,24 @@ function BestCars() {
       dataIndex: "carmakemodel",
       key: "carmakemodel",
       render: (text, record) => (
-  <div
-    role="button"
-    tabIndex={0}
-    onClick={() => handleCarClick(record)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        handleCarClick(record);
-      }
-    }}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      color: "#5c53e8",
-      cursor: "pointer",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.textDecoration = "underline";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.textDecoration = "none";
-    }}
-  >
-    <div style={{ fontWeight: 500 }}>{text}</div>
-  </div>
+ <button
+  onClick={() => handleCarClick(record)}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    color: "#5c53e8",
+    cursor: "pointer",
+    background: "none", // remove default button background
+    border: "none",     // remove default border
+    padding: 0,         // remove default padding
+    font: "inherit",    // inherit font styles
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+>
+ <div style={{ fontWeight: 500 }}>{text}</div>
+</button>
+
       )
 
     },

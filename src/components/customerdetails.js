@@ -69,32 +69,33 @@ function CustomerDetails() {
     }
   };
 
-  const handleConfirm = async (id,value = null) => {
-    const statusToSend = value || selectedRadio;
-    setIsModalVisible(false);
-    setRadioValue(statusToSend);
+ const handleConfirm = async (id, value = null) => {
+  const statusToSend = value || selectedRadio;
 
-    const body = {
-     verification_status: statusToSend,
-    };
-    
-    try {
-        setLoading(true);
-        const response = await userAPI.adminVerifyUserData(Number(id),body);
-        const cardetail = handleApiResponse(response);
-        if (cardetail) {
-          setVerifiedFlag(cardetail);
-          setRadioValue(radioValue);
-          fetchCustomersIdData(cardetail.user.id)
-        }
-         messageApi.open({ type: 'success', content: cardetail.message});
-      } catch (error) {
-        const errorData = handleApiError(error);
-         messageApi.open({ type: 'error', content: errorData});
-      } finally {
-        setLoading(false);
-      }
+  setIsModalVisible(false);
+  setRadioValue(statusToSend); 
+
+  const body = {
+    verification_status: statusToSend,
   };
+
+  try {
+    setLoading(true);
+    const response = await userAPI.adminVerifyUserData(Number(id), body);
+    const cardetail = handleApiResponse(response);
+    if (cardetail) {
+      setVerifiedFlag(cardetail);
+      fetchCustomersIdData(cardetail.user.id);
+    }
+    messageApi.open({ type: 'success', content: cardetail.message });
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({ type: 'error', content: errorData });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const getStatusColor = (status) => {
     if (status === "verified") return "green";

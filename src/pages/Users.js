@@ -68,12 +68,16 @@ function Users() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [editForm] = Form.useForm();
 
-  const roleColor =
-  selectedUser.role === "Admin"
-    ? "red"
-    : selectedUser.role === "Manager"
-    ? "blue"
-    : "green";
+let roleColor;
+
+if (selectedUser.role === "Admin") {
+  roleColor = "red";
+} else if (selectedUser.role === "Manager") {
+  roleColor = "blue";
+} else {
+  roleColor = "green";
+}
+
 
   // Handle edit user
   const handleEdit = (record) => {

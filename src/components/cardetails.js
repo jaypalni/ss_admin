@@ -112,21 +112,22 @@ const CarDetails = () => {
   return (
     <div className="car-details-container">
       <Carousel autoplay>
-        {imagesToShow.map((image, index) => (
-          <div key={index} className="d-flex justify-content-center">
-            <img
-              src={image}
-              alt={`Car Image ${index + 1}`}
-              style={{
-                width: "80%",
-                height: "500px",
-                objectFit: "cover",
-                borderRadius: 10,
-              }}
-            />
-          </div>
-        ))}
-      </Carousel>
+  {imagesToShow.map((image) => (
+    <div key={image} className="d-flex justify-content-center">
+      <img
+        src={image}
+        alt="Car"
+        style={{
+          width: "80%",
+          height: "500px",
+          objectFit: "cover",
+          borderRadius: 10,
+        }}
+      />
+    </div>
+  ))}
+</Carousel>
+
 
       <h2 className="car-title">{selectedCar.carmakemodel}</h2>
       <p className="car-description">{selectedCar.carDescription}</p>

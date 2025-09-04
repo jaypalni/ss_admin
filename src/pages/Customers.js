@@ -730,12 +730,13 @@ function Customers() {
             <div>
               <h4>Preferences</h4>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {selectedCustomer.preferences.map((preference, index) => (
-                  <Tag key={index} color="blue">
-                    {preference}
-                  </Tag>
-                ))}
-              </div>
+  {selectedCustomer.preferences.map((preference) => (
+    <Tag key={preference} color="blue">
+      {preference}
+    </Tag>
+  ))}
+</div>
+
             </div>
           </div>
         )}
