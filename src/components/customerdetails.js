@@ -30,6 +30,11 @@ function CustomerDetails() {
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedRadio, setSelectedRadio] = useState(null);
 
+  const banStatusMap = {
+  0: { color: "green", label: "Not Banned" },
+  1: { color: "orange", label: "Banned" },
+  };
+
   useEffect(() => {
     fetchCustomersIdData(id);
   }, [id]);
@@ -103,21 +108,16 @@ function CustomerDetails() {
     return "red";
   };
 
-  const banStatusMap = {
-  0: { color: "green", label: "Not Banned" },
-  1: { color: "orange", label: "Banned" },
-  };
-
-  const { color, label } = banStatusMap[customer.is_banned] || {
-  color: "red",
-  label: "Unknown",
-  };
-
    const handleCancel = () => {
     setIsModalVisible(false);
   };
 
   if (!customer) return <p>Loading customer details...</p>;
+
+  const { color, label } = banStatusMap[customer.is_banned] || {
+  color: "red",
+  label: "Unknown",
+  };
 
   return (
     <div className="content-wrapper" style={{ padding: "24px" }}>

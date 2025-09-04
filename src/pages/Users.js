@@ -61,23 +61,10 @@ function Users() {
     },
   ]);
 
-  
-
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editForm] = Form.useForm();
-
-let roleColor;
-
-if (selectedUser.role === "Admin") {
-  roleColor = "red";
-} else if (selectedUser.role === "Manager") {
-  roleColor = "blue";
-} else {
-  roleColor = "green";
-}
-
 
   // Handle edit user
   const handleEdit = (record) => {
@@ -143,19 +130,12 @@ if (selectedUser.role === "Admin") {
       dataIndex: "role",
       key: "role",
       render: (role) => {
-  // Determine tag color based on role
-  let tagColor;
-  if (role === "Admin") {
-    tagColor = "red";
-  } else if (role === "Manager") {
-    tagColor = "blue";
-  } else {
-    tagColor = "green";
-  }
-
-  return <Tag color={tagColor}>{role}</Tag>;
-}
-
+        let tagColor;
+        if (role === "Admin") tagColor = "red";
+        else if (role === "Manager") tagColor = "blue";
+        else tagColor = "green";
+        return <Tag color={tagColor}>{role}</Tag>;
+      }
     },
     {
       title: "Status",
@@ -208,8 +188,6 @@ if (selectedUser.role === "Admin") {
         </Space>
       ),
     },
-
-    
   ];
 
   return (
@@ -370,13 +348,20 @@ if (selectedUser.role === "Admin") {
               </div>
             </div>
 
-
             <Descriptions bordered column={2}>
-
-<Descriptions.Item label="Role" span={1}>
-  
-  <Tag color={roleColor}>{selectedUser.role}</Tag>
-</Descriptions.Item>
+              <Descriptions.Item label="Role" span={1}>
+                <Tag
+                  color={
+                    selectedUser.role === "Admin"
+                      ? "red"
+                      : selectedUser.role === "Manager"
+                      ? "blue"
+                      : "green"
+                  }
+                >
+                  {selectedUser.role}
+                </Tag>
+              </Descriptions.Item>
 
               <Descriptions.Item label="Status" span={1}>
                 <Tag color={selectedUser.status === "Active" ? "green" : "orange"}>
@@ -387,15 +372,19 @@ if (selectedUser.role === "Admin") {
                   )}
                 </Tag>
               </Descriptions.Item>
+
               <Descriptions.Item label="Phone" span={1}>
                 {selectedUser.phone || 'N/A'}
               </Descriptions.Item>
+
               <Descriptions.Item label="Department" span={1}>
                 {selectedUser.department || 'N/A'}
               </Descriptions.Item>
+
               <Descriptions.Item label="Join Date" span={1}>
                 {selectedUser.joinDate}
               </Descriptions.Item>
+
               <Descriptions.Item label="Last Login" span={1}>
                 {selectedUser.lastLogin}
               </Descriptions.Item>
@@ -404,16 +393,15 @@ if (selectedUser.role === "Admin") {
             <Divider />
 
             <div>
-  <h4>Permissions</h4>
-  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-    {selectedUser.permissions.map((permission) => (
-      <Tag key={permission} color="blue">
-        {permission}
-      </Tag>
-    ))}
-  </div>
-</div>
-
+              <h4>Permissions</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {selectedUser.permissions.map((permission) => (
+                  <Tag key={permission} color="blue">
+                    {permission}
+                  </Tag>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </Modal>
