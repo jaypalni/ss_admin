@@ -328,6 +328,7 @@ function Customers() {
         return <Tag color={getTypeColor(type)}>{type}</Tag>;
       },
     },
+    
     {
       title: "Verified",
       dataIndex: "verified",
@@ -355,6 +356,7 @@ function Customers() {
         );
       },
     },
+    
     {
       title: "Buy Count",
       dataIndex: "buyCount",
@@ -367,93 +369,111 @@ function Customers() {
       key: "sellCount",
       render: (count) => <Text strong>{count}</Text>,
     },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <Space>
+   {
+  title: "Actions",
+  key: "actions",
+  render: (_, record) => {
+    let actionButton;
+
+    if (activeTab === "reported") {
+      actionButton = (
+        <Button
+          type="text"
+          icon={<FaWalking />}
+          size="small"
+          onClick={() => fetchCustomersReportedFlag(record.key)}
+          title="Reported Action"
+        />
+      );
+    } else if (activeTab === "watchlist") {
+      actionButton = (
+        <Button
+          type="text"
+          icon={<FaWalking />}
+          size="small"
+          onClick={() => {
+            setSelectedWatchlistCustomer(record);
+            setIsModalOpen(true);
+          }}
+          title="WatchList Action"
+        />
+      );
+    } else {
+      actionButton = (
+        <Button
+          type="text"
+          size="small"
+          title="Edit Verification"
+        />
+      );
+    }
+
+    return (
+      <Space>
+        {/* View Details button */}
+        <Button
+          type="text"
+          icon={<FaEye />}
+          size="small"
+          onClick={() => navigate(`/customerdetails/${record.key}`)}
+          title="View Details"
+        />
+
+        {/* Render the conditional action button */}
+        {actionButton}
+
+        {/* Reported Comments Modal */}
+        <Modal
+          title="Reported Comments"
+          open={isModalOpen}
+          onOk={() => {
+            if (selectedWatchlistCustomer) {
+              fetchCustomersBannedFlag(selectedWatchlistCustomer.key, reason);
+            }
+            setIsModalOpen(false);
+            setReason("");
+            setSelectedWatchlistCustomer(null);
+          }}
+          onCancel={() => {
+            setIsModalOpen(false);
+            setReason("");
+            setSelectedWatchlistCustomer(null);
+          }}
+          okText="Submit"
+          cancelText="Cancel"
+        >
+          <Input.TextArea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Enter reason"
+            rows={4}
+          />
+        </Modal>
+
+        {/* Optional Delete button */}
+        {/* 
+        <Popconfirm
+          title="Delete Customer"
+          description="Are you sure you want to delete this customer? This action cannot be undone."
+          onConfirm={() => handleDelete(record)}
+          okText="Yes"
+          cancelText="No"
+          okType="danger"
+        >
           <Button
             type="text"
-            icon={<FaEye />}
+            icon={<FaTrash />}
             size="small"
-            onClick={() => navigate(`/customerdetails/${record.key}`)}
-            title="View Details"
-          />
-          {activeTab === "reported" ? (
-  <Button
-    type="text"
-    icon={<FaWalking />}
-    size="small"
-    onClick={() => fetchCustomersReportedFlag(record.key)}
-    title="Reported Action"
-  />
-) : activeTab === "watchlist" ? (
-  <Button
-    type="text"
-    icon={<FaWalking />}
-    size="small"
-    onClick={() => {
-    setSelectedWatchlistCustomer(record); 
-    setIsModalOpen(true);                
-  }}
-    title="WatchList Action"
-  />
-) : (
-  <Button
-    type="text"
-    //icon={<FaEdit />}
-    size="small"
-    // onClick={() => handleEdit(record)}
-    title="Edit Verification"
-  />
-)}
-
-  <Modal
-  title="Reported Comments"
-  open={isModalOpen}
-  onOk={() => {
-    if (selectedWatchlistCustomer) {
-      fetchCustomersBannedFlag(selectedWatchlistCustomer.key, reason);
-    }
-    setIsModalOpen(false);
-    setReason("");
-    setSelectedWatchlistCustomer(null); 
-  }}
-  onCancel={() => {
-    setIsModalOpen(false);
-    setReason("");
-    setSelectedWatchlistCustomer(null);
-  }}
-  okText="Submit"
-  cancelText="Cancel"
->
-  <Input.TextArea
-    value={reason}
-    onChange={(e) => setReason(e.target.value)}
-    placeholder="Enter reason"
-    rows={4}
-  />
-</Modal>
-
-          {/* <Popconfirm
+            danger
             title="Delete Customer"
-            description="Are you sure you want to delete this customer? This action cannot be undone."
-            onConfirm={() => handleDelete(record)}
-            okText="Yes"
-            cancelText="No"
-            okType="danger"
-          >
-            <Button
-              type="text"
-              icon={<FaTrash />}
-              size="small"
-              danger
-              title="Delete Customer"
-            />
-          </Popconfirm> */}
-        </Space>
-      ),
-    },
+          />
+        </Popconfirm> 
+        */}
+      </Space>
+    );
+  },
+}
+
   ];
 
   return (
@@ -685,12 +705,18 @@ function Customers() {
             <Divider />
 
             <Descriptions bordered column={2} style={{ marginTop: 24 }}>
-              <Descriptions.Item label="Cars Bought" span={2}>
-                {selectedCustomer.carsBought &&
-                selectedCustomer.carsBought.length > 0
-                  ? selectedCustomer.carsBought.join(", ")
-                  : "No cars bought"}
-              </Descriptions.Item>
+             <Descriptions.Item label="Cars Bought" span={2}>
+  {selectedCustomer.carsBought && selectedCustomer.carsBought.length > 0 ? (
+    selectedCustomer.carsBought.map((car) => (
+      <span key={car} style={{ marginRight: 4 }}>
+        {car}
+      </span>
+    ))
+  ) : (
+    "No cars bought"
+  )}
+</Descriptions.Item>
+
               <Descriptions.Item label="Cars Sold" span={2}>
                 {selectedCustomer.carsSold &&
                 selectedCustomer.carsSold.length > 0

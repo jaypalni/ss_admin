@@ -19,49 +19,50 @@ function Documents() {
         </div>
       ),
     },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-      render: (type) => (
-        <Tag
-          color={
-            type === "PDF"
-              ? "red"
-              : type === "DOC"
-              ? "blue"
-              : type === "XLS"
-              ? "green"
-              : "orange"
-          }
-        >
-          {type}
-        </Tag>
-      ),
-    },
+   {
+  title: "Type",
+  dataIndex: "type",
+  key: "type",
+  render: (type) => {
+    let tagColor;
+    if (type === "PDF") {
+      tagColor = "red";
+    } else if (type === "DOC") {
+      tagColor = "blue";
+    } else if (type === "XLS") {
+      tagColor = "green";
+    } else {
+      tagColor = "orange";
+    }
+
+    return <Tag color={tagColor}>{type}</Tag>;
+  }
+},
+
     {
       title: "Size",
       dataIndex: "size",
       key: "size",
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag
-          color={
-            status === "Published"
-              ? "green"
-              : status === "Draft"
-              ? "orange"
-              : "red"
-          }
-        >
-          {status}
-        </Tag>
-      ),
-    },
+  title: "Status",
+  dataIndex: "status",
+  key: "status",
+  render: (status) => {
+    // Determine the tag color based on status
+    let tagColor;
+    if (status === "Published") {
+      tagColor = "green";
+    } else if (status === "Draft") {
+      tagColor = "orange";
+    } else {
+      tagColor = "red";
+    }
+
+    return <Tag color={tagColor}>{status}</Tag>;
+  }
+},
+
     {
       title: "Actions",
       key: "actions",

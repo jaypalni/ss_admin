@@ -24,13 +24,14 @@ import { RiAdminFill } from "react-icons/ri";
 import "../assets/styles/layout.css";
 import { IoCarSharp } from "react-icons/io5";
 import { MdSubscriptions } from "react-icons/md";
-import { loginApi, userAPI } from "../services/api";
+import { loginApi } from "../services/api";
+import PropTypes from 'prop-types';
 const { Header, Sider, Content } = Layout;
-// const superAdmin = Number(localStorage.getItem("isSuperAdmin"));
+
 
 function AppLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const toggleCollapsed = () => {
@@ -270,4 +271,7 @@ function AppLayout({ children }) {
     </Layout>
   );
 }
+AppLayout.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 export default AppLayout;

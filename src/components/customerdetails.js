@@ -96,6 +96,22 @@ function CustomerDetails() {
       }
   };
 
+  const getStatusColor = (status) => {
+    if (status === "verified") return "green";
+    if (status === "pending") return "orange";
+    return "red";
+  };
+
+  const banStatusMap = {
+  0: { color: "green", label: "Not Banned" },
+  1: { color: "orange", label: "Banned" },
+  };
+
+  const { color, label } = banStatusMap[customer.is_banned] || {
+  color: "red",
+  label: "Unknown",
+  };
+
    const handleCancel = () => {
     setIsModalVisible(false);
   };
@@ -170,15 +186,7 @@ function CustomerDetails() {
           {customer.phone_number}
         </Descriptions.Item>
         <Descriptions.Item label="Verification Status">
-          <Tag
-            color={
-              customer.is_verified === "verified"
-                ? "green"
-                : customer.is_verified === "pending"
-                ? "orange"
-                : "red"
-            }
-          >
+          <Tag color={getStatusColor(customer.is_verified)}>
             {customer.is_verified}
           </Tag>
         </Descriptions.Item>
@@ -191,17 +199,7 @@ function CustomerDetails() {
           {customer.company_address}
         </Descriptions.Item>
         <Descriptions.Item label="Ban Reason" span={2}>
-          <Tag
-            color={
-              customer.is_banned === 0
-                ? "green"
-                : customer.is_banned === 1
-                ? "orange"
-                : "red"
-            }
-          >
-            {customer.is_banned === 0 ? "Not Banned" : "Banned"}
-          </Tag>
+         <Tag color={color}>{label}</Tag>
         </Descriptions.Item>
         <Descriptions.Item label="Company Registration No.">
           {customer.company_registration_number}

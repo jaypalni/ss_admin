@@ -39,6 +39,19 @@ function WebsiteContent() {
       });
   };
 
+  let modalTitle;
+if (activeTab === "faqs") {
+  modalTitle = "Add FAQ";
+} else if (activeTab === "privacy") {
+  modalTitle = "Add Privacy Policy";
+} else if (activeTab === "terms") {
+  modalTitle = "Add Terms & Conditions";
+} else if (activeTab === "blogs") {
+  modalTitle = "Add Blog";
+} else {
+  modalTitle = "Add Content";
+}
+
   return (
     <div className="content-wrapper" style={{ padding: "20px" }}>
       <div className="content-body">
@@ -75,14 +88,15 @@ function WebsiteContent() {
                 }
                 style={{ marginBottom: "16px" }}
               >
-                <ul style={{ paddingLeft: "20px" }}>
-                  {faqs.map((faq, index) => (
-                    <li key={index} style={{ marginBottom: "16px" }}>
-                      <strong>{faq.question}</strong>
-                      <p style={{ margin: "4px 0 0 0" }}>{faq.answer}</p>
-                    </li>
-                  ))}
-                </ul>
+               <ul style={{ paddingLeft: "20px" }}>
+  {faqs.map((faq) => (
+    <li key={faq.id || faq.question} style={{ marginBottom: "16px" }}>
+      <strong>{faq.question}</strong>
+      <p style={{ margin: "4px 0 0 0" }}>{faq.answer}</p>
+    </li>
+  ))}
+</ul>
+
               </Card>
             )}
 
@@ -153,49 +167,36 @@ function WebsiteContent() {
                 </ul>
               </Card>
             )}
- 
-            <Modal
-              title={
-                activeTab === "faqs"
-                  ? "Add FAQ"
-                  : activeTab === "privacy"
-                  ? "Add Privacy Policy"
-                  : activeTab === "terms"
-                  ? "Add Terms & Conditions"
-                  : activeTab === "blogs"
-                  ? "Add Blog" 
-                  : "Add Content"
-              }
-              visible={isModalOpen}
-              onCancel={handleCancel}
-              onOk={handleSubmit}
-              okText="Submit"
-              cancelText="Cancel"
-            >
-              <Form form={form} layout="vertical">
-                <Form.Item
-                  label=""
-                  name="question"
-                  rules={[
-                    { required: true, message: "Please enter a question" },
-                  ]}
-                >
-                  <Input placeholder="Enter the question" />
-                </Form.Item>
 
-                {activeTab === "faqs" && (
-                  <Form.Item
-                    label=""
-                    name="answer"
-                    rules={[
-                      { required: true, message: "Please enter an answer" },
-                    ]}
-                  >
-                    <Input.TextArea placeholder="Enter the answer" rows={4} />
-                  </Form.Item>
-                )}
-              </Form>
-            </Modal>
+<Modal
+  title={modalTitle}
+  visible={isModalOpen}
+  onCancel={handleCancel}
+  onOk={handleSubmit}
+  okText="Submit"
+  cancelText="Cancel"
+>
+  <Form form={form} layout="vertical">
+    <Form.Item
+      label=""
+      name="question"
+      rules={[{ required: true, message: "Please enter a question" }]}
+    >
+      <Input placeholder="Enter the question" />
+    </Form.Item>
+
+    {activeTab === "faqs" && (
+      <Form.Item
+        label=""
+        name="answer"
+        rules={[{ required: true, message: "Please enter an answer" }]}
+      >
+        <Input.TextArea placeholder="Enter the answer" rows={4} />
+      </Form.Item>
+    )}
+  </Form>
+</Modal>
+
           </div>
         </div>
       </div>

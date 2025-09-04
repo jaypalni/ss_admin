@@ -81,25 +81,28 @@ const LoginScreen = () => {
           {emailerrormsg && (
             <div className="emailerror-msg">{emailerrormsg}</div>
           )}
-          <Input.Password
-            placeholder="Password"
-            className="input-field"
-            size="large"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setPasswordErrorMsg("");
-            }}
-          />
-          {passworderrormsg && (
-            <div className="passworderror-msg">{passworderrormsg}</div>
-          )}
-          <div
-            className="forgot-password"
-            onClick={() => navigate("/ForgotPassword")}
-          >
-            <a style={{ cursor: "pointer" }}>Forgot password?</a>
-          </div>
+         <Input.Password
+  placeholder="Password"
+  className="input-field"
+  size="large"
+  value={password}
+  aria-label="Password"
+  aria-describedby={passworderrormsg ? "password-error" : undefined}
+  onChange={(e) => {
+    setPassword(e.target.value);
+    setPasswordErrorMsg("");
+  }}
+/>
+{passworderrormsg && (
+  <div id="password-error" className="passworderror-msg">
+    {passworderrormsg}
+  </div>
+)}
+
+         <div className="forgot-password">
+          <a href="/ForgotPassword">Forgot password?</a>
+         </div>
+
           <Button
             type="primary"
             className="login-button"

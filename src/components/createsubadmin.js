@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
-
+import PropTypes from 'prop-types';
 const { Option } = Select;
 const { Text, Title } = Typography;
 
@@ -160,5 +160,9 @@ function CreateSubadmin({ reloadList }) {
     </Card>
   );
 }
+
+CreateSubadmin.propTypes = {
+  reloadList: PropTypes.node.isRequired,
+};
 
 export default CreateSubadmin;

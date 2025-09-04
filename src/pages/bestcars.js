@@ -51,56 +51,62 @@ function BestCars() {
       title: "User",
       dataIndex: "name",
       key: "name",
-      render: (text, record) => (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            color: "#5c53e8",
-            cursor: "pointer",
-          }}
-          onClick={() => handleNameClick(record)}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.textDecoration = "underline";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.textDecoration = "none";
-          }}
-        >
-          <Avatar src={record.avatar} style={{ marginRight: 8 }}>
-            {text.charAt(0)}
-          </Avatar>
-          <div>
-            <div style={{ fontWeight: 500 }}>{text}</div>
-          </div>
-        </div>
-      ),
+     render: (text, record) => (
+  <div
+    role="button"
+    tabIndex={0}
+    onClick={() => handleNameClick(record)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") handleNameClick(record);
+    }}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      color: "#5c53e8",
+      cursor: "pointer",
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+    onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+  >
+    <Avatar src={record.avatar} style={{ marginRight: 8 }}>
+      {text.charAt(0)}
+    </Avatar>
+    <div style={{ fontWeight: 500 }}>{text}</div>
+  </div>
+)
+
     },
     {
       title: "Car Make & Model",
       dataIndex: "carmakemodel",
       key: "carmakemodel",
       render: (text, record) => (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            color: "#5c53e8",
-            cursor: "pointer",
-          }}
-          onClick={() => handleCarClick(record)}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.textDecoration = "underline";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.textDecoration = "none";
-          }}
-        >
-          <div>
-            <div style={{ fontWeight: 500 }}>{text}</div>
-          </div>
-        </div>
-      ),
+  <div
+    role="button"
+    tabIndex={0}
+    onClick={() => handleCarClick(record)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        handleCarClick(record);
+      }
+    }}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      color: "#5c53e8",
+      cursor: "pointer",
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.textDecoration = "underline";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.textDecoration = "none";
+    }}
+  >
+    <div style={{ fontWeight: 500 }}>{text}</div>
+  </div>
+      )
+
     },
     {
       title: "Mfg & Transmission",
@@ -283,10 +289,8 @@ function BestCars() {
                 },
                 { label: "Role", value: selectedUser.role },
               ].map((item, index) => (
-                <div
-                  key={index}
-                  style={{ display: "flex", marginBottom: "8px" }}
-                >
+               <div key={item.name} style={{ display: "flex", marginBottom: "8px" }}>
+
                   <div
                     style={{
                       width: "150px",

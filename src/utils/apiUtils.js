@@ -1,10 +1,8 @@
 // API Response Handler
 export const handleApiResponse = (response) => {
-  if (response && response.data) {
-    return response.data;
-  }
-  return null;
+  return response?.data ?? null;
 };
+
 
 // API Error Handler
 export const handleApiError = (error) => {

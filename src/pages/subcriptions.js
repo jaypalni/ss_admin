@@ -135,13 +135,14 @@ const Subscriptions = () => {
               <Title level={3}>${plan.price}</Title>
               <Text type="secondary">{plan.duration}</Text>
               <div className="features-list">
-                {plan.features.map((feature, index) => (
-                  <div key={index} className="feature-item">
-                    <CheckCircleTwoTone twoToneColor="#52c41a" />{" "}
-                    <span>{feature}</span>
-                  </div>
-                ))}
+                {plan.features.map((feature) => (
+                <div key={feature} className="feature-item">
+                <CheckCircleTwoTone twoToneColor="#52c41a" />{" "}
+                <span>{feature}</span>
               </div>
+              ))}
+             </div>
+
               <div style={{ display: "flex", gap: "10px" }}>
                 <Button
                   type="primary"

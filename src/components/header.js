@@ -1,15 +1,11 @@
 import React from "react";
 import "../assets/styles/header.css";
 import iconWhite from "../assets/images/souqLogo.svg";
-import { CiBellOn } from "react-icons/ci";
-import { useNavigate } from "react-router-dom";
 import Car_icon from "../assets/images/Car_icon.png";
 
 
 const Header = () => {
   
-
-  const navigate = useNavigate();
 
   return (
     <>
@@ -56,7 +52,7 @@ const Header = () => {
                 fontSize: 32,
               }}
             >
-              {"Welcome To Souq Siyarate"}
+              {"Welcome To Souq Sayarat"}
             </h1>
           </div>
         </div>

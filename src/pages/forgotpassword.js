@@ -105,18 +105,22 @@ const ForgotPassword = () => {
             style={{ textAlign: "center", fontSize: "16px", marginTop: "12px" }}
           >
             Remember your password?{" "}
-            <span
-              style={{
-                fontWeight: "bold",
-                color: "black",
-                cursor: "pointer",
-              }}
-              onMouseOver={(e) => (e.target.style.color = "#6c63ff")}
-              onMouseOut={(e) => (e.target.style.color = "black")}
-              onClick={handleLoginClick}
-            >
-              Login
-            </span>
+           <span
+  role="button"
+  tabIndex={0}
+  style={{ fontWeight: "bold", color: "black", cursor: "pointer" }}
+  onClick={handleLoginClick}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      handleLoginClick();
+    }
+  }}
+  onMouseOver={(e) => (e.target.style.color = "#6c63ff")}
+  onMouseOut={(e) => (e.target.style.color = "black")}
+>
+  Login
+</span>
+
           </div>
         </div>
 

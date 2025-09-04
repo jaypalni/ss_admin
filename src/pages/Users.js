@@ -61,10 +61,19 @@ function Users() {
     },
   ]);
 
+  
+
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editForm] = Form.useForm();
+
+  const roleColor =
+  selectedUser.role === "Admin"
+    ? "red"
+    : selectedUser.role === "Manager"
+    ? "blue"
+    : "green";
 
   // Handle edit user
   const handleEdit = (record) => {
@@ -129,15 +138,20 @@ function Users() {
       title: "Role",
       dataIndex: "role",
       key: "role",
-      render: (role) => (
-        <Tag
-          color={
-            role === "Admin" ? "red" : role === "Manager" ? "blue" : "green"
-          }
-        >
-          {role}
-        </Tag>
-      ),
+      render: (role) => {
+  // Determine tag color based on role
+  let tagColor;
+  if (role === "Admin") {
+    tagColor = "red";
+  } else if (role === "Manager") {
+    tagColor = "blue";
+  } else {
+    tagColor = "green";
+  }
+
+  return <Tag color={tagColor}>{role}</Tag>;
+}
+
     },
     {
       title: "Status",
@@ -190,6 +204,8 @@ function Users() {
         </Space>
       ),
     },
+
+    
   ];
 
   return (
@@ -350,15 +366,14 @@ function Users() {
               </div>
             </div>
 
+
             <Descriptions bordered column={2}>
-              <Descriptions.Item label="Role" span={1}>
-                <Tag color={
-                  selectedUser.role === "Admin" ? "red" : 
-                  selectedUser.role === "Manager" ? "blue" : "green"
-                }>
-                  {selectedUser.role}
-                </Tag>
-              </Descriptions.Item>
+
+<Descriptions.Item label="Role" span={1}>
+  
+  <Tag color={roleColor}>{selectedUser.role}</Tag>
+</Descriptions.Item>
+
               <Descriptions.Item label="Status" span={1}>
                 <Tag color={selectedUser.status === "Active" ? "green" : "orange"}>
                   {selectedUser.status === "Active" ? (
@@ -385,13 +400,16 @@ function Users() {
             <Divider />
 
             <div>
-              <h4>Permissions</h4>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {selectedUser.permissions.map((permission, index) => (
-                  <Tag key={index} color="blue">{permission}</Tag>
-                ))}
-              </div>
-            </div>
+  <h4>Permissions</h4>
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+    {selectedUser.permissions.map((permission) => (
+      <Tag key={permission} color="blue">
+        {permission}
+      </Tag>
+    ))}
+  </div>
+</div>
+
           </div>
         )}
       </Modal>
