@@ -25,6 +25,7 @@ import CarDetails from "./components/cardetails";
 import Subcriptions from "./pages/subcriptions";
 import CustomerDetails from "./components/customerdetails";
 import Profile from "./components/profile";
+import CarTypes from "./pages/CarTypes";
 import CreateSubadmin from "./components/createsubadmin";
 
 const AppRouter = () => {
@@ -86,7 +87,14 @@ const AppRouter = () => {
           }
         />
         <Route path="/bestcars/:car_id/CarDetails" element={<CarDetails />} />
-
+        <Route
+          path="/car-types"
+          element={
+            <AppLayout>
+              <CarTypes />
+            </AppLayout>
+          }
+        />
         <Route
           path="/transactions"
           element={

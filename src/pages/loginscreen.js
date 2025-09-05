@@ -5,6 +5,8 @@ import Car_icon from "../assets/images/Car_icon.png";
 import bluelogo_icon from "../assets/images/souqLogo_blue.svg";
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "../services/api";
+
+
 const LoginScreen = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -12,6 +14,9 @@ const LoginScreen = () => {
   const [emailerrormsg, setEmailErrorMsg] = useState("");
   const [passworderrormsg, setPasswordErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+
+
   const handleLogin = () => {
     let hasError = false;
     setEmailErrorMsg("");
@@ -33,16 +38,16 @@ const LoginScreen = () => {
       email: email,
       password: password,
     };
-    console.log("Body", body);
     setLoading(true);
     userloginAPI(body);
   };
+
   const userloginAPI = async (body) => {
     try {
       const response = await loginApi.login(body);
       const userData = response?.data || response;
       if (response.status === 200 || userData.statusCode === 200) {
-        message.success("Successfully Logged In");
+        messageApi.open({ type: 'success', content: response.message  });
         localStorage.setItem("token", userData?.access_token);
         localStorage.setItem("isSuperAdmin", userData?.is_super_admin);
         setLoading(false);
@@ -52,7 +57,7 @@ const LoginScreen = () => {
           navigate("/dashboard");
         }
       } else {
-        message.error(userData?.error || "Login failed");
+         messageApi.open({ type: 'error', content: userData.error  });
         setLoading(false);
       }
     } catch (error) {
@@ -63,6 +68,7 @@ const LoginScreen = () => {
   };
   return (
     <div className="login-page-wrapper">
+      {contextHolder}
       <div className="login-page">
         <div className="login-form">
           <img src={bluelogo_icon} alt="left side" className="ssblue-logo" />

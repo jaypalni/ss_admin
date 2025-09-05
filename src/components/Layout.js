@@ -97,6 +97,11 @@ function AppLayout({ children }) {
       icon: <IoCarSharp />,
       label: "Best Cars",
     },
+     {
+      key: "/car-types",
+      icon: <FaUserFriends />,
+      label: "Car Types",
+    },
     {
       key: "/transactions",
       icon: <FaFileAlt />,
@@ -160,27 +165,28 @@ function AppLayout({ children }) {
     ),
     label: collapsed ? "" : item.label,
   }));
-  // Profile API
-  // Logout API
+
   const userlogoutAPI = async () => {
     try {
-      console.log("API Call");
+      setLoading(true);
       const response = await loginApi.logout();
       const userData = response?.data || response;
       if (response.status_code === 200 || userData.status_code === 200) {
-         messageApi.open({ type: 'success', content: response.message });
-        setLoading(false);
-        navigate("/");
-      } else {
-        messageApi.open({ type: 'success', content: userData.error });
-        setLoading(false);
-      }
+          localStorage.clear();
+          navigate("/");
+          setTimeout(() => {
+          messageApi.open({ type: 'success', content: response.message });
+          }, 300);
+    } else {
+       messageApi.open({ type: 'error', content: response.error });
+    }
     } catch (error) {
       console.error("Error during logout", error);
       message.error("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {contextHolder}
@@ -244,8 +250,7 @@ function AppLayout({ children }) {
                   onClick: ({ key }) => {
                     if (key === "logout") {
                       console.log("Logout clicked");
-                      navigate("/");
-                      //userlogoutAPI();
+                      userlogoutAPI();
                     } else if (key === "profile") {
                       console.log("Profile clicked");
                       navigate("/profile");

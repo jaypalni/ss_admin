@@ -95,6 +95,13 @@ export const userAPI = {
     api.put(API_CONFIG.ENDPOINTS.USER.ADMIN_VERIFY_USER(id),body),
 
   userprofile: () => api.get(API_CONFIG.ENDPOINTS.USER.USER_PROFILE),
+  carTypeDetails: (body) => api.post(API_CONFIG.ENDPOINTS.USER.CAR_DETAILS_TYPES,body),
+  uploadimages: (formData) =>
+    api.post(API_CONFIG.ENDPOINTS.USER.UPLOAD_DOCUMENTS, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
 };
 
 export const loginApi = {

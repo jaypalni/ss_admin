@@ -16,6 +16,8 @@ const API_CONFIG = {
         `/api/admin/users/${id}/verification-status`,
 
       USER_PROFILE: "/api/admin/profile",
+      CAR_DETAILS_TYPES: "/api/admin/add_make_make_model_trim_year",
+      UPLOAD_DOCUMENTS: '/api/search/upload-attachment',
     },
 
     LOGIN: {
