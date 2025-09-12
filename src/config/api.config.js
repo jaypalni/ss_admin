@@ -18,6 +18,12 @@ const API_CONFIG = {
       USER_PROFILE: "/api/admin/profile",
       CAR_DETAILS_TYPES: "/api/admin/add_make_make_model_trim_year",
       UPLOAD_DOCUMENTS: '/api/search/upload-attachment',
+      CAR_DETAILS_ALL: (activeTab) => `/api/admin/pending-cars?approval=${activeTab}`,
+      CAR_BEST_PICK: (id,pick) => `/api/admin/cars/${id}/mark-best-pick/${pick}`,
+      CAR_APPROVE: (id) => `/api/admin/cars/${id}/approve`,
+      CAR_REJECTED: (id) => `/api/admin/cars/${id}/reject`,
+      GET_BY_ID: (id) => `/api/cars/details/${id}`,
+      REASON_REJECTIONS:  "api/admin/car-rejection-reasons"
     },
 
     LOGIN: {

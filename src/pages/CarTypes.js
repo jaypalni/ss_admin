@@ -149,8 +149,8 @@ const CarTypes = () => {
             <Input placeholder="Enter Year" />
           </Form.Item>
 
-          <Form.Item name="trim" rules={[{ required: true, message: "Please select trim!" }]}>
-            <Select placeholder="Select Trim" style={{ width: 150 }}>
+          <Form.Item name="body_type" rules={[{ required: true, message: "Please select body type!" }]}>
+            <Select placeholder="Select Body Type" style={{ width: 150 }}>
               <Option value="Sedan">Sedan</Option>
               <Option value="SUV">SUV</Option>
               <Option value="Coupe">Coupe</Option>
@@ -159,8 +159,12 @@ const CarTypes = () => {
             </Select>
           </Form.Item>
 
+           <Form.Item name="trim" rules={[{ required: true, message: "Please enter car trim!" }]}>
+            <Input  style={{marginTop:'10px'}} placeholder="Enter Trim" />
+          </Form.Item>
+
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button style={{marginTop:'10px'}}type="primary" htmlType="submit" loading={loading}>
               Add Car
             </Button>
           </Form.Item>

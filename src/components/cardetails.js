@@ -1,212 +1,386 @@
-import React from "react";
-import { Button, Switch, Carousel } from "antd";
-import { useNavigate, useParams } from "react-router-dom";
-import "../assets/styles/cardetails.css";
+  import React, { useState,useEffect } from "react";
+  import { Button, Switch, Carousel,Radio,message,Select,Input,Modal,Spin } from "antd";
+  import { useNavigate, useParams } from "react-router-dom";
+  import "../assets/styles/cardetails.css";
+  import { userAPI } from "../services/api";
+  import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 
-const CarDetails = () => {
-  const navigate = useNavigate();
-  const { car_id } = useParams();
-  const [isBestCar, setIsBestCar] = React.useState(false);
+  const CarDetails = () => {
+    const navigate = useNavigate();
+    const { car_id } = useParams();
+    const [loading, setLoading] = useState(false);
+    const [customerData, setCustomerData] = useState(null);
+    const [rejectReasonData, setRejectReasonData] = useState([]);
+    const [isBestCar, setIsBestCar] = useState(false);
+    const [approvalStatus, setApprovalStatus] = useState("");
+    const [messageApi, contextHolder] = message.useMessage();
+    const [radioValue, setRadioValue] = useState(null);
+    const [, setNotifySaved] = useState('');
+    const [, setApproved] = useState('');
+    const [prevApprovalStatus, setPrevApprovalStatus] = useState("");
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectReason, setRejectReason] = useState(null);
+    const [rejectComment, setRejectComment] = useState("");
+    const [submittingRejection, setSubmittingRejection] = useState(false); 
+    const API_BASE_URL = process.env.REACT_APP_API_URL
+    const { TextArea } = Input;
+    const { Option } = Select;
 
-  const data = [
-    {
-      key: "1",
-      name: "Warner",
-      carmakemodel: "Honda City",
-      yearmfg: "Manual, 2018",
-      carengine: "V8",
-      lastLogin: "2024-01-15 10:30",
-      avatar: "https://via.placeholder.com/40",
-      carImages: [
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-      ],
-      carDescription:
-        "A stylish and fuel-efficient sedan with spacious interiors.",
-      firstname: "David",
-      lastname: "Warner",
-      email: "warner@example.com",
-      date_of_birth: "1990-10-27",
-      country_code: "91",
-      phone_number: "9876543210",
-      address: "Sydney, Australia",
-      designation: "Cricketer",
-      industry: "Sports",
-      role: "Dealer",
-    },
-    {
-      key: "2",
-      name: "Jane Smith",
-      carmakemodel: "Hyundai i20",
-      yearmfg: "Manual, 2018",
-      carengine: "V8",
-      lastLogin: "2024-01-14 15:45",
-      avatar: "https://via.placeholder.com/40",
-      carImages: [
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-      ],
-      carDescription: "Compact hatchback offering premium features and safety.",
-      firstname: "Jane",
-      lastname: "Smith",
-      email: "jane@example.com",
-      date_of_birth: "1988-07-14",
-      country_code: "1",
-      phone_number: "1234567890",
-      address: "New York, USA",
-      designation: "Manager",
-      industry: "Tech",
-      role: "Dealer",
-    },
-    {
-      key: "3",
-      name: "Mike Johnson",
-      carmakemodel: "Tata Nexon",
-      yearmfg: "Manual, 2018",
-      carengine: "V8",
-      lastLogin: "2024-01-10 09:15",
-      avatar: "https://via.placeholder.com/40",
-      carImages: [
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-      ],
-      carDescription: "Indian compact SUV known for safety and performance.",
-      firstname: "Mike",
-      lastname: "Johnson",
-      email: "mike@example.com",
-      date_of_birth: "1985-05-23",
-      country_code: "44",
-      phone_number: "1122334455",
-      address: "London, UK",
-      designation: "Engineer",
-      industry: "Automotive",
-      role: "Dealer",
-    },
-  ];
+    useEffect(() => {
+        fetchCustomersIdData(car_id);
+    }, [car_id]);
 
-  const selectedCar = data.find((car) => car.key === String(car_id));
-  const defaultImages = data[0].carImages;
-  const imagesToShow = selectedCar?.carImages?.length
-    ? selectedCar.carImages
-    : defaultImages;
+    const fetchCustomersIdData = async (car_id) => {
+        try {
+          setLoading(true);
+          const response = await userAPI.getCarByIdDetails(Number(car_id));
+          const result = handleApiResponse(response);
+    
+          if (result?.data) {
+            setCustomerData(result.data);
+            const bestPick = result?.data?.is_best_pick ?? 0;
+            setIsBestCar(Number(bestPick) === 1);
+           const status = result?.data?.approval ?? "";
+           setApprovalStatus(status);
+          }
+          messageApi.open({ type: 'success', content: result.message});
+        } catch (error) {
+          const errorData = handleApiError(error);
+          messageApi.open({ type: 'error', content: errorData});
+        } finally {
+          setLoading(false);
+        }
+    };
+      
+    const handleEnableNotification = async (id, enabled) => {
+      setLoading(true);
+      const previous = isBestCar;
+      setIsBestCar(enabled);
+    try {
+      const pick = enabled ? 1 : 0;
 
-  const renderRow = (label, value) => (
-    <tr>
-      <td style={{ fontWeight: "bold", padding: "8px 4px" }}>{label}</td>
-      <td style={{ padding: "8px 4px" }}>{value}</td>
-    </tr>
-  );
+      const res = await userAPI.carBestPick(id, pick);
+      const response = handleApiResponse(res);
 
-  const tableStyle = {
-    width: "100%",
-    borderCollapse: "collapse",
-  };
+      if (response) {
+        messageApi.open({ type: 'success', content: response.message });
+        //Allsavedsearches('1');
+      } else {
+        setIsBestCar(previous);
+        setNotifySaved([]);
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({ type: 'error', content: errorData.message });
+    } finally {
+      setLoading(false);
+    }
+    };
 
-  if (!selectedCar) {
-    return <div style={{ padding: 24 }}> </div>;
+const onApprovalChange = (e) => {
+  const newVal = e.target.value;
+  if (newVal === "rejected") {
+    setPrevApprovalStatus(approvalStatus);
+    if (!rejectReasonData || rejectReasonData.length === 0) {
+      getReasonRejection();
+    }
+    setShowRejectModal(true);
+    return;
   }
 
-  return (
-    <div className="car-details-container">
-      <Carousel autoplay>
-  {imagesToShow.map((image) => (
-    <div key={image} className="d-flex justify-content-center">
-      <img
-        src={image}
-        alt="Car"
-        style={{
-          width: "80%",
-          height: "500px",
-          objectFit: "cover",
-          borderRadius: 10,
-        }}
-      />
-    </div>
-  ))}
-</Carousel>
+  if (newVal === "approved") {
+    setPrevApprovalStatus(approvalStatus);
+    getApproved();
+    return;
+  }
+  setApprovalStatus(newVal);
+};
+
+  const getReasonRejection = async () => {
+        try {
+          setLoading(true);
+          const response = await userAPI.reasonRejection();
+          const result = handleApiResponse(response);
+    
+          if (result?.data?.rejection_reasons) {
+            setRejectReasonData(result.data.rejection_reasons);
+        
+          }
+          messageApi.open({ type: 'success', content: result.data.message});
+        } catch (error) {
+          const errorData = handleApiError(error);
+          messageApi.open({ type: 'error', content: errorData});
+          setRejectReasonData([]);
+        } finally {
+          setLoading(false);
+        }
+    };
+
+    const getRejection = async () => {
+      if (!rejectReason) {
+      messageApi.open({ type: "warning", content: "Please select a reason for rejection." });
+      return;
+    }
+
+    if (!rejectComment) {
+      messageApi.open({ type: "warning", content: "Please enter a comment." });
+      return;
+    }
+      const body =  {
+        rejection_reason : rejectReason,
+        admin_rejection_comment: rejectComment
+      }
+        try {
+          setLoading(true);
+          const response = await userAPI.carRejected(Number(car_id),body);
+          const result = handleApiResponse(response);
+    
+          if (result?.data?.rejection_reasons) {
+            setRejectReasonData(result.data.rejection_reasons);
+            setApprovalStatus("rejected");
+            setShowRejectModal(false);
+        
+          }
+          messageApi.open({ type: 'success', content: result.data.message});
+        } catch (error) {
+          const errorData = handleApiError(error);
+          messageApi.open({ type: 'error', content: errorData});
+          setRejectReasonData([]);
+        } finally {
+          setLoading(false);
+        }
+    };
+
+    const getApproved = async () => {
+
+        try {
+          setLoading(true);
+          const response = await userAPI.carApprove(Number(car_id));
+          const result = handleApiResponse(response);
+    
+          if (result?.data?.rejection_reasons) {
+            setRejectReasonData(result.data.rejection_reasons);
+            setApprovalStatus("approved");
+            setShowRejectModal(false);
+        
+          }
+          messageApi.open({ type: 'success', content: result.data.message});
+        } catch (error) {
+          const errorData = handleApiError(error);
+          messageApi.open({ type: 'error', content: errorData});
+          setRejectReasonData([]);
+        } finally {
+          setLoading(false);
+        }
+    };
+
+  const onCancelRejection = () => {
+    setShowRejectModal(false);
+    setApprovalStatus(prevApprovalStatus ?? "");
+    setRejectReason(null);
+    setRejectComment("");
+  };
+
+  const imagesToShow = customerData?.car_image?.length
+    ? customerData.car_image
+    : [];
+
+    const renderRow = (label, value) => (
+      <tr>
+        <td style={{ fontWeight: "bold", padding: "8px 4px" }}>{label}</td>
+        <td style={{ padding: "8px 4px" }}>{value}</td>
+      </tr>
+    );
+
+    const tableStyle = {
+      width: "100%",
+      borderCollapse: "collapse",
+    };
+    if (!customerData?.car_image) {
+      return <div style={{ padding: 24 }}> </div>;
+    }
+
+    if (loading && !customerData) {
+      return (
+        <div style={{ padding: 24, textAlign: "center" }}>
+          {contextHolder}
+          <Spin />
+        </div>
+      );
+    }
+
+    return (
+      <div className="car-details-container">
+        {contextHolder}
+        {imagesToShow.length > 0 && (
+    <Carousel autoplay  dots arrows>
+      {imagesToShow.map((image, idx) => (
+        <div key={idx} className="d-flex justify-content-center">
+          <img
+            src={`${API_BASE_URL}${image}`}
+            alt={`Car ${idx}`}
+            style={{
+              width: "80%",
+              height: "500px",
+              objectFit: "cover",
+              borderRadius: 10,
+            }}
+          />
+        </div>
+      ))}
+    </Carousel>
+  )}
 
 
-      <h2 className="car-title">{selectedCar.carmakemodel}</h2>
-      <p className="car-description">{selectedCar.carDescription}</p>
+        <h2 className="car-title">{customerData.ad_title}</h2>
+        <p className="car-description">{customerData.description}</p>
 
-      <div className="summary-container">
-        <div className="summary-box">
-          <div className="summary-title">Year</div>
-          <div className="summary-value">2021</div>
+        <div className="summary-container">
+          <div className="summary-box">
+            <div className="summary-title">Year</div>
+            <div className="summary-value">{customerData.year}</div>
+          </div>
+          <div className="summary-box">
+            <div className="summary-title">Fuel Type</div>
+            <div className="summary-value">{customerData.fuel_type}</div>
+          </div>
+          <div className="summary-box">
+            <div className="summary-title">Condition</div>
+            <div className="summary-value">{customerData.condition}</div>
+          </div>
+          <div className="summary-box">
+            <div className="summary-title">Kilometers</div>
+            <div className="summary-value">{customerData.kilometers}</div>
+          </div>
         </div>
-        <div className="summary-box">
-          <div className="summary-title">Fuel Type</div>
-          <div className="summary-value">Petrol</div>
-        </div>
-        <div className="summary-box">
-          <div className="summary-title">Condition</div>
-          <div className="summary-value">New</div>
-        </div>
-        <div className="summary-box">
-          <div className="summary-title">Kilometers</div>
-          <div className="summary-value">59,000</div>
-        </div>
-      </div>
 
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ width: "48%" }}>
+            <h3>Car Informations</h3>
+            <table style={tableStyle}>
+              <tbody>
+                {renderRow("Body Type", customerData?.body_type)}
+                {renderRow("Regional Specs", customerData?.regional_specs)}
+                {renderRow("Door Count", customerData?.number_of_doors)}
+                {renderRow("Number of Seats", customerData?.number_of_seats)}
+                {renderRow("Version", customerData?.trim)}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ width: "48%" }}>
+            <h3>Additional Details</h3>
+            <table style={tableStyle}>
+              <tbody>
+                {renderRow("Engine CC", customerData?.engine_cc)}
+                {renderRow("Number of Cylinders", customerData?.no_of_cylinders)}
+                {renderRow("Consumption (1/100 km)", customerData?.consumption)}
+                {renderRow("Transmission", customerData?.transmission_type)}
+                {renderRow("Drive Type", customerData?.drive_type)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div
+      style={{
+        background: "#f9f9f9",
+        borderRadius: 8,
+        padding: 16,
+        marginTop: 20,
+      }}
+    >
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
-        <div style={{ width: "48%" }}>
-          <h3>Car Informations</h3>
-          <table style={tableStyle}>
-            <tbody>
-              {renderRow("Body Type", "Wagon")}
-              {renderRow("Regional Specs", "US Specs")}
-              {renderRow("Door Count", "4")}
-              {renderRow("Number of Seats", "5")}
-              {renderRow("Version", "B200")}
-            </tbody>
-          </table>
+
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span style={{ fontWeight: 600, marginRight: 10 }}>
+            Select as Best Car:
+          </span>
+          <Switch  checked={isBestCar}
+          onChange={(checked) => handleEnableNotification(customerData?.id ?? car_id, checked)} />
         </div>
-        <div style={{ width: "48%" }}>
-          <h3>Additional Details</h3>
-          <table style={tableStyle}>
-            <tbody>
-              {renderRow("Engine CC", "1600")}
-              {renderRow("Number of Cylinders", "4")}
-              {renderRow("Consumption (1/100 km)", "20")}
-              {renderRow("Transmission", "Automatic")}
-              {renderRow("Drive Type", "Front Wheel Drive")}
-            </tbody>
-          </table>
+
+        <div style={{ display: "flex", alignItems: "center" }}>
+
+          <Radio.Group 
+            onChange={onApprovalChange} value={approvalStatus}
+            style={{ marginLeft: 180 }}
+          >
+             <Radio value="pending" style={{ marginRight: 20 }}>
+              Pending
+            </Radio>
+            <Radio value="approved">
+              Approved
+            </Radio>
+            <Radio value="rejected">Rejected</Radio>
+          </Radio.Group>
         </div>
+
+        <Modal
+      title="Reject Car"
+      visible={showRejectModal}
+      onOk={getRejection}
+      onCancel={onCancelRejection}
+      okText="Confirm"
+      cancelText="Cancel"
+      confirmLoading={submittingRejection}
+    >
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Reason</label>
+      <Select
+    placeholder="Select a rejection reason"
+    value={rejectReason}
+    onChange={(val) => setRejectReason(val)}
+    style={{ width: "100%" }}
+    loading={loading}
+  >
+    {rejectReasonData && rejectReasonData.length > 0 ? (
+      rejectReasonData.map((r) => (
+        <Option key={r.id} value={r.rejected_reason}>
+          {r.rejected_reason}
+        </Option>
+      ))
+    ) : (
+      <Option disabled key="no-data" value="">
+        No reasons available
+      </Option>
+    )}
+      </Select>
+
       </div>
 
-      <div
-        style={{
-          background: "#f9f9f9",
-          borderRadius: 8,
-          padding: 16,
-          marginTop: 20,
-        }}
-      >
-        <span style={{ fontWeight: 600, marginRight: 10 }}>
-          Select as Best Car:
-        </span>
-        <Switch checked={isBestCar} onChange={setIsBestCar} />
+      <div>
+        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Rejection Comments</label>
+        <TextArea
+          rows={4}
+          placeholder="Add extra information for the user..."
+          value={rejectComment}
+          onChange={(e) => setRejectComment(e.target.value)}
+        />
       </div>
-
-      <Button
-        type="primary"
-        style={{ marginTop: 20 }}
-        onClick={() => navigate(-1)}
-      >
-        Back to List
-      </Button>
+    </Modal>
+      </div>
     </div>
-  );
-};
 
-export default CarDetails;
+        <Button
+          type="primary"
+          style={{ marginTop: 20 }}
+          onClick={() => navigate(-1)}
+        >
+          Back to List
+        </Button>
+      </div>
+    );
+  };
+
+  export default CarDetails;

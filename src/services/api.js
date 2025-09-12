@@ -80,6 +80,7 @@ export const authAPI = {
 export const userAPI = {
   adminGetUserSummary: (id) =>
     api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_GET_USER_SUMMARY(id)),
+
   adminCustomers: () => api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS),
   adminCustomersReported: () =>
     api.get(API_CONFIG.ENDPOINTS.USER.ADMIN_CUSTOMERS_REPORTED),
@@ -102,6 +103,14 @@ export const userAPI = {
         'Content-Type': 'multipart/form-data',
       },
     }),
+    carDetails: (activeTab) => api.get(API_CONFIG.ENDPOINTS.USER.CAR_DETAILS_ALL(activeTab)),
+    carBestPick: (id,pick) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_BEST_PICK(id,pick)),
+    carApprove: (id) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_APPROVE(id)),
+    carRejected: (id,body) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_REJECTED(id),body),
+    getCarByIdDetails: (id) =>
+    api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)),
+    reasonRejection: () =>
+    api.get(API_CONFIG.ENDPOINTS.USER.REASON_REJECTIONS),
 };
 
 export const loginApi = {

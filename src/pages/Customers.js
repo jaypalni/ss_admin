@@ -10,13 +10,13 @@ import {
   Modal,
   Form,
   Switch,
-  Radio,
   message,
   Descriptions,
   Divider,
   Typography,
   Tabs,
   Input,
+  Select,
   Row,Col
 } from "antd";
 import {
@@ -30,6 +30,7 @@ import {
   FaWalking,
 } from "react-icons/fa";
 import { userAPI } from "../services/api";
+const { Option } = Select;
 
 const { Text } = Typography;
 
@@ -49,7 +50,7 @@ function Customers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [selectedWatchlistCustomer, setSelectedWatchlistCustomer] = useState(null);
-  const [radioValue, setRadioValue] = useState("");
+  const [radioValue, setRadioValue] = useState("All");
 
 
   useEffect(() => {
@@ -499,15 +500,20 @@ function Customers() {
           ]}
         />
       </Col>
-      <Col style={{marginBottom:'10px',marginRight:'10px'}}>
-        <Radio.Group
-        onChange={(e) => setRadioValue(e.target.value)}
-        value={radioValue}
-      >
-        <Radio value="verified">Verified</Radio>
-        <Radio value="non_verified">Non Verified</Radio>
-      </Radio.Group>
-      </Col>
+
+<Col style={{ marginBottom: "10px", marginRight: "10px" }}>
+  <Select
+    value={radioValue}
+    onChange={(value) => setRadioValue(value)}
+    style={{ width: 200 }}
+    placeholder="Select Status"
+  >
+    <Option value="all">All</Option>
+    <Option value="verified">Verified</Option>
+    <Option value="non_verified">Non Verified</Option>
+  </Select>
+</Col>
+
     </Row>
             <Table
               columns={columns}

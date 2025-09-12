@@ -83,11 +83,6 @@ function AppLayout({ children }) {
       label: "Dashboard",
     },
     {
-      key: "/users",
-      icon: <FaUsers />,
-      label: "Users",
-    },
-    {
       key: "/customers",
       icon: <FaUserFriends />,
       label: "Customers",
@@ -95,7 +90,7 @@ function AppLayout({ children }) {
     {
       key: "/bestcars",
       icon: <IoCarSharp />,
-      label: "Best Cars",
+      label: "Cars",
     },
      {
       key: "/car-types",
@@ -131,6 +126,11 @@ function AppLayout({ children }) {
       key: "/settings",
       icon: <FaCog />,
       label: "Settings",
+    },
+    {
+      key: "/users",
+      icon: <FaUsers />,
+      label: "Users",
     },
     {
       key: "/content",

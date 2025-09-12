@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { Table, Avatar, Button, Modal } from "antd";
+import React, { useState,useEffect } from "react";
+import { Table, Avatar, Button, Modal,Tabs,Col,Row,message } from "antd";
 import moment from "moment";
 import CarDetails from "../components/cardetails";
 import { useNavigate } from "react-router-dom";
+import { userAPI } from "../services/api";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 
 const getInitials = (firstName = "", lastName = "") => {
   return `${firstName.charAt(0) || ""}${
@@ -15,15 +17,23 @@ function BestCars() {
 
   const [userDetailsModalVisible, setUserDetailsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-
+  const [activeTab, setActiveTab] = useState("all");
   const [, setCarDetailsModalVisible] = useState(false);
   const [, setSelectedCar] = useState(null);
+  const [, setLoading] = useState(false);
   const [, setIsBestCar] = useState(false);
+  const [customersData, setCustomersData] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const API_BASE_URL = process.env.REACT_APP_API_URL
+
+    useEffect(() => {
+      fetchCarDetailsData();
+    }, [activeTab]);
 
   const handleNameClick = (record) => {
     setSelectedUser(record);
-    setUserDetailsModalVisible(true);
+    //setUserDetailsModalVisible(true);
+    navigate(`/customerdetails/${record}`)
   };
 
   const closeUserDetailsModal = () => {
@@ -33,10 +43,42 @@ function BestCars() {
 
   const handleCarClick = (record) => {
     setSelectedCar(record);
-    setIsBestCar(false); // reset toggle when opening
+    setIsBestCar(false);
     setCarDetailsModalVisible(true);
-    navigate(`/bestcars/${record.key}/CarDetails`);
+    navigate(`/bestcars/${record}/CarDetails`);
   };
+
+   const fetchCarDetailsData = async () => {
+      try {
+        setLoading(true);
+        const response = await userAPI.carDetails(activeTab);
+        const data1 = handleApiResponse(response);
+        console.log("API Response123:", data1?.data?.cars);
+  
+        if (data1?.data?.cars) {
+          const formattedUsers = data1?.data?.cars.map((user) => ({
+          key: user.car_id,
+          name: `${user.first_name} ${user.last_name}`,
+          carImage: user.car_image || '',
+          carName: user.ad_title || '',
+          date: user.updated_at || null,
+          status: user.approval || '',
+          userId : user.user_id,
+        }));
+
+  
+          setCustomersData(formattedUsers);
+        }
+  
+        message.success(data1.message || "Fetched successfully");
+      } catch (error) {
+        const errorData = handleApiError(error);
+        message.error(errorData.message || "Failed to load customers data");
+        setCustomersData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const rowSelection = {
     selectedRowKeys,
@@ -53,45 +95,44 @@ function BestCars() {
       key: "name",
      render: (text, record) => (
  <button
-  onClick={() => handleNameClick(record)}
+  onClick={() => handleNameClick(record?.userId)}
   style={{
     display: "flex",
     alignItems: "center",
     color: "#5c53e8",
     cursor: "pointer",
-    background: "none", // remove default button background
-    border: "none",     // remove default border
-    padding: 0,         // remove default padding
-    font: "inherit",    // inherit font styles
+    background: "none",
+    border: "none", 
+    padding: 0,   
+    font: "inherit",
   }}
   onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
   onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
 >
-  <Avatar src={record.avatar} style={{ marginRight: 8 }}>
+  {/* <Avatar src={record.avatar} style={{ marginRight: 8 }}>
     {text.charAt(0)}
-  </Avatar>
+  </Avatar> */}
   <div style={{ fontWeight: 500 }}>{text}</div>
 </button>
 
 )
-
     },
     {
-      title: "Car Make & Model",
-      dataIndex: "carmakemodel",
-      key: "carmakemodel",
+      title: "Car Name",
+      dataIndex: "carName",
+      key: "carName",
       render: (text, record) => (
- <button
-  onClick={() => handleCarClick(record)}
+  <button
+  onClick={() => handleCarClick(record?.key)}
   style={{
     display: "flex",
     alignItems: "center",
     color: "#5c53e8",
     cursor: "pointer",
-    background: "none", // remove default button background
-    border: "none",     // remove default border
-    padding: 0,         // remove default padding
-    font: "inherit",    // inherit font styles
+    background: "none", 
+    border: "none", 
+    padding: 0,     
+    font: "inherit",
   }}
   onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
   onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
@@ -102,15 +143,27 @@ function BestCars() {
       )
 
     },
+     {
+  title: "Car Image",
+  dataIndex: "carImage",
+  key: "carImage",
+render: (carImage) => (
+    <Avatar
+      src={`${API_BASE_URL}${carImage}`}
+      size={48}
+      shape="square"
+    />
+  )
+},
     {
-      title: "Mfg & Transmission",
-      dataIndex: "yearmfg",
-      key: "yearmfg",
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
     },
     {
-      title: "Created On",
-      dataIndex: "lastLogin",
-      key: "lastLogin",
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
     },
   ];
 
@@ -199,13 +252,29 @@ function BestCars() {
       <div className="content-body">
         <div className="card">
           <div className="card-body">
+            <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+      <Col flex="auto">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            { key: "all", label: "All" },
+            { key: "pending", label: "Pending" },
+            { key: "approved", label: "Approved" },
+            { key: "rejected", label: "Rejected" },
+             { key: "best_car", label: "Best Cars" },
+          ]}
+        />
+      </Col>
+
+    </Row>
             <Table
             rowSelection={{
             type: "checkbox",
             ...rowSelection,
             }}
               columns={columns}
-              dataSource={data}
+              dataSource={customersData}
               pagination={{ pageSize: 10 }}
               size="middle"
             />

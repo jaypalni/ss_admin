@@ -86,7 +86,7 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
-        <Route path="/bestcars/:car_id/CarDetails" element={<CarDetails />} />
+        <Route path="/bestcars/:car_id/CarDetails" element={ <AppLayout><CarDetails /></AppLayout>} />
         <Route
           path="/car-types"
           element={

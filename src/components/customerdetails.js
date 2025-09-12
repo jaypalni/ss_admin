@@ -29,6 +29,7 @@ function CustomerDetails() {
   const [modalText, setModalText] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedRadio, setSelectedRadio] = useState(null);
+  
 
   const banStatusMap = {
   0: { color: "green", label: "Not Banned" },
