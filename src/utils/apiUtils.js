@@ -7,29 +7,32 @@ export const handleApiResponse = (response) => {
 // API Error Handler
 export const handleApiError = (error) => {
   if (error.response) {
-    // Server responded with error
     const { status, data } = error.response;
+    const message = data.message || data.error || 'An error occurred';
     return {
       status,
-      message: data.message || 'An error occurred',
+      message,
+      error: data.error || message,
       errors: data.errors || [],
     };
   } else if (error.request) {
-    // Request made but no response
     return {
       status: 0,
       message: 'No response from server',
+      error: 'No response from server',
       errors: [],
     };
   } else {
-    // Request setup error
+    const message = error.message || 'Request failed';
     return {
       status: 0,
-      message: error.message || 'Request failed',
+      message,
+      error: message,
       errors: [],
     };
   }
 };
+
 
 // Form Data Helper
 export const createFormData = (data) => {
