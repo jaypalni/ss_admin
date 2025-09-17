@@ -132,7 +132,7 @@ const Subscriptions = () => {
                   Highlight
                 </Tag>
               )}
-              <Title level={3}>${plan.price}</Title>
+              <Title level={3}>IQD {plan.price}</Title>
               <Text type="secondary">{plan.duration}</Text>
               <div className="features-list">
                 {plan.features.map((feature) => (
