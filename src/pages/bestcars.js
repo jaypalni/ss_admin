@@ -23,11 +23,14 @@ function BestCars() {
   const [, setLoading] = useState(false);
   const [, setIsBestCar] = useState(false);
   const [customersData, setCustomersData] = useState([]);
+  const [paginationData, setPaginationData] = useState({});
+  const [currentPage,setCurrentPage]=useState(1)
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const API_BASE_URL = process.env.REACT_APP_API_URL
 
     useEffect(() => {
-      fetchCarDetailsData();
+    setCurrentPage(1);
+    fetchCarDetailsData(1, 5);
     }, [activeTab]);
 
   const handleNameClick = (record) => {
@@ -48,12 +51,14 @@ function BestCars() {
     navigate(`/bestcars/${record}/CarDetails`);
   };
 
-   const fetchCarDetailsData = async () => {
+   const fetchCarDetailsData = async (page,limit) => {
       try {
         setLoading(true);
-        const response = await userAPI.carDetails(activeTab);
+        const response = await userAPI.carDetails(activeTab,page,limit);
         const data1 = handleApiResponse(response);
-        console.log("API Response123:", data1?.data?.cars);
+        const meta = data1?.data?.pagination || {};
+        setPaginationData(meta)
+        setCurrentPage(data1?.data?.pagination?.current_page)
   
         if (data1?.data?.cars) {
           const formattedUsers = data1?.data?.cars.map((user) => ({
@@ -66,7 +71,6 @@ function BestCars() {
           userId : user.user_id,
         }));
 
-  
           setCustomersData(formattedUsers);
         }
   
@@ -246,7 +250,14 @@ render: (carImage) => (
       role: "Dealer",
     },
   ];
+  const handleTableChange = (newPagination ) => {
 
+    console.log('newPagination',newPagination)
+   
+    setCurrentPage(newPagination.current)
+    fetchCarDetailsData(newPagination?.current,newPagination?.pageSize)
+
+  }
   return (
     <div className="content-wrapper">
       <div className="content-body">
@@ -275,8 +286,12 @@ render: (carImage) => (
             }}
               columns={columns}
               dataSource={customersData}
-              pagination={{ pageSize: 10 }}
+           
+              pagination={{   current: currentPage,
+    pageSize: paginationData?.limit,
+    total: paginationData?.total_cars, }}
               size="middle"
+              onChange={handleTableChange}
             />
           </div>
         </div>

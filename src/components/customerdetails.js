@@ -53,7 +53,7 @@ function CustomerDetails() {
 
       setRadioValue(defaultStatus);
       }
-      messageApi.open({ type: 'success', content: result.message});
+     // messageApi.open({ type: 'success', content: result.message});
     } catch (error) {
       const errorData = handleApiError(error);
       messageApi.open({ type: 'error', content: errorData});
@@ -65,6 +65,7 @@ function CustomerDetails() {
   const handleRadioChange = (e) => {
     const selectedValue = e.target.value;
     setSelectedRadio(selectedValue)
+    setRadioValue(selectedValue);
 
     if (selectedValue === "verified") {
       setModalText("Are you sure you want to verify the user?");
@@ -111,6 +112,8 @@ function CustomerDetails() {
 
    const handleCancel = () => {
     setIsModalVisible(false);
+    setRadioValue(customer?.is_verified ?? null);
+    setSelectedRadio(null);
   };
 
   if (!customer) return <p>Loading customer details...</p>;
@@ -119,6 +122,7 @@ function CustomerDetails() {
   color: "red",
   label: "Unknown",
   };
+  const currentStatus = radioValue ?? customer.is_verified;
 
   return (
     <div className="content-wrapper" style={{ padding: "24px" }}>
@@ -156,10 +160,11 @@ function CustomerDetails() {
     onChange={handleRadioChange}
         value={radioValue}
       >
-    <Radio value="verified">
-        Verify
-      </Radio>
-       {customer.is_verified === "pending" && (
+         {currentStatus !== "rejected" && currentStatus !== "verified" && (
+              <Radio value="verified">Verify</Radio>
+            )}
+    
+       {customer.is_verified === "pending" &&  (
         <Radio value="rejected" >
         Reject
       </Radio>

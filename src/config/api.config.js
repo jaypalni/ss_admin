@@ -16,9 +16,9 @@ const API_CONFIG = {
         `/api/admin/users/${id}/verification-status`,
 
       USER_PROFILE: "/api/admin/profile",
-      CAR_DETAILS_TYPES: "/api/admin/add_make_make_model_trim_year",
+      CAR_DETAILS_TYPES: "/api/admin/add-make-model-trim-year",
       UPLOAD_DOCUMENTS: '/api/search/upload-attachment',
-      CAR_DETAILS_ALL: (activeTab) => `/api/admin/pending-cars?approval=${activeTab}`,
+      CAR_DETAILS_ALL: (activeTab,page,limit) => `/api/admin/pending-cars?approval=${activeTab}&page=${page}&limit=${limit}`,
       CAR_BEST_PICK: (id,pick) => `/api/admin/cars/${id}/mark-best-pick/${pick}`,
       CAR_APPROVE: (id) => `/api/admin/cars/${id}/approve`,
       CAR_REJECTED: (id) => `/api/admin/cars/${id}/reject`,

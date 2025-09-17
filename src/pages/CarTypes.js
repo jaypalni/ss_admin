@@ -13,7 +13,9 @@ const CarTypes = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [uploading, setUploading] = useState(false);
+  const [uploadingBody, setUploadingBody] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState("");
+  const [uploadedUrlBody, setUploadedUrlBody] = useState("");
   const columns = [
     { title: "Id", dataIndex: "id", key: "id", align: "center" },
     { title: "Make", dataIndex: "make", key: "make", align: "center" },
@@ -21,6 +23,8 @@ const CarTypes = () => {
     { title: "Year", dataIndex: "year", key: "year", align: "center" },
     { title: "Trim", dataIndex: "trim", key: "trim", align: "center" },
     { title: "Make Image", dataIndex: "makeImage", key: "makeImage", align: "center" },
+    { title: "Body Type Image", dataIndex: "bodyImage", key: "bodyImage", align: "center" },
+    { title: "Body Type", dataIndex: "bodyType", key: "bodyType", align: "center" },
     {
       title: "Actions",
       key: "actions",
@@ -72,17 +76,58 @@ const CarTypes = () => {
     }
   };
 
+  const handleFileUpload1 = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const isImage = file.type.startsWith("image/");
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isImage) {
+      message.error("Only image files are allowed!");
+      return;
+    }
+    if (!isLt2M) {
+      message.error("Image must be smaller than 2MB!");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("attachment", file);
+
+      const response = await userAPI.uploadimages(formData);
+      const data = handleApiResponse(response);
+
+      if (data?.attachment_url) {
+        setUploadedUrlBody(data.attachment_url);
+        form.setFieldsValue({ bodyImage: data.attachment_url });
+        messageApi.open({ type: 'success', content: data.message });
+      } else {
+        message.error("Upload failed!");
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({ type: 'error', content: errorData?.error });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const onFinish = async (values) => {
     try {
       setLoading(true);
 
       const body = {
-        make: values.make,
-        model: values.model,
+        make_name: values.make,
+        model_name: values.model,
         year: values.year,
-        trim: values.trim,
+        trim_name: values.trim,
         //make_mage: values.makeImage
-        make_image: '/api/search/upload-attachment/bmw_logo_20250905_122011_ce396f74.png'
+        body_type: values.bodyType,
+        //body_type_image: values.bodyImage,
+        make_image: '/api/search/upload-attachment/bmw_logo_20250905_122011_ce396f74.png',
+        body_type_image: '/api/search/upload-attachment/image_7_1_20250811_114841_3dad304b.png'
       };
 
       const response = await userAPI.carTypeDetails(body);
@@ -128,7 +173,7 @@ const CarTypes = () => {
             ) : (
               <>
                 <AiOutlineUpload style={{ marginRight: 8 }} />
-                {uploadedUrl ? "Change Image" : "Upload Image"}
+                {uploadedUrl ? "Change Image" : "Make Image"}
               </>
             )}
             <input
@@ -149,8 +194,38 @@ const CarTypes = () => {
             <Input placeholder="Enter Year" />
           </Form.Item>
 
-          <Form.Item name="body_type" rules={[{ required: true, message: "Please select body type!" }]}>
-            <Select placeholder="Select Body Type" style={{ width: 150 }}>
+           <Form.Item>
+          <label
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "pointer",
+              padding: "6px 12px",
+              border: "1px solid #d9d9d9",
+              borderRadius: "6px",
+              background: "#fafafa",
+            }}
+          >
+            {uploadingBody ? (
+              <Spin size="small" />
+            ) : (
+              <>
+                <AiOutlineUpload style={{ marginRight: 8 }} />
+                {uploadedUrlBody ? "Change Image" : "Body Type Image"}
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload1}
+              style={{ display: "none"}}
+              rules={[{ required: false, message: "Please upload Body type image!" }]}
+            />
+          </label>
+           </Form.Item>
+
+            <Form.Item name="bodyType" rules={[{ required: true, message: "Please select body type!" }]}>
+            <Select placeholder="Select Body Type" style={{ width: 150,marginTop: "10px" }}>
               <Option value="Sedan">Sedan</Option>
               <Option value="SUV">SUV</Option>
               <Option value="Coupe">Coupe</Option>

@@ -103,7 +103,7 @@ export const userAPI = {
         'Content-Type': 'multipart/form-data',
       },
     }),
-    carDetails: (activeTab) => api.get(API_CONFIG.ENDPOINTS.USER.CAR_DETAILS_ALL(activeTab)),
+    carDetails: (activeTab,page,limit) => api.get(API_CONFIG.ENDPOINTS.USER.CAR_DETAILS_ALL(activeTab,page,limit)),
     carBestPick: (id,pick) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_BEST_PICK(id,pick)),
     carApprove: (id) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_APPROVE(id)),
     carRejected: (id,body) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_REJECTED(id),body),
