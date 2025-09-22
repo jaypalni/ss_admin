@@ -205,8 +205,10 @@ function AppLayout({ children }) {
         }}
       >
         <div className="logo-container">
-          <h3 className="logo-text">{!collapsed && "SS Admin "}</h3>
+          <h3 className="logo-text">{!collapsed && "Souq Sayarat"}</h3>
+          <p className="logo-subtext">Admin Portal</p>
         </div>
+
         <Menu
           theme="dark"
           mode="inline"
