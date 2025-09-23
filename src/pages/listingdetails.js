@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
-import { Card, Button, Tag, Row, Col, Avatar, Divider } from "antd";
+import { useState } from "react";
+import { Card, Button, Tag, Row, Col, Avatar, Divider, Modal, Select, Input, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import crownicon from "../assets/images/crown_icon.png";
 import boosticon from "../assets/images/boosticon.png";
@@ -17,6 +18,32 @@ import "../assets/styles/listingdetails.css";
 
 const ListingDetails = () => {
   const { listingId } = useParams();
+  const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
+const [rejectionReason, setRejectionReason] = useState(null);
+const [comment, setComment] = useState("");
+
+
+const showRejectModal = () => {
+  setIsRejectModalVisible(true);
+};
+
+const handleRejectCancel = () => {
+  setIsRejectModalVisible(false);
+  setRejectionReason(null);
+  setComment("");
+};
+
+const handleRejectSubmit = () => {
+  if (!rejectionReason) {
+    message.error("Please select a rejection reason");
+    return;
+  }
+  console.log("Selected Reason:", rejectionReason);
+  console.log("Comment:", comment);
+  message.success("Listing rejected successfully!");
+  handleRejectCancel();
+};
+
 
   return (
     <div  style={{
@@ -449,26 +476,66 @@ const ListingDetails = () => {
   </Button>
 
   <Button
-    danger
-    block
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "6px",
-      backgroundColor: "#DC2626",
-      borderColor: "#DC2626",
-      color: "#fff",
-    }}
-  >
-    <img src={rejectIcon} alt="cross" style={{ width: 14, height: 16 }} />
-    Reject Listing
-  </Button>
+  danger
+  block
+  onClick={showRejectModal}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    backgroundColor: "#DC2626",
+    borderColor: "#DC2626",
+    color: "#fff",
+  }}
+>
+  <img src={rejectIcon} alt="cross" style={{ width: 14, height: 16 }} />
+  Reject Listing
+</Button>
+
 </div>
             </Card>
           </div>
         </Col>
       </Row>
+
+      <Modal
+  title="Rejection Reason"
+  visible={isRejectModalVisible}
+  onCancel={handleRejectCancel}
+  footer={[
+    <Button key="cancel" onClick={handleRejectCancel}>
+      Cancel
+    </Button>,
+    <Button key="submit" type="primary" danger onClick={handleRejectSubmit}>
+      Submit
+    </Button>,
+  ]}
+>
+  <div style={{ marginBottom: 16 }}>
+    <Select
+      placeholder="Select a reason"
+      style={{ width: "100%" }}
+      value={rejectionReason}
+      onChange={(value) => setRejectionReason(value)}
+    >
+      <Select.Option value="Incorrect Info">Incorrect Info</Select.Option>
+      <Select.Option value="Fraudulent Listing">Fraudulent Listing</Select.Option>
+      <Select.Option value="Prohibited Item">Prohibited Item</Select.Option>
+      <Select.Option value="Other">Other</Select.Option>
+    </Select>
+  </div>
+
+  <div>
+    <Input.TextArea
+      placeholder="Add comment (optional)"
+      rows={4}
+      value={comment}
+      onChange={(e) => setComment(e.target.value)}
+    />
+  </div>
+</Modal>
+
     </div>
   );
 };
