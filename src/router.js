@@ -29,6 +29,7 @@ import CarTypes from "./pages/CarTypes";
 import ListingManagement from "./pages/listingmanagement";
 import CreateSubadmin from "./components/createsubadmin";
 import ListingDetails from "./pages/listingdetails";
+import OtpScreen from "./pages/otpscreen";
 
 const AppRouter = () => {
   return (
@@ -37,6 +38,7 @@ const AppRouter = () => {
         {/* Public Routes */}
         <Route path="/" element={<LoginScreen />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
+        <Route path="/OtpScreen" element={<OtpScreen />} />
         <Route path="/CreatePassword" element={<CreatePassword />} />
 
         {/* Protected Routes inside Layout */}

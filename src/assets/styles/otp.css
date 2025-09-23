@@ -1,0 +1,353 @@
+/* OTP Title */
+.otp-site-title {
+  font-size: 18px;
+  margin: 8px 0 0 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.otp-page-wrapper {
+  width: 100%;
+  min-height: 100vh;            
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f2f5;         
+  padding: 20px;
+}
+
+.otp-page {
+  width: 400px;
+  background: #fff;             
+  border-radius: 12px;         
+  padding: 32px 28px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.otp-site-subtitle {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #1F2937;
+  font-weight: 600;
+}
+
+.otp-resend-button {
+  background: transparent;
+  border: 1px solid #0090d4;
+  color: #0090d4;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.otp-resend-button[disabled],
+.otp-resend-button[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: #9CA3AF;
+  border-color: #9CA3AF;
+  font-weight: 500;
+  font-size: 8px;
+}
+
+
+.otp-subtitle {
+  font-size: 14px;
+  color: #4B5563;
+  margin-bottom: 18px;
+  text-align: center;
+  font-weight: 400;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.otp-input {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 24px;
+  text-align: center;
+  background:#FFFFFF;
+  outline: none;
+  transition: border 0.2s, background 0.2s;
+}
+
+/* focus state */
+.otp-input:focus {
+  border-color: #007bbf;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 142, 220, 0.12);
+  caret-color: #000;
+}
+
+/* filled style */
+.otp-input.filled {
+  background: #eaf6fd;
+  border: 2px solid #0090d4;
+  color: #0090d4;
+  font-weight: 600;
+}
+
+/* error state */
+.otp-input.otp-input-error {
+  border-color: #ff4d4f;
+  background: #fff5f5;
+}
+
+/* timer / resend */
+.otp-timer {
+  margin-bottom: 16px;
+  color: #0090d4;
+  font-size: 15px;
+  text-align: center;
+}
+
+.otp-text {
+  color: #4B5563;  
+  font-weight: 400;
+  font-size: 13px;
+}
+.otp-timer-count {
+  font-weight: 600;
+  color: #0090d4;
+
+}
+
+/* resend button */
+.otp-resend {
+  color: #0090d4;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 15px;
+}
+
+/* buttons row */
+.otp-btn-row {
+    width: 100%;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* filled CTA */
+.otp-btn.otp-btn-filled {
+  height: 45px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 22px;
+  width: 50%;
+  background: #0090d4;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.08s ease;
+}
+
+.otp-btn.otp-btn-filled:active {
+  transform: translateY(1px);
+}
+
+/* disabled state */
+.otp-btn.otp-btn-filled[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.otp-button {
+  width: 80%;
+  max-width: 400px;
+  margin-top: 30px;
+  background-color: #D1D5DB !important;
+  border-color: #E5E7EB !important;
+  color: #fff !important;
+  border-radius: 12px; 
+  box-shadow: none;   
+}
+.otp-button-back {
+  width: 80%;
+  max-width: 400px;
+  margin-top: 10px;
+  background-color: #F3F4F6 !important;
+  border-color: #E5E7EB !important;
+  color: #374151 !important;
+  border-radius: 12px; 
+  box-shadow: none;   
+}
+
+.otp-button-back-1 {
+  width: 80%;
+  height: auto;
+  max-width: 400px;
+  margin-top: 10px;
+  background-color: #E6F4FD !important;
+  border: 1px solid #E5E7EB !important;
+  color: #374151 !important;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.otp-button-content {
+  display: flex;
+  flex-direction: column; /* stack top + subtext */
+  align-items: flex-start;
+  gap: 6px;
+  max-lines: 2;
+}
+
+.otp-button-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.otp-button-icon {
+  width: 16px;
+  height: 16px;
+}
+.otp-button-subtext {
+  font-size: 13px;
+  color: #4B5563; 
+  line-height: 1.4;
+  text-wrap: auto;
+  font-weight: 400;
+  margin-left: 15px;
+}
+
+
+.button-text-otp {
+  display: inline-block;
+  font-weight: 500;
+  font-size: 14px;
+  color: inherit;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .otp-btn.otp-btn-filled {
+    width: 70%;
+  }
+
+  .otp-input {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+}
+
+
+.otp-timer-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* center horizontally */
+  gap: 8px;                  /* spacing between lines */
+  margin-top: 12px;
+}
+
+/* first line: "Resend available in 00:45" */
+.otp-timer-line {
+  text-align: center;
+}
+
+.otp-timer-text {
+  font-size: 15px;
+  color: #4B5563;            /* blue text */
+}
+
+/* make the time slightly bolder */
+.otp-timer-count {
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+/* second line: the "Resend" link (always visible) */
+.otp-resend-line {
+  text-align: center;
+  margin-top: 3px;
+  font-weight: 500;
+  font-size: 6px;
+}
+
+/* Resend default style */
+.otp-resend {
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s ease, opacity 0.15s ease;
+  user-select: none;
+}
+
+/* Disabled look while timer running */
+.otp-resend.disabled {
+  color: #9CA3AF;            /* greyed-out blue */
+  cursor: not-allowed;
+  opacity: 0.7;
+  pointer-events: none;      /* prevents clicks */
+  text-decoration: none;
+}
+
+/* Enabled look when timer = 0 */
+.otp-resend.enabled {
+  color: #0090d4;            /* active blue */
+  cursor: pointer;
+}
+
+/* hover for enabled */
+.otp-resend.enabled:hover {
+  color: #007bbf;
+}
+
+
+.otp-security-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.otp-security-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.otp-security-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.otp-security-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.otp-security-subtext {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280; /* grey text */
+  line-height: 1.4;
+}
