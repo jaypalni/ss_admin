@@ -18,8 +18,8 @@
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  background: #002140;
-  border-bottom: 1px solid #003a70;
+  background: #ffffff;
+  border-bottom: 1px solid #ffffff;
 }
 
 .logo-text {
@@ -54,7 +54,7 @@
 }
 
 .sidebar-menu .ant-menu-item-selected {
-  background-color: #1890ff !important;
+  background-color: #008AD5 !important;
 }
 
 .sidebar-menu .ant-menu-item:hover {
@@ -103,6 +103,10 @@
   display: flex !important;
   align-items: center;
   justify-content: center;
+}
+
+:where(.css-dev-only-do-not-override-16dneet).ant-menu-light .ant-menu-item-selected, :where(.css-dev-only-do-not-override-16dneet).ant-menu-light>.ant-menu .ant-menu-item-selected {
+    color: #fff;
 }
 
 .ant-layout-sider-collapsed .sidebar-menu .ant-menu-item-selected {
@@ -240,9 +244,9 @@
   background: #f0f2f5;
 }
 
-.content-wrapper {
+.content-wrapper-allcardashboard {
   padding: 24px;
-  min-height: calc(100vh - 64px);
+  /* min-height: calc(100vh - 64px); */
 }
 
 .page-header {

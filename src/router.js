@@ -26,7 +26,9 @@ import Subcriptions from "./pages/subcriptions";
 import CustomerDetails from "./components/customerdetails";
 import Profile from "./components/profile";
 import CarTypes from "./pages/CarTypes";
+import ListingManagement from "./pages/listingmanagement";
 import CreateSubadmin from "./components/createsubadmin";
+import ListingDetails from "./pages/listingdetails";
 
 const AppRouter = () => {
   return (
@@ -95,6 +97,24 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
+        <Route
+          path="/listingmanagement"
+          element={
+            <AppLayout>
+              <ListingManagement />
+            </AppLayout>
+          }
+        />
+        
+         <Route
+  path="/listingdetails/:listingId"
+  element={
+    <AppLayout>
+      <ListingDetails />
+    </AppLayout>
+  }
+/>
+
         <Route
           path="/transactions"
           element={

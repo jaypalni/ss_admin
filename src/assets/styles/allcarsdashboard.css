@@ -1,0 +1,51 @@
+.content-wrapper {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+}
+
+/* Card Body Layout */
+.dashboard-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+}
+
+/* Text Container */
+.card-text-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card Title */
+.card-title {
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+/* Number or Text */
+.card-number {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Icon Wrapper */
+.card-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  margin-right: -5px;
+}
+
+/* Icon Image */
+.card-icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}

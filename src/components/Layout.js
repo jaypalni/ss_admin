@@ -18,16 +18,19 @@ import {
   FaBell,
   FaSearch,
   FaCloud,
+  FaDollarSign,
 } from "react-icons/fa";
+import { BiSupport } from "react-icons/bi";
+import { TfiMenuAlt } from "react-icons/tfi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RiAdminFill } from "react-icons/ri";
 import "../assets/styles/layout.css";
 import { IoCarSharp } from "react-icons/io5";
 import { MdSubscriptions } from "react-icons/md";
+import menucar_icon from "../assets/images/menucariocn.png";
 import { loginApi } from "../services/api";
 import PropTypes from 'prop-types';
 const { Header, Sider, Content } = Layout;
-
 
 function AppLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -82,77 +85,94 @@ function AppLayout({ children }) {
       icon: <FaHome />,
       label: "Dashboard",
     },
-    {
-      key: "/customers",
-      icon: <FaUserFriends />,
-      label: "Customers",
-    },
-    {
-      key: "/bestcars",
-      icon: <IoCarSharp />,
-      label: "Cars",
+     {
+      key: "/listingmanagement",
+      icon: <TfiMenuAlt />,
+      label: "Listing Management",
     },
      {
-      key: "/car-types",
-      icon: <FaUserFriends />,
-      label: "Car Types",
-    },
-    {
-      key: "/transactions",
-      icon: <FaFileAlt />,
-      label: "Transactions",
-    },
-    {
-      key: "/subcriptions",
-      icon: <MdSubscriptions />,
-      label: "Subcriptions",
-    },
-    {
-      key: "/documents",
-      icon: <FaFileAlt />,
-      label: "Documents",
-    },
-    {
-      key: "/analytics",
-      icon: <FaChartBar />,
-      label: "Analytics",
-    },
-    {
-      key: "/messages",
-      icon: <FaEnvelope />,
-      label: "Messages",
-    },
+    key: "/financials",  
+    icon: <FaDollarSign />,
+    label: "Financials",
+    hasDropdown: true,
+    children: [
+      {
+        key: "/financials/pricing", 
+        label: "Pricing",
+      },
+      {
+        key: "/financials/transactions", 
+        label: "Transactions",
+      },
+    ],
+  },
+  {
+    key: "/user-management", 
+    icon: <FaUsers />,
+    label: "User Management",
+    hasDropdown: true,
+    children: [
+      {
+        key: "/user-management/individual", 
+        label: "Individual",
+      },
+      {
+        key: "/user-management/dealer", 
+        label: "Dealer",
+      },
+    ],
+  },
     {
       key: "/settings",
-      icon: <FaCog />,
-      label: "Settings",
-    },
-    {
-      key: "/users",
-      icon: <FaUsers />,
-      label: "Users",
-    },
-    {
-      key: "/content",
-      icon: <FaCloud />,
-      label: "Content",
-      hasDropdown: true,
-      children: [
-        {
-          key: "/content/websitecontent",
-          label: "Website content",
-        },
-        {
-          key: "/content/managecountry",
-          label: "Manage Country",
-        },
-        {
-          key: "/content/bannermanagement",
-          label: "Banner management",
-        },
-      ],
+      icon: <BiSupport />,
+      label: "Support",
     },
   ];
+
+  const headerTitles = {
+  "/dashboard": {
+    title: "Dashboard",
+    tagline: "Overview of all metrics and statistics",
+  },
+  "/listingmanagement": {
+    title: "Listing Management",
+    tagline: "Review and moderate vehicle listings",
+  },
+  "/financials": {
+    title: "Financials",
+    tagline: "View financial transactions and pricing",
+  },
+  "/financials/pricing": {
+    title: "Pricing",
+    tagline: "Manage pricing plans and rates",
+  },
+  "/financials/transactions": {
+    title: "Transactions",
+    tagline: "Track all financial transactions",
+  },
+  "/user-management": {
+    title: "User Management",
+    tagline: "Manage individual and dealer users",
+  },
+  "/user-management/individual": {
+    title: "Individual Users",
+    tagline: "Manage individual user accounts",
+  },
+  "/user-management/dealer": {
+    title: "Dealer Users",
+    tagline: "Manage dealer user accounts",
+  },
+  "/settings": {
+    title: "Support",
+    tagline: "Get help and support for the portal",
+  },
+};
+
+// In the Header section
+const currentHeader = headerTitles[location.pathname] || {
+  title: "Dashboard",
+  tagline: "",
+};
   // Create menu items with tooltips for collapsed state
   const menuItemsWithTooltips = sideMenuItems.map((item) => ({
     ...item,
@@ -204,18 +224,61 @@ function AppLayout({ children }) {
           }
         }}
       >
-        <div className="logo-container">
-          <h3 className="logo-text">{!collapsed && "Souq Sayarat"}</h3>
-          <p className="logo-subtext">Admin Portal</p>
-        </div>
+      <div
+  className="logo-container"
+  style={{
+    display: 'flex',
+    alignItems: 'center', 
+    gap: '10px',          
+    flexDirection: 'row',
+  }}
+>
+  {/* Car Icon */}
+  <img
+    src={menucar_icon}
+    alt="Car"
+    style={{
+      width: '40px',
+      height: '40px',
+    }}
+  />
 
+  {/* Text Section */}
+  {!collapsed && (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        lineHeight: '1.2',
+      }}
+    >
+      <h3 className="logo-text" style={{ margin: 0 }}>
+        Souq Sayarat
+      </h3>
+      <p
+        className="logo-subtext"
+        style={{
+          margin: 0,
+          fontSize: '14px',
+          color: '#6B7280',
+        }}
+      >
+        Admin Portal
+      </p>
+    </div>
+  )}
+</div>
         <Menu
-          theme="dark"
-          mode="inline"
+          theme="light"
+           mode="inline"
           selectedKeys={[location.pathname]}
           items={menuItemsWithTooltips}
           onClick={handleMenuClick}
           className="sidebar-menu"
+            style={{
+    fontSize: "13px",
+    fontWeight: 500,
+  }}
         />
       </Sider>
       <Layout>
@@ -230,13 +293,9 @@ function AppLayout({ children }) {
                 className="trigger-btn"
               />
               <div className="search-container ms-3">
-                <div className="search-input-wrapper">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="search-input"
-                  />
+                <div>
+                  <div className="card-number-total" style={{ color: '#000000', font: '24px', fontWeight: '700', lineHeight: '18px'}}>Listing Management</div>
+                   <div className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', lineHeight: '12px'}}>Review and moderate vehicle listings</div>
                 </div>
               </div>
             </div>
