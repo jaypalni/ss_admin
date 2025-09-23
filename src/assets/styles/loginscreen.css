@@ -12,8 +12,6 @@ body {
 .login-page-wrapper1 {
   width: 100%;
   overflow-y: auto;
-  /* min-height: 100vh; */
-  /* height: 100vh;  */
   display: flex;
   margin: 10vh 0px;
   justify-content: center;
@@ -54,7 +52,7 @@ body {
 
 .input-field1 {
   width: 100%;
-  font-size: 16px;
+  font-size: 13px;
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 10px 12px; 
@@ -141,10 +139,10 @@ body {
 .login-button2 {
   width: 100%;
   background-color: #E6F4FB !important;
-  border-color: #E6F4FB !important;
+  border-color: #008AD533 !important;
   color: #008AD5 !important;
-  height: 44px;
-  border-radius: 8px;
+  height: 38px;
+  border-radius: 9px;
   position: relative;
   overflow: visible; 
 }
@@ -152,7 +150,7 @@ body {
 .btn-icon {
   width: 14px;  
   height: 14px;
-  margin-right: 8px;
+  margin-right: 0px;
   vertical-align: middle;
 }
 
@@ -167,7 +165,7 @@ body {
 .button-text {
   display: inline-block;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .button-badge {

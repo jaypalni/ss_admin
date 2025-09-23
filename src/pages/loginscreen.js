@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import "../assets/styles/loginscreen.css";
 import { Input, Button, message } from "antd";
-import Car_icon from "../assets/images/Car_icon.png";
 import bluelogo_icon from "../assets/images/div.svg";
 import frame_icon from "../assets/images/Frame.svg";
 import arrow_icon from "../assets/images/arrow.svg";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { loginApi } from "../services/api";
+import { loginSuccess } from "../redux/actions/authActions";
 
 const LoginScreen = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailerrormsg, setEmailErrorMsg] = useState("");
@@ -17,7 +19,14 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
+  const allowedDomains = [
+  "@souqsayarat.com",
+  "@souqsayarat.net",
+  "@souqsayarat.iq"
+];
+
   const handleLogin = () => {
+    console.log("handleLogin called");
     let hasError = false;
     setEmailErrorMsg("");
     setPasswordErrorMsg("");
@@ -30,31 +39,37 @@ const LoginScreen = () => {
       hasError = true;
     }
     if (hasError) return;
-    if (!email.endsWith("@souqsayarat.com" || "@souqsayarat.net" || "@souqsayarat.iq")) {
-      setEmailErrorMsg("Use your company email (…@souqsayarat.com / …@souqsayarat.net / …@souqsayarat.iq).");
-      return;
-    }
+    const domainValid = allowedDomains.some((d) => email.toLowerCase().endsWith(d));
+  if (!domainValid) {
+    setEmailErrorMsg(
+      "Use your company email (…@souqsayarat.com / …@souqsayarat.net / …@souqsayarat.iq)."
+    );
+    return;
+  }
     const body = {
       email: email,
       password: password,
     };
     setLoading(true);
-    userloginAPI(body);
+     userloginAPI(body); 
   };
 
   const userloginAPI = async (body) => {
+    
+    console.log("body12345",body)
     try {
       const response = await loginApi.login(body);
-      const userData = response?.data || response;
-      if (response.status === 200 || userData.statusCode === 200) {
+      const userData = response;
+      console.log("userData123456",userData)
+      alert('1')
+      if (userData.status_code === 200) {
         messageApi.open({ type: 'success', content: response.message  });
-        localStorage.setItem("token", userData?.access_token);
-        localStorage.setItem("isSuperAdmin", userData?.is_super_admin);
+        //dispatch(loginSuccess(userData.firstname,userData.access_token,userData.email))
         setLoading(false);
         if (userData?.needs_password_update === 1) {
-          navigate("/createpassword");
+          //navigate("/createpassword");
         } else {
-          navigate("/dashboard");
+          //navigate("/dashboard");
         }
       } else {
          messageApi.open({ type: 'error', content: userData.error  });
@@ -84,9 +99,7 @@ const LoginScreen = () => {
       className="login-button2"
       size="large"
       block
-      //onClick={handleLogin}
-      loading={loading}
-      aria-label="Sign in"
+      onClick={""}
     >
        <img 
       src={frame_icon} 

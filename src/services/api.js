@@ -114,8 +114,8 @@ export const userAPI = {
 };
 
 export const loginApi = {
-  login: (credentials) =>
-    api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMIN_LOGIN, credentials),
+  login: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMIN_LOGIN, body),
   logout: () => api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMIN_LOGOUT),
   createsubadmin: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATE_SUBADMIN, body),

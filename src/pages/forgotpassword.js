@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import "../assets/styles/forgotpassword.css";
 import { Input, Button, message } from "antd";
 import Car_icon from "../assets/images/Car_icon.png";
-import bluelogo_icon from "../assets/images/souqLogo_blue.svg";
+import bluelogo_icon from "../assets/images/div.svg";
 import { useNavigate } from "react-router-dom";
+import arrow_icon from "../assets/images/tick.svg";
+import arrow_icon1 from "../assets/images/arrow.svg";
+import bluelogo_icon1 from "../assets/images/message.svg";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -12,54 +15,79 @@ const ForgotPassword = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [emailerrormsg, setEmailErrorMsg] = useState("");
   const [otperrormsg, setOtpErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLoginClick = () => {
     navigate("/");
   };
 
+  const emailHasAllowedDomain = (value) => {
+    if (!value) return false;
+    const lower = value.toLowerCase().trim();
+    const allowed = [
+      "@souqsayarat.com",
+      "@souqsayarat.net",
+      "@souqsayarat.iq",
+    ];
+    return allowed.some((d) => lower.endsWith(d));
+  };
+
   const handleButtonClick = () => {
-    setEmailErrorMsg("");
-    setOtpErrorMsg("");
 
-    if (!isOtpSent) {
-      if (!email) {
-        setEmailErrorMsg("Please enter your email.");
-        return;
-      }
-      if (!email.endsWith("@SouqSayarat.com")) {
-        setEmailErrorMsg("Email must end with '@SouqSayarat.com'.");
-        return;
-      }
+    // setEmailErrorMsg("");
+    // setOtpErrorMsg("");
+    //   if (!email) {
+    //     setEmailErrorMsg("Please enter your email.");
+    //     return;
+    //   }
 
-      setIsOtpSent(true);
-      message.success("OTP sent to your email.");
-    } else {
-      if (!otp) {
-        setOtpErrorMsg("Please enter the OTP.");
-        return;
-      }
+    //   const basicEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //   if (!basicEmailRegex.test(email)) {
+    //     setEmailErrorMsg("Please enter a valid email address.");
+    //     return;
+    //   }
 
-      const otpRegex = /^[0-9]+$/;
-      if (!otpRegex.test(otp)) {
-        setOtpErrorMsg("OTP should contain numbers only.");
-        return;
-      }
+    //   if (!emailHasAllowedDomain(email)) {
+    //     setEmailErrorMsg("Use your company email (…@souqsayarat.com / …@souqsayarat.net / …@souqsayarat.iq).");
+    //     return;
+    //   }
 
-      message.success("OTP verified successfully.");
-      navigate("/CreatePassword");
-    }
+    //   setLoading(true);
+    //   setTimeout(() => {
+    //     setLoading(false);
+    //     setIsOtpSent(true);
+    //     message.success("OTP sent to your email.");
+    //   }, 900);
+     navigate("/OtpScreen");
   };
 
   return (
-    <div className="login-page-wrapper">
-      <div className="login-page">
+    <div className="forgot-page-wrapper">
+      <div className="forgot-page">
         <div className="login-form">
-          <img src={bluelogo_icon} alt="left side" className="ssblue-logo" />
-          <h2>Forgot Password</h2>
+          <img
+            src={bluelogo_icon}
+            alt="Souq Sayarat logo"
+            className="ssblue-logo1"
+          />
+          <h2 className="forgot-site-title">Souq Sayarat</h2>
+          <h6 className="forgot-site-subtitle">Admin Portal</h6>
+
+<img
+            src={bluelogo_icon1}
+            alt="Souq Sayarat logo"
+            className="ssblue-forgot"
+          />
+          <h2 className="forgot-title">Forgot Password?</h2>
+<h6 className="forgot-subtitle">
+  Enter your email address and we'll send you a verification code to
+  reset your password.
+</h6>
 
           <Input
-            placeholder="Email"
-            className="input-field"
+            id="fp-email"
+            placeholder="Enter your email address"
+            className="input-field-forgot"
             type="email"
             size="large"
             value={email}
@@ -68,66 +96,65 @@ const ForgotPassword = () => {
               setEmailErrorMsg("");
             }}
             disabled={isOtpSent}
+            aria-invalid={!!emailerrormsg}
+            aria-describedby={emailerrormsg ? "email-error" : undefined}
           />
           {emailerrormsg && (
-            <div className="emailerror-msg">{emailerrormsg}</div>
-          )}
-
-          {isOtpSent && (
-            <>
-              <Input
-                placeholder="OTP"
-                className="input-field"
-                size="large"
-                value={otp}
-                onChange={(e) => {
-                  setOtp(e.target.value);
-                  setOtpErrorMsg("");
-                }}
-              />
-              {otperrormsg && (
-                <div className="emailerror-msg">{otperrormsg}</div>
-              )}
-            </>
+            <div id="email-error" className="emailerror-msg">
+              {emailerrormsg}
+            </div>
           )}
 
           <Button
             type="primary"
-            className="login-button"
+            className="forgot-button"
             size="large"
             block
             onClick={handleButtonClick}
+            loading={loading}
+            disabled={loading}
+            aria-label={isOtpSent ? "" : "Send Verification Code"}
           >
-            {isOtpSent ? "Verify OTP" : "Get OTP"}
+            <span className="button-text-forgot">
+              {isOtpSent ? "" : "Send Verification Code"}
+            </span>
+            <img src={arrow_icon1} alt="arrow"  style={{ width: "12px", height: "12px",marginTop:"2px"}} />
           </Button>
 
           <div
-            style={{ textAlign: "center", fontSize: "16px", marginTop: "12px" }}
-          >
-            Remember your password?{" "}
-           <button
-  onClick={handleLoginClick}
   style={{
-    fontWeight: "bold",
-    color: "black",
-    cursor: "pointer",
-    background: "none", // remove default button background
-    border: "none",     // remove default border
-    padding: 0,         // remove default padding
-    font: "inherit",    // inherit font styles
+    textAlign: "center",
+    fontSize: "16px",
+    marginTop: "12px",
   }}
-  onMouseOver={(e) => (e.currentTarget.style.color = "#6c63ff")}
-  onMouseOut={(e) => (e.currentTarget.style.color = "black")}
 >
-  Login
-</button>
+  <button
+    onClick={handleLoginClick}
+    style={{
+      fontWeight: "bold",
+      color: "#008AD5", 
+      cursor: "pointer",
+      background: "none",
+      border: "none",
+      padding: 0,
+      font: "inherit",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px", 
+    }}
+    onMouseOver={(e) => (e.currentTarget.style.color = "#008AD5")}
+    onMouseOut={(e) => (e.currentTarget.style.color = "#008AD5")}
+  >
+    <img
+      src={arrow_icon}
+      alt="arrow"
+      style={{ width: "12px", height: "12px" ,justifyItems:"center",marginRight:"2px",marginTop:"1px"}}
+    />
+    Back to Login
+  </button>
+</div>
 
 
-          </div>
-        </div>
-
-        <div className="image-section">
-          <img src={Car_icon} alt="Right side" className="side-image" />
         </div>
       </div>
     </div>
