@@ -155,8 +155,8 @@ function AppLayout({ children }) {
     tagline: "Manage individual and dealer users",
   },
   "/user-management/individual": {
-    title: "Individual Users",
-    tagline: "Manage individual user accounts",
+    title: "User Management - Individual",
+    tagline: "Manage individual user accounts and monitor platform activity",
   },
   "/user-management/dealer": {
     title: "Dealer Users",
