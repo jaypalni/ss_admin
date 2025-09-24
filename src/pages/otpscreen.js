@@ -238,10 +238,10 @@ const OtpScreen = () => {
             onClick={handleButtonClick}
             loading={loading}
             disabled={loading}
-            aria-label={isOtpSent ? "" : "Verify Code"}
+            aria-label={isOtpSent ? "Verify Code" : "Verify Code"}
           >
             <img src={arrow_icon1} alt="arrow" style={{ width: "12px", height: "12px", marginTop: "2px" }} />
-            <span className="button-text-otp">{isOtpSent ? "" : "Verify Code"}</span>
+            <span className="button-text-otp">{isOtpSent ? "Verify Code" : "Verify Code"}</span>
           </Button>
 
           <Button

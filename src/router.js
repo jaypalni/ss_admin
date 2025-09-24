@@ -30,6 +30,7 @@ import ListingManagement from "./pages/listingmanagement";
 import CreateSubadmin from "./components/createsubadmin";
 import ListingDetails from "./pages/listingdetails";
 import OtpScreen from "./pages/otpscreen";
+import Individual from "./pages/Individual";
 
 const AppRouter = () => {
   return (
@@ -116,6 +117,15 @@ const AppRouter = () => {
     </AppLayout>
   }
 />
+
+         <Route
+          path="/user-management/individual"
+          element={
+            <AppLayout>
+              <Individual />
+            </AppLayout>
+          }
+        />
 
         <Route
           path="/transactions"

@@ -17,7 +17,7 @@ const CreatePassword = () => {
   const [reenterpassworderrormsg, setReenterPasswordErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const mydata = useSelector((state) => state);
+  const {email,token} = useSelector((state) => state.auth);
 
   const [reqLength, setReqLength] = useState(false);
   const [reqUpper, setReqUpper] = useState(false);
@@ -45,9 +45,12 @@ const CreatePassword = () => {
     navigate("/OtpScreen");
   };
 
-  console.log("123456",mydata)
+  console.log("123456",email)
 
-  const handleResetPassword = () => {
+  const handleResetPassword = (e) => {
+     if (e) {
+      e.preventDefault();
+    }
     setPasswordErrorMsg("");
     setReenterPasswordErrorMsg("");
 
@@ -71,7 +74,7 @@ const CreatePassword = () => {
       return;
     }
     const body = {
-      email: "",
+      email: email,
       new_password: newPassword,
     };
     setLoading(true);
@@ -80,32 +83,33 @@ const CreatePassword = () => {
 
   const updatePassword = async (body) => {
       try {
-        const response = await loginApi.login(body);
-        const userData = response?.data || response;
-        if (response.status === 200 || userData.status_code === 200) {
-          messageApi.open({ type: 'success', content: response.message  });
+        const response = await loginApi.createnewpassword(body);
+        const userData = response.data;
+        if (userData.status_code === 200) {
+          messageApi.open({ type: 'success', content: userData.message  });
           setLoading(false);
-            navigate("/");
+          navigate("/dashboard");
         } else {
            messageApi.open({ type: 'error', content: userData.error  });
           setLoading(false);
         }
       } catch (error) {
         console.error("Error during login", error);
-        message.error("Something went wrong. Please try again.");
+        messageApi.open({ type: 'error', content: error.message  });
         setLoading(false);
       }
     };
 
   return (
     <div className="create-page-wrapper">
+      {contextHolder}
       <div className="create-page">
         <div className="create-form">
           <img src={bluelogo_icon} alt="Souq Sayarat logo" className="ssblue-create" />
           <h2 className="create-site-title">Souq Sayarat</h2>
           <h2 className="create-title">Create New Password</h2>
           <h6 className="create-subtitle">Enter your new password to complete the reset process</h6>
-
+ <form className="login-card" onSubmit={handleResetPassword} aria-label="Login form">
           <div className="form-group-create">
             <label htmlFor="password-input" className="create-label">New Password</label>
             <Input.Password
@@ -184,7 +188,7 @@ const CreatePassword = () => {
             className="create-button"
             size="large"
             block
-            onClick={handleResetPassword}
+             htmlType="submit"
             loading={loading}
             disabled={loading || !allRequirementsMet || !passwordsMatch}
           >
@@ -223,6 +227,7 @@ const CreatePassword = () => {
               </div>
             </div>
           </Button>
+          </form>
         </div>
       </div>
     </div>

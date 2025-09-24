@@ -43,7 +43,7 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          localStorage.removeItem("token");
+          //localStorage.removeItem("token");
           // window.location.href = "/login";
           break;
         case 403:
@@ -139,6 +139,8 @@ export const loginApi = {
   logout: () => api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMIN_LOGOUT),
   createsubadmin: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATE_SUBADMIN, body),
+  createnewpassword: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATENEWPASSWORD, body),
 };
 export const bestcarAPI = {};
 
