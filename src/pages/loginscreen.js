@@ -69,8 +69,8 @@ const LoginScreen = () => {
           type: 'success', 
           content: userData.message || 'Login successful!' 
         });
-        dispatch(loginSuccess(userData.firstname, userData.access_token, userData.email));
-        
+        dispatch(loginSuccess(userData?.data?.firstname, userData?.data?.access_token, userData?.data?.email));
+        console.log('Token we need', userData?.data)
         setLoading(false);
         
         if (userData?.needs_password_update === 1) {

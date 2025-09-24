@@ -23,7 +23,7 @@ const API_CONFIG = {
       CAR_APPROVE: (id) => `/api/admin/cars/${id}/approve`,
       CAR_REJECTED: (id) => `/api/admin/cars/${id}/reject`,
       GET_BY_ID: (id) => `/api/cars/details/${id}`,
-      REASON_REJECTIONS:  "api/admin/car-rejection-reasons"
+      REASON_REJECTIONS:  "/api/admin/car-rejection-reasons"
     },
 
     LOGIN: {

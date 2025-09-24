@@ -1,5 +1,6 @@
 import axios from "axios";
 import API_CONFIG from "../config/api.config";
+import store from '../redux/store';
 
 //Validate base URL
 if (!API_CONFIG.BASE_URL) {
@@ -20,9 +21,10 @@ const api = axios.create({
 // Add request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = store.getState().auth.token || localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Token sent with request:', token);
     }
     return config;
   },

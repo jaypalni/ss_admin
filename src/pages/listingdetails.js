@@ -15,6 +15,8 @@ import carfour_icon from '../assets/images/careimagefour.png'
 import carfive_icon from '../assets/images/careimagefive.png'
 import carsix_icon from '../assets/images/careimagesix.png'
 import "../assets/styles/listingdetails.css";
+import { userAPI } from "../services/api";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 
 const ListingDetails = () => {
   const { listingId } = useParams();
@@ -22,9 +24,13 @@ const ListingDetails = () => {
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
 const [rejectionReason, setRejectionReason] = useState(null);
 const [comment, setComment] = useState("");
+const [loading, setLoading] = useState(false);
+const [messageApi, contextHolder] = message.useMessage();
+const [rejectReasonData, setRejectReasonData] = useState([]);
 
 
 const showRejectModal = () => {
+    getReasonRejection();
   setIsRejectModalVisible(true);
 };
 
@@ -39,17 +45,58 @@ const handleRejectSubmit = () => {
     message.error("Please select a rejection reason");
     return;
   }
-  console.log("Selected Reason:", rejectionReason);
-  console.log("Comment:", comment);
-  message.success("Listing rejected successfully!");
-  handleRejectCancel();
+
+  Modal.confirm({
+    title: "Are you sure you want to reject this listing?",
+    content: "Once rejected, this action cannot be undone.",
+    okText: "Confirm",
+    cancelText: "Cancel",
+    okType: "danger",
+    onOk: () => {
+      console.log("Selected Reason:", rejectionReason);
+      console.log("Comment:", comment);
+
+      message.success("Listing rejected successfully!");
+      handleRejectCancel(); // Close the modal and reset
+    },
+    onCancel: () => {
+      console.log("Rejection cancelled");
+    },
+  });
+};
+
+
+// Rejection Reasons API
+
+const getReasonRejection = async () => {
+  try {
+    setLoading(true);
+    const response = await userAPI.reasonRejection();
+    const result = handleApiResponse(response);
+
+    if (result?.data?.rejection_reasons) {
+      setRejectReasonData(result.data.rejection_reasons);
+    } else {
+      setRejectReasonData([]);
+    }
+
+    if (result?.message) {
+      messageApi.open({ type: "success", content: result.message });
+    }
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({ type: "error", content: errorData });
+    setRejectReasonData([]);
+  } finally {
+    setLoading(false);
+  }
 };
 
 
   return (
     <div  style={{
         background: "#f7f7f7",
-        padding: 24,
+        padding: 14,
         height: "100%",        
         overflowY: "auto",     
         boxSizing: "border-box",
@@ -57,25 +104,59 @@ const handleRejectSubmit = () => {
       
       {/* ===== PAGE HEADER SECTION ===== */}
       <div style={{ 
-        padding: "20px 0", 
+        padding: "0px 0", 
         marginBottom: 24
       }}>
         {/* Breadcrumb Navigation */}
-        <Breadcrumb 
-          style={{ marginBottom: 16 }}
-          items={[
-            {
-              title: <span style={{ color: "#2563EB", cursor: "pointer" }} onClick={() => navigate("/dashboard")}>Dashboard</span>
-            },
-            {
-              title: <span style={{ color: "#2563EB", cursor: "pointer" }} onClick={() => navigate("/listingmanagement")}>Listing Management</span>
-            },
-            {
-              title: "Listing Details"
-            }
-          ]}
-        />
-        
+        <Breadcrumb
+  separator=">"
+  style={{ marginBottom: 16 }}
+  items={[
+    {
+      title: (
+        <span
+          style={{
+            color: "#6B7280",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "400",
+          }}
+          onClick={() => navigate("/dashboard")}
+        >
+          Dashboard
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{
+            color: "#6B7280",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "400",
+          }}
+          onClick={() => navigate("/listingmanagement")}
+        >
+          Listing Management
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{
+            color: "#000000",
+            fontSize: "14px",
+            fontWeight: "500",
+          }}
+        >
+          Listing Details
+        </span>
+      ),
+    },
+  ]}
+/>
         {/* Header Row */}
         <div style={{ 
           display: "flex", 
@@ -579,17 +660,24 @@ const handleRejectSubmit = () => {
   ]}
 >
   <div style={{ marginBottom: 16 }}>
-    <Select
-      placeholder="Select a reason"
-      style={{ width: "100%" }}
-      value={rejectionReason}
-      onChange={(value) => setRejectionReason(value)}
-    >
-      <Select.Option value="Incorrect Info">Incorrect Info</Select.Option>
-      <Select.Option value="Fraudulent Listing">Fraudulent Listing</Select.Option>
-      <Select.Option value="Prohibited Item">Prohibited Item</Select.Option>
-      <Select.Option value="Other">Other</Select.Option>
-    </Select>
+   <Select
+  placeholder="Select a reason"
+  style={{ width: "100%" }}
+  value={rejectionReason}
+  onChange={(value) => setRejectionReason(value)}
+  loading={loading} // Show loading spinner while fetching
+>
+  {rejectReasonData.length > 0 ? (
+    rejectReasonData.map((reason) => (
+      <Select.Option key={reason.id} value={reason.id}>
+        {reason.rejected_reason}
+      </Select.Option>
+    ))
+  ) : (
+    <Select.Option disabled>No reasons available</Select.Option>
+  )}
+</Select>
+
   </div>
 
   <div>
