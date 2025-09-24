@@ -1,118 +1,146 @@
-import React, { useState, useMemo } from "react";
-import { Input, Select, DatePicker, Table, Card, Row, Col } from "antd";
+import React, { useState, useEffect } from "react";
+import { Input, Select, DatePicker, Table, Card, Row, Col, message } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import dayjs from "dayjs"; // For date comparison
+import dayjs from "dayjs";
+import { userAPI } from "../services/api";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 
 const { Option } = Select;
 
 const PendingListings = () => {
   const [searchValue, setSearchValue] = useState("");
-  const [cityFilter, setCityFilter] = useState("All Cities");
-  const [sellerType, setSellerType] = useState("All Types");
-  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [cityFilter, setCityFilter] = useState("");
+  const [sellerType, setSellerType] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [dateRange, setDateRange] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [tableData, setTableData] = useState([]);
   const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [carLocation, setCarLocation] = useState([]);
 
-  // Sample table data
-  const dataSource = [
-    {
-      key: "1",
-      referenceId: "LST-001",
-      dateSubmitted: "2025-01-23",
-      sellerName: "Ahmed Hassan",
-      listingTitle: "2018 Toyota Camry LE",
-      location: "Baghdad",
-      type: "Individual",
-      status: "Pending",
-    },
-    {
-      key: "2",
-      referenceId: "LST-002",
-      dateSubmitted: "2025-01-22",
-      sellerName: "Baghdad Motors",
-      listingTitle: "2020 Honda Civic Sport",
-      location: "Basra",
-      type: "Dealer",
-      status: "Pending",
-    },
-    {
-      key: "3",
-      referenceId: "LST-003",
-      dateSubmitted: "2025-01-20",
-      sellerName: "Ali Kareem",
-      listingTitle: "2019 Nissan Altima",
-      location: "Baghdad",
-      type: "Individual",
-      status: "Approved",
-    },
-  ];
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
-  // Filtered data based on search and filters
-  const filteredData = useMemo(() => {
-    return dataSource.filter((item) => {
-      // Search filter (listingTitle or referenceId)
-      const searchMatch =
-        item.listingTitle.toLowerCase().includes(searchValue.toLowerCase()) ||
-        item.referenceId.toLowerCase().includes(searchValue.toLowerCase());
+  const handleTableChange = (paginationInfo) => {
+    fetchPendingListings(paginationInfo.current, paginationInfo.pageSize);
+  };
 
-      // City filter
-      const cityMatch =
-        cityFilter === "All Cities" || item.location === cityFilter;
+  // Fetch locations dynamically
+  const fetchRegion = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.regionslist({});
+      const data1 = handleApiResponse(response);
 
-      // Seller type filter
-      const typeMatch =
-        sellerType === "All Types" || item.type === sellerType;
-
-      // Status filter
-      const statusMatch =
-        statusFilter === "All Status" || item.status === statusFilter;
-
-      // Date range filter
-      let dateMatch = true;
-      if (dateRange && dateRange.length === 2) {
-        const start = dayjs(dateRange[0]);
-        const end = dayjs(dateRange[1]);
-        const itemDate = dayjs(item.dateSubmitted);
-        dateMatch = itemDate.isSameOrAfter(start, "day") && itemDate.isSameOrBefore(end, "day");
+      if (!data1 || !data1.data) {
+        message.error("No location data received");
+        setCarLocation([]);
+        return;
       }
 
-      return searchMatch && cityMatch && typeMatch && statusMatch && dateMatch;
+      setCarLocation(data1.data);
+    } catch (error) {
+      const errorData = handleApiError(error);
+      message.error(errorData.message || "Failed to fetch location data");
+      setCarLocation([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch pending listings
+  const fetchPendingListings = async (page = 1, limit = 10) => {
+  try {
+    setLoading(true);
+
+    const body = {
+      search: searchValue || "",
+      city_filter: cityFilter || "",
+      date_range:
+    dateRange && dateRange.length === 2
+      ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(dateRange[1]).format("DD/MM/YYYY")}`
+      : "",
+      status: statusFilter || "",
+      seller_type: sellerType || "",
+    };
+
+    const response = await userAPI.pendingcars(body, page, limit);
+    const data = handleApiResponse(response);
+
+    if (data?.data?.cars) {
+      const formattedData = data.data.cars.map((item) => ({
+        key: item.car_id,
+        car_id: item.car_id,
+        referenceId: item.car_id,
+        dateSubmitted: dayjs(item.date_submitted).format("DD/MM/YYYY"),
+        listingTitle: item.ad_title,
+        sellerName: `${item.first_name} ${item.last_name}`,
+        location: item.location,
+        type: item.user_type === "dealer" ? "Dealer" : "Individual",
+        status: item.approval,
+      }));
+
+      setTableData(formattedData);
+
+      // ✅ Update pagination
+      setPagination({
+        current: data.data.pagination.current_page,
+        pageSize: data.data.pagination.limit,
+        total: data.data.pagination.total_cars,
+      });
+    }
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({
+      type: "error",
+      content: errorData?.message || "Failed to fetch pending cars",
     });
-  }, [searchValue, cityFilter, sellerType, statusFilter, dateRange, dataSource]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // Call APIs on mount
+  useEffect(() => {
+    fetchPendingListings(1, pagination.pageSize);
+    fetchRegion();
+  }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);
 
   const columns = [
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Reference ID</span>,
+      title: "Reference ID",
       dataIndex: "referenceId",
       key: "referenceId",
-      render: (text) => (
-        <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>
-      ),
+      render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Date Submitted</span>,
+      title: "Date Submitted",
       dataIndex: "dateSubmitted",
       key: "dateSubmitted",
-      render: (date) => dayjs(date).format("DD/MM/YYYY")
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Seller Name</span>,
+      title: "Seller Name",
       dataIndex: "sellerName",
       key: "sellerName",
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Listing Title</span>,
+      title: "Listing Title",
       dataIndex: "listingTitle",
       key: "listingTitle",
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Location</span>,
+      title: "Location",
       dataIndex: "location",
       key: "location",
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Type</span>,
+      title: "Type",
       dataIndex: "type",
       key: "type",
       render: (type) => (
@@ -130,48 +158,44 @@ const PendingListings = () => {
       ),
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>Status</span>,
+      title: "Status",
       dataIndex: "status",
       key: "status",
-     render: (status) => {
-  let bgColor = "#FFF7E6";
-  let textColor = "#FAAD14";
+      render: (status) => {
+        let bgColor = "#FFF7E6";
+        let textColor = "#FAAD14";
 
-  if (status === "Approved") {
-    bgColor = "#DCFCE7"; 
-    textColor = "#166534"; 
-  } else if (status === "Rejected") {
-    bgColor = "#FFE4E6"; 
-    textColor = "#B91C1C";
-  }
+        if (status === "approved") {
+          bgColor = "#DCFCE7";
+          textColor = "#166534";
+        } else if (status === "rejected") {
+          bgColor = "#FFE4E6";
+          textColor = "#B91C1C";
+        }
 
-  return (
-    <span
-      style={{
-        backgroundColor: bgColor,
-        color: textColor,
-        padding: "2px 8px",
-        borderRadius: "8px",
-        fontSize: "12px",
-      }}
-    >
-      {status}
-    </span>
-  );
-}
+        return (
+          <span
+            style={{
+              backgroundColor: bgColor,
+              color: textColor,
+              padding: "2px 8px",
+              borderRadius: "8px",
+              fontSize: "12px",
+            }}
+          >
+            {status}
+          </span>
+        );
+      },
     },
     {
-      title: () => (
-        <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 500 }}>
-          Actions
-        </span>
-      ),
+      title: "Actions",
       key: "actions",
       align: "center",
       render: (_, record) => (
         <EyeOutlined
           style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
-          onClick={() => navigate(`/listingdetails/${record.key}`)}
+          onClick={() => navigate(`/listingdetails/${record.car_id}`)}
         />
       ),
     },
@@ -179,6 +203,7 @@ const PendingListings = () => {
 
   return (
     <div style={{ padding: "20px", background: "#f0f2f5" }}>
+      {contextHolder}
       <Card
         style={{
           margin: "0 auto",
@@ -191,42 +216,69 @@ const PendingListings = () => {
         {/* Filters Section */}
         <Row gutter={16} style={{ marginBottom: 20, display: "flex", flexWrap: "wrap" }}>
           {[
-            { label: "Search", component: <Input placeholder="Listing title or ID..." value={searchValue} onChange={(e) => setSearchValue(e.target.value)} /> },
-            { label: "City", component: (
-                <Select value={cityFilter} onChange={setCityFilter} style={{ width: "100%" }}>
-                  <Option value="All Cities">All Cities</Option>
-                  <Option value="Baghdad">Baghdad</Option>
-                  <Option value="Basra">Basra</Option>
-                </Select>
-              )
+            {
+              label: "Search",
+              component: (
+                <Input
+                  placeholder="Listing title or ID..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+              ),
             },
-            { label: "Seller Type", component: (
+            {
+              label: "City",
+              component: (
+                <Select
+                  value={cityFilter}
+                  onChange={setCityFilter}
+                  style={{ width: "100%" }}
+                  placeholder="Select City"
+                  allowClear
+                >
+                  <Option value="">All Cities</Option>
+                  {carLocation.map((loc) => (
+                    <Option key={loc.id} value={loc.location}>
+                      {loc.location}
+                    </Option>
+                  ))}
+                </Select>
+              ),
+            },
+            {
+              label: "Seller Type",
+              component: (
                 <Select value={sellerType} onChange={setSellerType} style={{ width: "100%" }}>
-                  <Option value="All Types">All Types</Option>
+                  <Option value="">All Types</Option>
                   <Option value="Individual">Individual</Option>
                   <Option value="Dealer">Dealer</Option>
                 </Select>
-              )
+              ),
             },
-            { label: "Status", component: (
+            {
+              label: "Status",
+              component: (
                 <Select value={statusFilter} onChange={setStatusFilter} style={{ width: "100%" }}>
-                  <Option value="All Status">All Status</Option>
+                  <Option value="">All Status</Option>
                   <Option value="Pending">Pending</Option>
                   <Option value="Approved">Approved</Option>
                   <Option value="Rejected">Rejected</Option>
                 </Select>
-              )
+              ),
             },
-            { label: "Date Range", component: (
-                <DatePicker.RangePicker style={{ width: "100%" }} format="DD/MM/YYYY" value={dateRange} onChange={setDateRange} />
-              )
-            }
+            {
+              label: "Date Range",
+              component: (
+                <DatePicker.RangePicker
+                  style={{ width: "100%" }}
+                  format="DD/MM/YYYY"
+                  value={dateRange}
+                  onChange={setDateRange}
+                />
+              ),
+            },
           ].map((item, index) => (
-            <Col
-              key={index}
-              flex="1"
-              style={{ paddingLeft: 8, paddingRight: 8, marginBottom: 12 }}
-            >
+            <Col key={index} flex="1" style={{ paddingLeft: 8, paddingRight: 8, marginBottom: 12 }}>
               <div style={{ marginBottom: 6 }}>
                 <strong>{item.label}</strong>
               </div>
@@ -236,13 +288,22 @@ const PendingListings = () => {
         </Row>
 
         {/* Table Section */}
-        <h3 style={{ marginBottom: 15, fontSize: '18px', fontWeight: '600' }}>Pending Listings ({filteredData.length})</h3>
+        <h3 style={{ marginBottom: 15, fontSize: "18px", fontWeight: "600" }}>
+          Pending Listings ({tableData.length})
+        </h3>
 
         <Table
-          dataSource={filteredData}
+          dataSource={tableData}
           columns={columns}
-          pagination={false}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showSizeChanger: false,
+          }}
+          loading={loading}
           bordered={false}
+          onChange={handleTableChange}
         />
       </Card>
     </div>

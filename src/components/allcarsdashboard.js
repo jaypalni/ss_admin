@@ -1,13 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import activeIcon from "../assets/images/active-icon.png"; 
 import pendingIcon from "../assets/images/pending-icon.png";
 import soldIcon from "../assets/images/sold-icon.png";
 import modelIcon from "../assets/images/model-icon.png";
 import "../assets/styles/allcarsdashboard.css";
+import { userAPI } from "../services/api";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import { message, Spin } from "antd";
 
 function AllCarsDashboard() {
+  const [loading, setLoading] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [messageApi, contextHolder] = message.useMessage();
+
+  useEffect(() => {
+    dashboardcounts();
+}, []);
+
+  // Dashboard Counts API
+
+  const dashboardcounts = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.dashboardstats();
+      const result = handleApiResponse(response);
+
+      if (result?.data) {
+        setDashboardData(result.data);
+      }
+
+      if (result?.message) {
+        messageApi.open({ type: "success", content: result.message });
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({ type: "error", content: errorData });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Show loader while fetching data
+  if (loading || !dashboardData) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        {contextHolder}
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
     <div className="content-wrapper-allcardashboard">
+      {/* {contextHolder} */}
       <div className="content-body">
         <div className="row">
           {/* Active Listings */}
@@ -16,7 +61,9 @@ function AllCarsDashboard() {
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
                   <h5 className="card-title">Active Listings</h5>
-                  <p className="card-number" style={{ color: '#16A34A'}}>142</p>
+                  <p className="card-number" style={{ color: '#16A34A' }}>
+                    {dashboardData.active_listings}
+                  </p>
                 </div>
                 <div className="card-icon-wrapper" style={{ backgroundColor: "#DCFCE7" }}>
                   <img src={activeIcon} alt="Active Listings" className="card-icon" />
@@ -31,7 +78,9 @@ function AllCarsDashboard() {
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
                   <h5 className="card-title">Pending Approval</h5>
-                  <p className="card-number" style={{ color: '#CA8A04'}}>23</p>
+                  <p className="card-number" style={{ color: '#CA8A04' }}>
+                    {dashboardData.listings_pending_approval}
+                  </p>
                 </div>
                 <div className="card-icon-wrapper" style={{ backgroundColor: "#FEF9C3" }}>
                   <img src={pendingIcon} alt="Pending Approval" className="card-icon" />
@@ -46,7 +95,9 @@ function AllCarsDashboard() {
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
                   <h5 className="card-title">Sold This Month</h5>
-                  <p className="card-number" style={{ color: '#2563EB'}}>67</p>
+                  <p className="card-number" style={{ color: '#2563EB' }}>
+                    {dashboardData.cars_sold_this_month}
+                  </p>
                 </div>
                 <div className="card-icon-wrapper" style={{ backgroundColor: "#DBEAFE" }}>
                   <img src={soldIcon} alt="Sold This Month" className="card-icon" />
@@ -61,8 +112,12 @@ function AllCarsDashboard() {
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
                   <h5 className="card-title">Total Model</h5>
-                  <p className="card-number-total" style={{ color: '#2563EB', font: '18px', fontWeight: '700'}}>Toyota Camry</p>
-                   <p className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', marginTop: '-10px', marginBottom: '-10px'}}>18 sales</p>
+                  <p className="card-number-total" style={{ color: '#2563EB', font: '18px', fontWeight: '700' }}>
+                    {dashboardData.model_name}
+                  </p>
+                  <p className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', marginTop: '-10px', marginBottom: '-10px' }}>
+                    {dashboardData.top_selling_models_this_month} sales
+                  </p>
                 </div>
                 <div className="card-icon-wrapper" style={{ backgroundColor: "#DBEAFE" }}>
                   <img src={modelIcon} alt="Total Model" className="card-icon" />
@@ -70,6 +125,7 @@ function AllCarsDashboard() {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

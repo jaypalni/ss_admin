@@ -111,8 +111,26 @@ export const userAPI = {
     carRejected: (id,body) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_REJECTED(id),body),
     getCarByIdDetails: (id) =>
     api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)),
+
+    // New API's
+    regionslist: () =>
+      api.get(API_CONFIG.ENDPOINTS.USER.REGIONS_LIST),
     reasonRejection: () =>
     api.get(API_CONFIG.ENDPOINTS.USER.REASON_REJECTIONS),
+    dashboardstats: () => 
+      api.get(API_CONFIG.ENDPOINTS.USER.DASHBOARD_STATS),
+    // pendingcars: (body) => api.post(API_CONFIG.ENDPOINTS.USER.PENDING_CARS,body),
+    pendingcars: (body, page = 1, limit = 10) => 
+  api.post(API_CONFIG.ENDPOINTS.USER.PENDING_CARS(page, limit), body),
+    getCarById: (id) => api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)),
+    approvecar: (body) => 
+  api.post(API_CONFIG.ENDPOINTS.USER.APPORVE_CAR, body),
+    rejectcar: (body) => 
+  api.post(API_CONFIG.ENDPOINTS.USER.REJECT_CAR, body),
+    
+    
+
+
 };
 
 export const loginApi = {

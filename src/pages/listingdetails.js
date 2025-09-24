@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, Button, Tag, Row, Col, Avatar, Divider, Modal, Select, Input, message, Breadcrumb } from "antd";
 import { UserOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import crownicon from "../assets/images/crown_icon.png";
@@ -8,12 +8,6 @@ import { FaCalendar } from "react-icons/fa";
 import approveIcon from "../assets/images/tick_icon.png"; 
 import rejectIcon from "../assets/images/cross_icon.png";
 import greentickicon from "../assets/images/greentick_icon.png"
-import carone_icon from '../assets/images/careimageone.png'
-import cartwo_icon from '../assets/images/careimagetwo.png'
-import carthree_icon from '../assets/images/careimagethree.png'
-import carfour_icon from '../assets/images/careimagefour.png'
-import carfive_icon from '../assets/images/careimagefive.png'
-import carsix_icon from '../assets/images/careimagesix.png'
 import "../assets/styles/listingdetails.css";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -27,6 +21,9 @@ const [comment, setComment] = useState("");
 const [loading, setLoading] = useState(false);
 const [messageApi, contextHolder] = message.useMessage();
 const [rejectReasonData, setRejectReasonData] = useState([]);
+  const [carDetails, setCarDetails] = useState(null);
+  const BASE_URL = process.env.REACT_APP_API_URL;
+  const fetchCalled = useRef(false)
 
 
 const showRejectModal = () => {
@@ -40,37 +37,11 @@ const handleRejectCancel = () => {
   setComment("");
 };
 
-const handleRejectSubmit = () => {
-  if (!rejectionReason) {
-    message.error("Please select a rejection reason");
-    return;
-  }
-
-  Modal.confirm({
-    title: "Are you sure you want to reject this listing?",
-    content: "Once rejected, this action cannot be undone.",
-    okText: "Confirm",
-    cancelText: "Cancel",
-    okType: "danger",
-    onOk: () => {
-      console.log("Selected Reason:", rejectionReason);
-      console.log("Comment:", comment);
-
-      message.success("Listing rejected successfully!");
-      handleRejectCancel(); // Close the modal and reset
-    },
-    onCancel: () => {
-      console.log("Rejection cancelled");
-    },
-  });
-};
-
-
 // Rejection Reasons API
 
 const getReasonRejection = async () => {
   try {
-    setLoading(true);
+  
     const response = await userAPI.reasonRejection();
     const result = handleApiResponse(response);
 
@@ -79,19 +50,112 @@ const getReasonRejection = async () => {
     } else {
       setRejectReasonData([]);
     }
-
-    if (result?.message) {
-      messageApi.open({ type: "success", content: result.message });
-    }
   } catch (error) {
     const errorData = handleApiError(error);
     messageApi.open({ type: "error", content: errorData });
     setRejectReasonData([]);
   } finally {
-    setLoading(false);
+    
   }
 };
 
+// Car Details Api
+
+useEffect(() => {
+  if (!listingId || fetchCalled.current) return;
+
+  fetchCalled.current = true;
+
+  const fetchCarDetails = async () => {
+    try {
+      
+      const response = await userAPI.getCarById(Number(listingId));
+      const result = handleApiResponse(response);
+      if (result?.data) setCarDetails(result.data);
+      if (result?.message) messageApi.open({ type: "success", content: result.message });
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({ type: "error", content: errorData.error || "Error fetching car details" });
+    } finally {
+      
+    }
+  };
+
+  fetchCarDetails();
+}, [listingId]);
+
+
+// Reject Car API
+  
+
+  const handleRejectSubmit = async () => {
+  // Check if a reason is selected
+  if (!rejectionReason) {
+    messageApi.open({ type: "warning", content: "Please select a rejection reason." });
+    return;
+  }
+
+  // Find the selected reason object
+  const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
+
+  // If "Other" is selected, comment becomes mandatory
+  if (selectedReason?.rejected_reason.toLowerCase() === "other" && !comment?.trim()) {
+    messageApi.open({ type: "warning", content: "Please add a comment for 'Other' reason." });
+    return;
+  }
+
+  // Call the API
+  try {
+    
+    const body = {
+      car_id: listingId,
+      rejection_reason: rejectionReason,
+      admin_rejection_comment: comment || "",
+    };
+
+    const response = await userAPI.rejectcar(body);
+    const data = handleApiResponse(response);
+
+    if (data.status_code === 200) {
+      messageApi.open({ type: "success", content: data.message });
+      setIsRejectModalVisible(false);
+      navigate("/listingmanagement");
+    } else {
+      messageApi.open({ type: "error", content: data?.message || "Failed to reject car" });
+    }
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({ type: "error", content: errorData.message || "Failed to reject car" });
+  } finally {
+    // setLoading(false);
+  }
+};
+
+
+// Approve Car API
+
+const handleapproveapi = async () => {
+  try {
+    setLoading(true);
+    const body = { car_id: listingId }; // send car_id
+    const response = await userAPI.approvecar(body);
+    const data = handleApiResponse(response);
+
+    if (data.status_code === 200) {
+      if (data?.message) {
+        messageApi.open({ type: "success", content: data.message });
+        navigate("/listingmanagement")
+      }
+    } else {
+      messageApi.open({ type: "error", content: data?.message || "Failed to approve car" });
+    }
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({ type: "error", content: errorData.message || 'Failed to approve car' });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div  style={{
@@ -101,6 +165,7 @@ const getReasonRejection = async () => {
         overflowY: "auto",     
         boxSizing: "border-box",
       }}>
+        { contextHolder }
       
       {/* ===== PAGE HEADER SECTION ===== */}
       <div style={{ 
@@ -232,7 +297,7 @@ const getReasonRejection = async () => {
         >
           Reference ID:
         </strong>
-        <span>#LST-2024-03-15-7892</span>
+        <span>{ listingId }</span>
       </div>
       <div style={{ marginBottom: 16 }}>
         <strong
@@ -287,22 +352,25 @@ const getReasonRejection = async () => {
        <div style={{ display: "flex", alignItems: "center" }}>
   <Tag
     style={{
-      backgroundColor: "#DCFCE7", 
-      color: "#166534",          
+      backgroundColor: carDetails?.is_featured === 1 ? "#DCFCE7" : "#FFF4E5", // green bg if active, light orange if not
+      color: carDetails?.is_featured === 1 ? "#166534" : "#B45309", // green text if active, orange if not
       borderRadius: "22px",
       border: "none",
       padding: "2px 10px",
       fontWeight: 500,
     }}
   >
-    Active
+    {carDetails?.is_featured === 1 ? "Active" : "Not Active"}
   </Tag>
-  <img
-    src={boosticon}
-    alt="Crown Icon"
-    style={{ width: 18, height: 18 }}
-  />
+  {carDetails?.is_featured === 1 && (
+    <img
+      src={boosticon}
+      alt="Boost Icon"
+      style={{ width: 18, height: 18, marginLeft: 6 }}
+    />
+  )}
 </div>
+
       </div>
       <div style={{ marginBottom: 16 }}>
         <strong
@@ -328,14 +396,8 @@ const getReasonRejection = async () => {
 <Card style={{ marginBottom: 24 }}>
   <h3 style={{ marginBottom: 16 }}>Vehicle Images</h3>
   <Row gutter={[16, 16]}>
-    {[
-      carone_icon,
-      cartwo_icon,
-      carthree_icon,
-      carfour_icon,
-      carfive_icon,
-      carsix_icon,
-    ].map((imgSrc, index) => (
+  {carDetails?.car_image?.length > 0 ? (
+    carDetails.car_image.map((imgSrc, index) => (
       <Col xs={12} md={8} key={index}>
         <div
           style={{
@@ -349,14 +411,18 @@ const getReasonRejection = async () => {
           }}
         >
           <img
-            src={imgSrc}
+            src={`${BASE_URL}${imgSrc}`}
             alt={`Vehicle ${index + 1}`}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
       </Col>
-    ))}
-  </Row>
+    ))
+  ) : (
+    <p>No images available</p>
+  )}
+</Row>
+
 </Card>
 
 
@@ -367,7 +433,7 @@ const getReasonRejection = async () => {
     Basic Information
   </h3>
   <h2 style={{ marginBottom: 12, fontSize: '20px', fontWeight: '700' }}>
-    2023 BMW 5 Series 530i M Sport
+    {carDetails?.ad_title}
   </h2>
   <p
     style={{
@@ -377,25 +443,22 @@ const getReasonRejection = async () => {
       fontWeight: '400'
     }}
   >
-    Luxury sedan in excellent condition with premium features and low mileage.
-    Perfect for business and personal use.
+    {carDetails?.description}
   </p>
 
   <Row gutter={24}>
     <Col xs={24} md={12}>
       <h4 style={{ marginBottom: 4, fontSize: '14px', fontWeight: '400', color: '#6B7280' }}>Price</h4>
       <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#2563EB' }}>
-        85,000,000 IQD
-      </p>
+  {carDetails?.price ? Number(carDetails.price).toLocaleString('en-US') : '0'} IQD
+</p>
     </Col>
     <Col xs={24} md={12}>
       <h4 style={{ marginBottom: 4, fontSize: '14px', fontWeight: '400', color: '#6B7280' }}>Location</h4>
-      <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#000000' }}>Baghdad, Iraq</p>
+      <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#000000' }}>{carDetails?.location}</p>
     </Col>
   </Row>
 </Card>
-
-
           {/* Listing Timeline */}
         <Card style={{ marginBottom: 24 }}>
   <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>
@@ -412,45 +475,73 @@ const getReasonRejection = async () => {
             width: 12,
             height: 12,
             borderRadius: 12,
-            backgroundColor: '#3B82F6', // Blue dot, you can change per item
+            backgroundColor: '#3B82F6', 
           }}
         />
         <strong>Date of Creation:</strong>
       </div>
-      <span style={{ marginRight: 12 }}>March 15, 2024</span>
+      <span style={{ marginRight: 12 }}>
+  {carDetails?.created_at
+    ? new Date(carDetails.created_at).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : ""}
+</span>
     </div>
 
     {/* Item 2 */}
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
-        <div
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 12,
-            backgroundColor: '#EAB308', // Yellow dot
-          }}
-        />
-        <strong>Date of Approval/Reject:</strong>
-      </div>
-      <span style={{ marginRight: 12 }}>Pending</span>
-    </div>
-
+  <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
+    <div
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: 12,
+        backgroundColor: '#EAB308', // Yellow dot
+      }}
+    />
+    <strong>Date of Approval/Reject:</strong>
+  </div>
+  <span style={{ marginRight: 12 }}>
+    {carDetails?.approval === "pending"
+      ? "Pending"
+      : carDetails?.updated_at
+      ? new Date(carDetails.updated_at).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : ""}
+  </span>
+</div>
     {/* Item 3 */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
-        <div
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 12,
-            backgroundColor: '#D1D5DB', // Red dot
-          }}
-        />
-        <strong>Date of Sale:</strong>
-      </div>
-      <span style={{ marginRight: 12 }}>Not sold</span>
-    </div>
+   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
+    <div
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: 12,
+        backgroundColor: '#D1D5DB', // Red dot
+      }}
+    />
+    <strong>Date of Sale:</strong>
+  </div>
+  <span style={{ marginRight: 12 }}>
+    {carDetails?.status === "unsold"
+      ? "Not Sold"
+      : carDetails?.status === "sold" && carDetails?.updated_at
+      ? new Date(carDetails.updated_at).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : ""}
+  </span>
+</div>
+
   </div>
 </Card>
           {/* Technical Specifications */}
@@ -463,77 +554,77 @@ const getReasonRejection = async () => {
     <Col xs={24} md={8}>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Vehicle Type</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>Sedan</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.vechile_type}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Body Type</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>4-Door Sedan</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.body_type}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Make</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>BMW</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.make}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Model</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>5 Series</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.model}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Trim</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>530i M Sport</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.trim}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Regional Specs</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>GCC</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.regional_specs}</p>
       </div>
     </Col>
 
     <Col xs={24} md={8}>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Kilometers</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>15,000 km</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.kilometers}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Year</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>2023</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.year}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Condition</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>Used</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.condition}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Fuel Type</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>Gasoline</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.fuel_type}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Transmission</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>Automatic</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.transmission_type}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Exterior Color</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>Alpine White</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.exterior_color}</p>
       </div>
     </Col>
 
     <Col xs={24} md={8}>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Interior Color</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>Black Leather</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.interior_color}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Seats</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>5</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.number_of_seats}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Cylinders</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>4</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.no_of_cylinders}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Engine</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>2.0L Turbo</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.engine_cc}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Horsepower</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>248 HP</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.horse_power}</p>
       </div>
     </Col>
   </Row>
@@ -544,7 +635,7 @@ const getReasonRejection = async () => {
          <Card>
   <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>Features</h3>
   <Row gutter={[8, 8]}>
-    {[
+    {/* {[
       "Leather Seats",
       "Sunroof",
       "Navigation System",
@@ -571,7 +662,26 @@ const getReasonRejection = async () => {
           {f}
         </Tag>
       </Col>
-    ))}
+    ))} */}
+    {carDetails?.extra_features?.map((feature, index) => (
+                <Col key={index} xs={12} sm={8}>
+                  <Tag  style={{
+            backgroundColor: "transparent",
+            border: "none",
+            color: "#000",
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontWeight: 400,
+            fontSize: 14,
+            justifyContent: "flex-start",
+          }}>
+                    <img src={greentickicon} alt="Tick" style={{ width: 14, height: 16 }} />
+                    {feature}
+                  </Tag>
+                </Col>
+              ))}
   </Row>
 </Card>
         </Col>
@@ -592,35 +702,37 @@ const getReasonRejection = async () => {
               <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
                 <Avatar size={48} icon={<UserOutlined />} style={{ marginRight: 12 }} />
                 <div>
-                  <p style={{ margin: 0, fontWeight: 600 }}>Ahmed Hassan</p>
-                  <p style={{ margin: 0, color: "#888" }}>Individual Seller</p>
+                  <p style={{ margin: 0, fontWeight: 600 }}>{carDetails?.seller?.last_name}</p>
+                  <p style={{ margin: 0, color: "#888" }}>{carDetails?.seller?.is_dealer === "True" ? "Dealer Seller" : "Individual Seller"}</p>
                 </div>
               </div>
               <Divider style={{ margin: "12px 0" }} />
-              <p style={{ marginBottom: 8 }}>📞 +964 770 123 4567</p>
-              <p style={{ marginBottom: 8 }}>✉️ ahm.hassan@gmail.com</p>
-              <p style={{ marginBottom: 0 }}><FaCalendar/>  Member since 2022</p>
+              <p style={{ marginBottom: 8 }}>📞 {carDetails?.seller?.phone_number}</p>
+              <p style={{ marginBottom: 8 }}>✉️ {carDetails?.seller?.email || "N/A"}</p>
+              <p style={{ marginBottom: 0 }}><FaCalendar/>  Member since {carDetails?.seller?.member_since}</p>
             </Card>
 
             <Card>
               <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>Actions</h3>
              <div>
   <Button
-    type="primary"
-    block
-    style={{
-      marginBottom: 12,
-      backgroundColor: "#28a745", // Green color
-      borderColor: "#28a745",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "6px",
-    }}
-  >
-    <img src={approveIcon} alt="tick" style={{ width: 14, height: 16 }} />
-    Approve Listing
-  </Button>
+  type="primary"
+  block
+  style={{
+    marginBottom: 12,
+    backgroundColor: "#28a745", 
+    borderColor: "#28a745",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+  }}
+  onClick={handleapproveapi}
+  loading={loading} // Show loader while API is running
+>
+  <img src={approveIcon} alt="tick" style={{ width: 14, height: 16 }} />
+  Approve Listing
+</Button>
 
   <Button
   danger
@@ -665,7 +777,7 @@ const getReasonRejection = async () => {
   style={{ width: "100%" }}
   value={rejectionReason}
   onChange={(value) => setRejectionReason(value)}
-  loading={loading} // Show loading spinner while fetching
+//   loading={loading} // Show loading spinner while fetching
 >
   {rejectReasonData.length > 0 ? (
     rejectReasonData.map((reason) => (
