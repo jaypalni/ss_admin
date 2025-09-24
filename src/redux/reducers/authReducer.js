@@ -62,6 +62,7 @@ import {
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
+  email:null,
   loading: false,
   error: null,
   isAuthenticated: !!localStorage.getItem('token'),
@@ -78,6 +79,7 @@ const authReducer = (state = initialState, action) => {
         loading: false,
         user: action.payload.user,
         token: action.payload.token,
+        email:action.payload.email,
         isAuthenticated: true,
         error: null,
       };
@@ -89,7 +91,7 @@ const authReducer = (state = initialState, action) => {
         isAuthenticated: false,
       };
     case AUTH_LOGOUT:
-      return { ...state, user: null, token: null, isAuthenticated: false, error: null };
+      return { ...state, user: null, token: null,email:null, isAuthenticated: false, error: null };
     default:
       return state;
   }

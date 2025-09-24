@@ -298,8 +298,8 @@ const currentHeader = headerTitles[location.pathname] || {
                 />
                 <div className="search-container ms-3">
                   <div>
-                    <div className="card-number-total" style={{ color: '#000000', font: '24px', fontWeight: '700', lineHeight: '18px'}}>Listing Management</div>
-                     <div className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', lineHeight: '12px'}}>Review and moderate vehicle listings</div>
+                    <div className="card-number-total" style={{ color: '#000000', font: '24px', fontWeight: '700', lineHeight: '18px'}}>{currentHeader.title}</div>
+                     <div className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', lineHeight: '14px'}}>{currentHeader.tagline}</div>
                   </div>
                 </div>
               </div>

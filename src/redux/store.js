@@ -61,6 +61,7 @@ const initialState = {
   auth: {
     user: null,
     token: persistedToken || null,
+    email: null,
     loading: false,
     error: null,
     isAuthenticated: !!persistedToken,

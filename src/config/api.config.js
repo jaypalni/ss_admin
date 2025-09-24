@@ -30,7 +30,7 @@ const API_CONFIG = {
       ADMIN_LOGIN: "/api/admin/login",
       ADMIN_LOGOUT: "/api/admin/logout",
       CREATE_SUBADMIN: "/api/admin/admins",
-      // CREATENEWPASSWORD: "api/admin/update-password-initial",
+      CREATENEWPASSWORD: "api/admin/update-password-initial",
     },
 
     BESTCAR: {},
