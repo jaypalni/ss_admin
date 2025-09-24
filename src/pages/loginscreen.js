@@ -25,7 +25,12 @@ const LoginScreen = () => {
   "@souqsayarat.iq"
 ];
 
-  const handleLogin = () => {
+  const handleLogin = (e) => {
+    // Prevent default form submission behavior
+    if (e) {
+      e.preventDefault();
+    }
+    
     console.log("handleLogin called");
     let hasError = false;
     setEmailErrorMsg("");
@@ -55,29 +60,40 @@ const LoginScreen = () => {
   };
 
   const userloginAPI = async (body) => {
-    
-    console.log("body12345",body)
     try {
       const response = await loginApi.login(body);
       const userData = response;
-      console.log("userData123456",userData)
-      alert('1')
+      
       if (userData.status_code === 200) {
-        messageApi.open({ type: 'success', content: response.message  });
-        //dispatch(loginSuccess(userData.firstname,userData.access_token,userData.email))
+        messageApi.open({ 
+          type: 'success', 
+          content: userData.message || 'Login successful!' 
+        });
+        
+        // Dispatch login success action
+        dispatch(loginSuccess(userData.firstname, userData.access_token, userData.email));
+        
         setLoading(false);
+        
+        // Navigate based on password update requirement
         if (userData?.needs_password_update === 1) {
-          //navigate("/createpassword");
+          navigate("/CreatePassword");
         } else {
-          //navigate("/dashboard");
+          navigate("/dashboard");
         }
       } else {
-         messageApi.open({ type: 'error', content: userData.error  });
+        messageApi.open({ 
+          type: 'error', 
+          content: userData.error || userData.message || 'Login failed. Please try again.' 
+        });
         setLoading(false);
       }
     } catch (error) {
       console.error("Error during login", error);
-      message.error("Something went wrong. Please try again.");
+      messageApi.open({ 
+        type: 'error', 
+        content: "Something went wrong. Please try again." 
+      });
       setLoading(false);
     }
   };
@@ -115,7 +131,7 @@ const LoginScreen = () => {
             <h6 className="site-subtitle">Access the admin dashboard</h6>
           </div>
 
-         <div className="login-card" role="region" aria-label="Login form card">
+         <form className="login-card" onSubmit={handleLogin} aria-label="Login form">
 
   <div className="form-group">
     <label htmlFor="email-input" className="input-label">Email Address</label>
@@ -163,7 +179,7 @@ const LoginScreen = () => {
       className="login-button1"
       size="large"
       block
-      onClick={handleLogin}
+      htmlType="submit"
       loading={loading}
       aria-label="Sign in"
     >
@@ -179,7 +195,7 @@ const LoginScreen = () => {
   <div className="forgot-password1">
     <a href="/ForgotPassword">Forgot password?</a>
   </div>
-</div>
+</form>
         </div>
       </div>
     </div>
