@@ -62,20 +62,17 @@ const LoginScreen = () => {
   const userloginAPI = async (body) => {
     try {
       const response = await loginApi.login(body);
-      const userData = response;
+      const userData = response.data;
       
       if (userData.status_code === 200) {
         messageApi.open({ 
           type: 'success', 
           content: userData.message || 'Login successful!' 
         });
-        
-        // Dispatch login success action
         dispatch(loginSuccess(userData.firstname, userData.access_token, userData.email));
         
         setLoading(false);
         
-        // Navigate based on password update requirement
         if (userData?.needs_password_update === 1) {
           navigate("/CreatePassword");
         } else {
@@ -92,7 +89,7 @@ const LoginScreen = () => {
       console.error("Error during login", error);
       messageApi.open({ 
         type: 'error', 
-        content: "Something went wrong. Please try again." 
+        content: error.error || error.message 
       });
       setLoading(false);
     }
