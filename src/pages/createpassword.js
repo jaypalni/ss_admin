@@ -17,7 +17,7 @@ const CreatePassword = () => {
   const [reenterpassworderrormsg, setReenterPasswordErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const myData = useSelector((state) => state);
+  const mydata = useSelector((state) => state);
 
   const [reqLength, setReqLength] = useState(false);
   const [reqUpper, setReqUpper] = useState(false);
@@ -45,7 +45,7 @@ const CreatePassword = () => {
     navigate("/OtpScreen");
   };
 
-  console.log("12345",myData)
+  console.log("123456",mydata)
 
   const handleResetPassword = () => {
     setPasswordErrorMsg("");
