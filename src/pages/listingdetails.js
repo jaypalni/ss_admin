@@ -1,7 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Card, Button, Tag, Row, Col, Avatar, Divider, Modal, Select, Input, message } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { Card, Button, Tag, Row, Col, Avatar, Divider, Modal, Select, Input, message, Breadcrumb } from "antd";
+import { UserOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import crownicon from "../assets/images/crown_icon.png";
 import boosticon from "../assets/images/boosticon.png";
 import { FaCalendar } from "react-icons/fa";
@@ -18,6 +18,7 @@ import "../assets/styles/listingdetails.css";
 
 const ListingDetails = () => {
   const { listingId } = useParams();
+  const navigate = useNavigate();
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
 const [rejectionReason, setRejectionReason] = useState(null);
 const [comment, setComment] = useState("");
@@ -53,12 +54,77 @@ const handleRejectSubmit = () => {
         overflowY: "auto",     
         boxSizing: "border-box",
       }}>
-      {/* ===== TOP BAR ===== */}
-      <div className="top-bar">
-        <h2 style={{ margin: 0 }}>Listing Details</h2>
-        <Tag className="pending-tag">
-          Pending Review
-        </Tag>
+      
+      {/* ===== PAGE HEADER SECTION ===== */}
+      <div style={{ 
+        padding: "20px 0", 
+        marginBottom: 24
+      }}>
+        {/* Breadcrumb Navigation */}
+        <Breadcrumb 
+          style={{ marginBottom: 16 }}
+          items={[
+            {
+              title: <span style={{ color: "#2563EB", cursor: "pointer" }} onClick={() => navigate("/dashboard")}>Dashboard</span>
+            },
+            {
+              title: <span style={{ color: "#2563EB", cursor: "pointer" }} onClick={() => navigate("/listingmanagement")}>Listing Management</span>
+            },
+            {
+              title: "Listing Details"
+            }
+          ]}
+        />
+        
+        {/* Header Row */}
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16
+        }}>
+          {/* Left Side - Back Button and Page Title */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/listingmanagement")}
+              style={{
+                backgroundColor: "#f8f9fa",
+                borderColor: "#e9ecef",
+                color: "#495057",
+                borderRadius: 6,
+                fontWeight: 500
+              }}
+            >
+              Back to Listings
+            </Button>
+            
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: "24px", 
+              fontWeight: 600, 
+              color: "#212529"
+            }}>
+              Listing Details
+            </h1>
+          </div>
+          
+          {/* Right Side - Status Tag */}
+          <Tag
+            style={{
+              backgroundColor: "#fff3cd",
+              color: "#856404",
+              border: "1px solid #ffeaa7",
+              borderRadius: 6,
+              padding: "4px 12px",
+              fontSize: "14px",
+              fontWeight: 500
+            }}
+          >
+            Pending Review
+          </Tag>
+        </div>
       </div>
 
       {/* ===== WRAPPER ROW FOR BOTH LEFT AND RIGHT ===== */}
