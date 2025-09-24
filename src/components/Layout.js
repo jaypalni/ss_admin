@@ -207,6 +207,9 @@ const currentHeader = headerTitles[location.pathname] || {
     }
   };
 
+  // Check if current route is listing details to hide header
+  const isListingDetails = location.pathname.startsWith('/listingdetails/');
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {contextHolder}
@@ -282,58 +285,60 @@ const currentHeader = headerTitles[location.pathname] || {
         />
       </Sider>
       <Layout>
-        {/* Top Header */}
-        <Header className="header">
-          <div className="d-flex justify-content-between align-items-center w-100">
-            <div className="d-flex align-items-center">
-              <Button
-                type="text"
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={toggleCollapsed}
-                className="trigger-btn"
-              />
-              <div className="search-container ms-3">
-                <div>
-                  <div className="card-number-total" style={{ color: '#000000', font: '24px', fontWeight: '700', lineHeight: '18px'}}>Listing Management</div>
-                   <div className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', lineHeight: '12px'}}>Review and moderate vehicle listings</div>
+        {/* Top Header - Conditionally rendered */}
+        {!isListingDetails && (
+          <Header className="header">
+            <div className="d-flex justify-content-between align-items-center w-100">
+              <div className="d-flex align-items-center">
+                <Button
+                  type="text"
+                  icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                  onClick={toggleCollapsed}
+                  className="trigger-btn"
+                />
+                <div className="search-container ms-3">
+                  <div>
+                    <div className="card-number-total" style={{ color: '#000000', font: '24px', fontWeight: '700', lineHeight: '18px'}}>Listing Management</div>
+                     <div className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', lineHeight: '12px'}}>Review and moderate vehicle listings</div>
+                  </div>
                 </div>
               </div>
+              <div className="d-flex align-items-center">
+                <Button
+                  type="text"
+                  icon={<FaBell />}
+                  className="notification-btn me-3"
+                />
+                <Dropdown
+                  menu={{
+                    items: userMenuItems,
+                    onClick: ({ key }) => {
+                      if (key === "logout") {
+                        console.log("Logout clicked");
+                        userlogoutAPI();
+                      } else if (key === "profile") {
+                        console.log("Profile clicked");
+                        navigate("/profile");
+                      } else if (key === "subadmin") {
+                        console.log("Createadmin clicked");
+                        navigate("/createsubadmin");
+                      }
+                    },
+                  }}
+                  placement="bottomRight"
+                  trigger={["click"]}
+                >
+                  <div className="user-profile">
+                    <Avatar icon={<UserOutlined />} className="user-avatar" />
+                    {/* {!collapsed && ( */}
+                    <span className="user-name ms-2">John Doe</span>
+                    {/* )} */}
+                  </div>
+                </Dropdown>
+              </div>
             </div>
-            <div className="d-flex align-items-center">
-              <Button
-                type="text"
-                icon={<FaBell />}
-                className="notification-btn me-3"
-              />
-              <Dropdown
-                menu={{
-                  items: userMenuItems,
-                  onClick: ({ key }) => {
-                    if (key === "logout") {
-                      console.log("Logout clicked");
-                      userlogoutAPI();
-                    } else if (key === "profile") {
-                      console.log("Profile clicked");
-                      navigate("/profile");
-                    } else if (key === "subadmin") {
-                      console.log("Createadmin clicked");
-                      navigate("/createsubadmin");
-                    }
-                  },
-                }}
-                placement="bottomRight"
-                trigger={["click"]}
-              >
-                <div className="user-profile">
-                  <Avatar icon={<UserOutlined />} className="user-avatar" />
-                  {/* {!collapsed && ( */}
-                  <span className="user-name ms-2">John Doe</span>
-                  {/* )} */}
-                </div>
-              </Dropdown>
-            </div>
-          </div>
-        </Header>
+          </Header>
+        )}
         {/* Main Content */}
         <Content className="content">{children}</Content>
       </Layout>
