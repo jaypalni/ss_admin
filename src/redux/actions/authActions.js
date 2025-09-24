@@ -30,12 +30,11 @@ export const login = (credentials) => async (dispatch) => {
   try {
     dispatch(loginRequest());
     const response = await authAPI.login(credentials);
-    const { user, token } = response.data;
+    const { user, token,email } = response.data;
     
     // Store token in localStorage
-    localStorage.setItem('token', token);
     
-    dispatch(loginSuccess(user, token));
+    dispatch(loginSuccess(user, token,email));
     return { success: true };
   } catch (error) {
     const errorMessage = error.response?.data?.message || 'Login failed';

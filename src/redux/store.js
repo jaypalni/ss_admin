@@ -3,16 +3,15 @@ import { thunk } from "redux-thunk";
 import rootReducer from "./reducers";
 
 // Load persisted data from localStorage if available
-const persistedUserData = localStorage.getItem("userData")
-  ? JSON.parse(localStorage.getItem("userData"))
-  : { isLogin: false };
+// const persistedUserData = localStorage.getItem("userData")
+//   ? JSON.parse(localStorage.getItem("userData"))
+//   : { isLogin: false };
 
 // Initial state
 const initialState = {
   userData:
-    persistedUserData && typeof persistedUserData === "object"
-      ? { isLogin: false, ...persistedUserData }
-      : { isLogin: false },
+    { isLogin: false }
+     
 };
 
 // Reducer function
@@ -34,7 +33,7 @@ const reducer = (state = initialState, action) => {
 };
 
 // Create store
-const store = createStore(reducer, applyMiddleware(thunk));
+const store = createStore(reducer,applyMiddleware(thunk));
 
 // Subscribe to store changes to persist to localStorage
 store.subscribe(() => {

@@ -63,7 +63,7 @@ const LoginScreen = () => {
     try {
       const response = await loginApi.login(body);
       const userData = response.data;
-      
+      console.log('userdata',userData)
       if (userData.status_code === 200) {
         messageApi.open({ 
           type: 'success', 

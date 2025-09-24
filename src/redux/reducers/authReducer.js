@@ -14,6 +14,7 @@ const initialState = {
 };
 
 const authReducer = (state = initialState, action) => {
+  console.log('set111',action.payload)
   switch (action.type) {
     case AUTH_LOGIN_REQUEST:
       return {
