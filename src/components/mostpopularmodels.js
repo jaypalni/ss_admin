@@ -20,7 +20,7 @@ const MostPopularModels = () => {
   };
 
   return (
-    <div style={{ padding: "20px", background: "#f0f2f5" }}>
+    <div style={{ padding: "5px", background: "#f0f2f5", marginTop: '22px' }}>
       <Card
         style={{
           margin: "0 auto",

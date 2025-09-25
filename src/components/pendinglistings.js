@@ -19,6 +19,7 @@ const PendingListings = () => {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [carLocation, setCarLocation] = useState([]);
+  const headerStyle = { fontSize: "12px", fontWeight: 500, color: "#6B7280" };
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -77,7 +78,7 @@ const PendingListings = () => {
         key: item.car_id,
         car_id: item.car_id,
         referenceId: item.car_id,
-        dateSubmitted: dayjs(item.date_submitted).format("DD/MM/YYYY"),
+        dateSubmitted: dayjs(item.date_submitted).format("MMM DD, YYYY"),
         listingTitle: item.ad_title,
         sellerName: `${item.first_name} ${item.last_name}`,
         location: item.location,
@@ -113,96 +114,97 @@ const PendingListings = () => {
   }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);
 
   const columns = [
-    {
-      title: "Reference ID",
-      dataIndex: "referenceId",
-      key: "referenceId",
-      render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
-    },
-    {
-      title: "Date Submitted",
-      dataIndex: "dateSubmitted",
-      key: "dateSubmitted",
-    },
-    {
-      title: "Seller Name",
-      dataIndex: "sellerName",
-      key: "sellerName",
-    },
-    {
-      title: "Listing Title",
-      dataIndex: "listingTitle",
-      key: "listingTitle",
-    },
-    {
-      title: "Location",
-      dataIndex: "location",
-      key: "location",
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-      render: (type) => (
+  {
+    title: <span style={headerStyle}>Reference ID</span>,
+    dataIndex: "referenceId",
+    key: "referenceId",
+    render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
+  },
+  {
+    title: <span style={headerStyle}>Date Submitted</span>,
+    dataIndex: "dateSubmitted",
+    key: "dateSubmitted",
+    render: (text) => <span style={{ color: "#6B7280" }}>{text}</span>,
+  },
+  {
+    title: <span style={headerStyle}>Seller Name</span>,
+    dataIndex: "sellerName",
+    key: "sellerName",
+  },
+  {
+    title: <span style={headerStyle}>Listing Title</span>,
+    dataIndex: "listingTitle",
+    key: "listingTitle",
+  },
+  {
+    title: <span style={headerStyle}>Location</span>,
+    dataIndex: "location",
+    key: "location",
+  },
+  {
+    title: <span style={headerStyle}>Type</span>,
+    dataIndex: "type",
+    key: "type",
+    render: (type) => (
+      <span
+        style={{
+          backgroundColor: type === "Individual" ? "#E6F4FF" : "#F3E8FF",
+          color: type === "Individual" ? "#1677FF" : "#722ED1",
+          padding: "2px 8px",
+          borderRadius: "8px",
+          fontSize: "12px",
+        }}
+      >
+        {type}
+      </span>
+    ),
+  },
+  {
+    title: <span style={headerStyle}>Status</span>,
+    dataIndex: "status",
+    key: "status",
+    render: (status) => {
+      let bgColor = "#FFF7E6";
+      let textColor = "#FAAD14";
+
+      if (status === "approved") {
+        bgColor = "#DCFCE7";
+        textColor = "#166534";
+      } else if (status === "rejected") {
+        bgColor = "#FFE4E6";
+        textColor = "#B91C1C";
+      }
+
+      return (
         <span
           style={{
-            backgroundColor: type === "Individual" ? "#E6F4FF" : "#F3E8FF",
-            color: type === "Individual" ? "#1677FF" : "#722ED1",
+            backgroundColor: bgColor,
+            color: textColor,
             padding: "2px 8px",
             borderRadius: "8px",
             fontSize: "12px",
           }}
         >
-          {type}
+          {status}
         </span>
-      ),
+      );
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        let bgColor = "#FFF7E6";
-        let textColor = "#FAAD14";
-
-        if (status === "approved") {
-          bgColor = "#DCFCE7";
-          textColor = "#166534";
-        } else if (status === "rejected") {
-          bgColor = "#FFE4E6";
-          textColor = "#B91C1C";
-        }
-
-        return (
-          <span
-            style={{
-              backgroundColor: bgColor,
-              color: textColor,
-              padding: "2px 8px",
-              borderRadius: "8px",
-              fontSize: "12px",
-            }}
-          >
-            {status}
-          </span>
-        );
-      },
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      align: "center",
-      render: (_, record) => (
-        <EyeOutlined
-          style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
-          onClick={() => navigate(`/listingdetails/${record.car_id}`)}
-        />
-      ),
-    },
-  ];
+  },
+  {
+    title: <span style={headerStyle}>Actions</span>,
+    key: "actions",
+    align: "center",
+    render: (_, record) => (
+      <EyeOutlined
+        style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
+        onClick={() => navigate(`/listingdetails/${record.car_id}`)}
+      />
+    ),
+  },
+];
 
   return (
-    <div style={{ padding: "20px", background: "#f0f2f5", marginTop: "-25px" }}>
+    <div style={{ padding: "5px", background: "#f0f2f5" }}>
       {contextHolder}
       <Card
         style={{

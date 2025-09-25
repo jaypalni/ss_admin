@@ -3,6 +3,10 @@
   min-height: calc(100vh - 64px);
 }
 
+.content-wrapper-allcardashboard {
+  padding: 5px;
+}
+
 /* Card Body Layout */
 .dashboard-card-body {
   display: flex;
