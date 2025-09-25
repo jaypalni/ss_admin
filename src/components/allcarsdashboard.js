@@ -14,7 +14,16 @@ function AllCarsDashboard() {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
+  
+  dashboardcounts();
+
+  // Set interval to call every 15 minutes (15 * 60 * 1000 ms)
+  const interval = setInterval(() => {
     dashboardcounts();
+  }, 15 * 60 * 1000);
+
+  // Cleanup interval on unmount
+  return () => clearInterval(interval);
 }, []);
 
   // Dashboard Counts API
