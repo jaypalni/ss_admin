@@ -680,8 +680,12 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
         <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.engine_cc}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
-        <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Horsepower</p>
+        <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Horse Power</p>
         <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.horse_power}</p>
+      </div>
+       <div style={{ marginBottom: 12 }}>
+        <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Doors</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.number_of_doors}</p>
       </div>
     </Col>
   </Row>
