@@ -122,7 +122,7 @@ const Individual = () => {
         <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
           <EyeOutlined
             style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
-            onClick={() => navigate(`/listingdetails/${record.id}`)}
+            onClick={() => navigate(`/user-management/individual/:individualId`)}
           />
            <img src={EditOutlined} onClick={() => console.log(`/listingdetails/${record.id}`)} alt="arrow" cursor = "pointer"style={{ width: "12px", height: "12px", marginTop: "2px"  }} />
           <img src={DeleteOutlined} onClick={() => console.log(`/listingdetails/${record.id}`)} alt="arrow" cursor = "pointer" style={{ width: "12px", height: "12px", marginTop: "2px"  }} />

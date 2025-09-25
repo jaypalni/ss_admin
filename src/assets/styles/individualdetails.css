@@ -1,0 +1,34 @@
+.card-individual-title {
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 2px;
+  color: #6B7280;
+}
+
+.card-individual-number {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.card-icon-individual-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  margin-right: -5px;
+}
+
+.card-individual-icon {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.card-individual-icon-active {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
