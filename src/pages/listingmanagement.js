@@ -7,7 +7,7 @@ const ListingManagement = () => {
   return (
     <div
       style={{
-        height: "calc(100vh - 100px)", 
+        height: "calc(100vh - 70px)", 
         overflowY: "auto",
         padding: "20px",
       }}

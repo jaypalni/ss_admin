@@ -202,7 +202,7 @@ const PendingListings = () => {
   ];
 
   return (
-    <div style={{ padding: "20px", background: "#f0f2f5" }}>
+    <div style={{ padding: "20px", background: "#f0f2f5", marginTop: "-25px" }}>
       {contextHolder}
       <Card
         style={{
