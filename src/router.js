@@ -120,7 +120,8 @@ const AppRouter = () => {
 />
 
          <Route
-          path="/user-management/individual"
+          //path="/user-management/individual"
+          path=""
           element={
             <AppLayout>
               <Individual />
