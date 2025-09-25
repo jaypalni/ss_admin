@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { Card, Button, Tag, Row, Col, Avatar, Divider, Modal, Select, Input, message, Breadcrumb } from "antd";
+import { Card, Button, Tag, Row, Col, Avatar, Divider, Modal, Select, Input, message, Breadcrumb, Switch } from "antd";
 import { UserOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import crownicon from "../assets/images/crown_icon.png";
 import boosticon from "../assets/images/boosticon.png";
@@ -24,6 +24,8 @@ const [rejectReasonData, setRejectReasonData] = useState([]);
   const [carDetails, setCarDetails] = useState(null);
   const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchCalled = useRef(false)
+  const [isBestCar, setIsBestCar] = useState(false);
+
 
 
 const showRejectModal = () => {
@@ -71,8 +73,15 @@ useEffect(() => {
       
       const response = await userAPI.getCarById(Number(listingId));
       const result = handleApiResponse(response);
-      if (result?.data) setCarDetails(result.data);
-      if (result?.message) messageApi.open({ type: "success", content: result.message });
+      if (result?.data) {
+        setCarDetails(result.data);
+        console.log('Mark as bes', result?.data?.is_best_pick)
+        setIsBestCar(result?.data?.is_best_pick === "1"); // Initialize toggle state
+      }
+
+      if (result?.message) {
+        messageApi.open({ type: "success", content: result.message });
+      }
     } catch (error) {
       const errorData = handleApiError(error);
       messageApi.open({ type: "error", content: errorData.error || "Error fetching car details" });
@@ -157,13 +166,48 @@ const handleapproveapi = async () => {
   }
 };
 
+// Mark as Best API
+
+const handleMarkAsBestApi = async (isBestPickValue) => {
+  try {
+    setLoading(true);
+
+    const body = { 
+      car_id: listingId, 
+      is_best_pick: isBestPickValue 
+    };
+
+    const response = await userAPI.markasbestcar(body);
+    const data = handleApiResponse(response);
+
+    if (data.status_code === 200) {
+      if (data?.message) {
+        messageApi.open({ type: "success", content: data.message });
+      }
+    } else {
+      messageApi.open({ type: "error", content: data?.message || "Failed to mark as best car" });
+    }
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({ type: "error", content: errorData.message || 'Failed to mark as best car' });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
     <div  style={{
         background: "#f7f7f7",
         padding: 14,
-        height: "100%",        
-        overflowY: "auto",     
-        boxSizing: "border-box",
+        // height: "100%",        
+        // overflowY: "auto",     
+        // boxSizing: "border-box",
+        
+        height: "calc(100vh - 0px)", 
+        overflowY: "auto",
+        padding: "20px",
+      
       }}>
         { contextHolder }
       
@@ -257,19 +301,35 @@ const handleapproveapi = async () => {
           </div>
           
           {/* Right Side - Status Tag */}
-          <Tag
-            style={{
-              backgroundColor: "#fff3cd",
-              color: "#856404",
-              border: "1px solid #ffeaa7",
-              borderRadius: 6,
-              padding: "4px 12px",
-              fontSize: "14px",
-              fontWeight: 500
-            }}
-          >
-            Pending Review
-          </Tag>
+         <Tag
+  style={{
+    backgroundColor:
+      carDetails?.approval === "approved"
+        ? "#d4edda" // Light green background
+        : carDetails?.approval === "rejected"
+        ? "#f8d7da" // Light red background
+        : "#fff3cd", // Light orange background (default for pending/others)
+    color:
+      carDetails?.approval === "approved"
+        ? "#155724" // Dark green text
+        : carDetails?.approval === "rejected"
+        ? "#721c24" // Dark red text
+        : "#856404", // Dark orange text
+    border:
+      carDetails?.approval === "approved"
+        ? "1px solid #c3e6cb" // Green border
+        : carDetails?.approval === "rejected"
+        ? "1px solid #f5c6cb" // Red border
+        : "1px solid #ffeaa7", // Orange border
+    borderRadius: 6,
+    padding: "4px 12px",
+    fontSize: "14px",
+    fontWeight: 500,
+  }}
+>
+  {carDetails?.approval || "Pending"}
+</Tag>
+
         </div>
       </div>
 
@@ -713,47 +773,84 @@ const handleapproveapi = async () => {
             </Card>
 
             <Card>
-              <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>Actions</h3>
-             <div>
-  <Button
-  type="primary"
-  block
-  style={{
-    marginBottom: 12,
-    backgroundColor: "#28a745", 
-    borderColor: "#28a745",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "6px",
-  }}
-  onClick={handleapproveapi}
-  loading={loading} // Show loader while API is running
->
-  <img src={approveIcon} alt="tick" style={{ width: 14, height: 16 }} />
-  Approve Listing
-</Button>
+  <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>
+    Actions
+  </h3>
 
-  <Button
-  danger
-  block
-  onClick={showRejectModal}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "6px",
-    backgroundColor: "#DC2626",
-    borderColor: "#DC2626",
-    color: "#fff",
+  {/* Conditional Rendering */}
+  {carDetails?.approval === "rejected" ? (
+    // If approval is rejected -> hide the entire card
+    null
+  ) : carDetails?.approval === "approved" ? (
+    // If approval is approved -> show Toggle Button + Mark as Best Car text
+    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <Switch
+  checked={isBestCar}
+  onChange={(checked) => {
+    setIsBestCar(checked); // Update toggle instantly
+    handleMarkAsBestApi(checked ? 1 : 0); // Send 1 for ON, 0 for OFF
   }}
->
-  <img src={rejectIcon} alt="cross" style={{ width: 14, height: 16 }} />
-  Reject Listing
-</Button>
+  style={{
+    backgroundColor: isBestCar ? "#52c41a" : "#d9d9d9",
+  }}
+/>
+      <span style={{ fontSize: "16px", fontWeight: 500 }}>Mark as Best Car</span>
+    </div>
+  ) : (
+    // Else (Pending or any other status) -> show Approve and Reject buttons
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* Approve Button */}
+      <Button
+        type="primary"
+        block
+        onClick={handleapproveapi}
+        loading={loading}
+        style={{
+          backgroundColor: "#28a745",
+          borderColor: "#28a745",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          fontWeight: 500,
+        }}
+      >
+        <img
+          src={approveIcon}
+          alt="approve"
+          style={{ width: 16, height: 16 }}
+        />
+        Approve Listing
+      </Button>
 
-</div>
-            </Card>
+      {/* Reject Button */}
+      <Button
+        danger
+        block
+        onClick={showRejectModal}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          backgroundColor: "#DC2626",
+          borderColor: "#DC2626",
+          color: "#fff",
+          fontWeight: 500,
+        }}
+      >
+        <img
+          src={rejectIcon}
+          alt="reject"
+          style={{ width: 16, height: 16 }}
+        />
+        Reject Listing
+      </Button>
+    </div>
+  )}
+</Card>
+
+
           </div>
         </Col>
       </Row>

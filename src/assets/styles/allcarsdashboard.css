@@ -23,6 +23,7 @@
   font-weight: 400;
   margin-bottom: 5px;
   color: #333;
+  text-transform: capitalize;
 }
 
 /* Number or Text */

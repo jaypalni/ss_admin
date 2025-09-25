@@ -127,6 +127,9 @@ export const userAPI = {
   api.post(API_CONFIG.ENDPOINTS.USER.APPORVE_CAR, body),
     rejectcar: (body) => 
   api.post(API_CONFIG.ENDPOINTS.USER.REJECT_CAR, body),
+   markasbestcar: (body) => 
+  api.post(API_CONFIG.ENDPOINTS.USER.MARKAS_BESTCAR, body),
+    
     
     
 

@@ -6,7 +6,7 @@ import modelIcon from "../assets/images/model-icon.png";
 import "../assets/styles/allcarsdashboard.css";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
-import { message, Spin } from "antd";
+import { message, Spin, Tooltip } from "antd";
 
 function AllCarsDashboard() {
   const [loading, setLoading] = useState(false);
@@ -108,23 +108,51 @@ function AllCarsDashboard() {
 
           {/* Total Model */}
           <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card dashboard-card">
-              <div className="card-body dashboard-card-body">
-                <div className="card-text-container">
-                  <h5 className="card-title">Total Model</h5>
-                  <p className="card-number-total" style={{ color: '#2563EB', font: '18px', fontWeight: '700' }}>
-                    {dashboardData.model_name}
-                  </p>
-                  <p className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', marginTop: '-10px', marginBottom: '-10px' }}>
-                    {dashboardData.top_selling_models_this_month} sales
-                  </p>
-                </div>
-                <div className="card-icon-wrapper" style={{ backgroundColor: "#DBEAFE" }}>
-                  <img src={modelIcon} alt="Total Model" className="card-icon" />
-                </div>
-              </div>
-            </div>
-          </div>
+  <div className="card dashboard-card">
+    <div className="card-body dashboard-card-body">
+      <div className="card-text-container">
+        <h5 className="card-title">Total Model</h5>
+
+        {/* Tooltip with ellipsis for long text */}
+        <Tooltip title={dashboardData.model_name}>
+          <p
+            className="card-number-total"
+            style={{
+              color: '#2563EB',
+              fontSize: '18px',
+              fontWeight: '700',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '150px', // adjust width based on your card
+              cursor: 'pointer',
+              margin: 0,
+            //   marginTop: "-12px",
+            }}
+          >
+            {dashboardData.model_name}
+          </p>
+        </Tooltip>
+
+        <p
+          className="card-number-name"
+          style={{
+            color: '#6B7280',
+            fontSize: '14px',
+            fontWeight: '400',
+            marginTop: '-1px',
+            marginBottom: '-10px',
+          }}
+        >
+          {dashboardData.top_selling_models_this_month} sales
+        </p>
+      </div>
+      <div className="card-icon-wrapper" style={{ backgroundColor: "#DBEAFE" }}>
+        <img src={modelIcon} alt="Total Model" className="card-icon" />
+      </div>
+    </div>
+  </div>
+</div>
 
         </div>
       </div>

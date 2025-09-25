@@ -32,6 +32,7 @@ const API_CONFIG = {
       GET_BY_ID: (id) => `/api/cars/details/${id}`,
       APPORVE_CAR: '/api/admin/cars/approve',
       REJECT_CAR: '/api/admin/cars/reject',
+      MARKAS_BESTCAR: '/api/admin/cars/mark-best-pick'
     },
 
     LOGIN: {
