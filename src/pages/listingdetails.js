@@ -11,6 +11,7 @@ import greentickicon from "../assets/images/greentick_icon.png"
 import "../assets/styles/listingdetails.css";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import shareicon from "../assets/images/share_icon.png";
 
 const ListingDetails = () => {
   const { listingId } = useParams();
@@ -200,10 +201,6 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
     <div  style={{
         background: "#f7f7f7",
         padding: 14,
-        // height: "100%",        
-        // overflowY: "auto",     
-        // boxSizing: "border-box",
-        
         height: "calc(100vh - 0px)", 
         overflowY: "auto",
         padding: "20px",
@@ -762,9 +759,17 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
               <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
                 <Avatar size={48} icon={<UserOutlined />} style={{ marginRight: 12 }} />
                 <div>
-                  <p style={{ margin: 0, fontWeight: 600 }}>{carDetails?.seller?.last_name}</p>
+                  <p style={{ margin: 0, fontWeight: 600 }}>
+  {carDetails?.seller?.first_name} {carDetails?.seller?.last_name}
+</p>
+
                   <p style={{ margin: 0, color: "#888" }}>{carDetails?.seller?.is_dealer === "True" ? "Dealer Seller" : "Individual Seller"}</p>
                 </div>
+                <img 
+    src={shareicon} 
+    alt="Share" 
+    style={{ marginLeft: "auto", cursor: "pointer" }} 
+  />
               </div>
               <Divider style={{ margin: "12px 0" }} />
               <p style={{ marginBottom: 8 }}>📞 {carDetails?.seller?.phone_number}</p>
