@@ -2,13 +2,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import activeIcon from "../assets/images/total.svg"; 
 import pendingIcon from "../assets/images/active-icon.png";
 import soldIcon from "../assets/images/sold-icon.png";
 import modelIcon from "../assets/images/reject.svg";
 import "../assets/styles/allcarsdashboard.css";
 import "../assets/styles/individualdetails.css";
-import { message,Table, Select, Row, Col, Button } from "antd";
+import { message,Table, Select, Row, Col, Button,Breadcrumb } from "antd";
 
 const { Option } = Select;
 
@@ -101,6 +102,71 @@ const Individualdetails = () => {
 
   return (
      <div className="content-wrapper-allcardashboard">
+
+<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/user-management/individual")}
+              style={{
+                marginBottom: 16,
+                backgroundColor: "#F3F4F6",
+                borderColor: "#E5E7EB",
+                color: "#374151",
+                borderRadius: 12,
+                fontWeight: 400
+              }}
+            >
+              Back to Users
+            </Button>
+        <Breadcrumb
+  separator="/"
+  style={{ marginBottom: 16 }}
+  items={[
+    {
+      title: (
+        <span
+          style={{
+            color: "#6B7280",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "400",
+          }}
+          //onClick={() => navigate("/user-management")}
+        >
+          User Management 
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{
+            color: "#6B7280",
+            fontSize: "14px",
+            fontWeight: "400",
+          }}
+          onClick={() => navigate("/user-management/individual")}
+        >
+          Individual Users
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{
+            color: "#000000",
+            fontSize: "14px",
+            fontWeight: "400",
+          }}
+        >
+          Ahmed Mohammed
+        </span>
+      ),
+    },
+  ]}
+/>
+</div>
       {/* {contextHolder} */}
       <div className="content-body">
         <div className="row">
