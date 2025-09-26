@@ -40,6 +40,8 @@ const API_CONFIG = {
       ADMIN_LOGOUT: "/api/admin/logout",
       CREATE_SUBADMIN: "/api/admin/admins",
       CREATENEWPASSWORD: "api/admin/update-password-initial",
+      ADMINCREATE: "/api/admin/admins",
+      GETADMINDATA:(page = 1, limit = 10) => `/api/admin/admins?page=${page}&limit=${limit}`,
     },
 
     BESTCAR: {},

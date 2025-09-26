@@ -144,6 +144,10 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATE_SUBADMIN, body),
   createnewpassword: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATENEWPASSWORD, body),
+  admincreate: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMINCREATE, body),
+   getadmindata: (page = 1, limit = 10) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.GETADMINDATA(page, limit)),
 };
 export const bestcarAPI = {};
 

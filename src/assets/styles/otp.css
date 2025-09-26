@@ -209,6 +209,24 @@
   text-align: left;
 }
 
+.otp-button-back-2 {
+  width: 80%;
+  height: auto;
+  max-width: 600px;
+  margin-top: 10px;
+  background-color: #E6F4FD !important;
+  border: 1px solid #E5E7EB !important;
+  color: #374151 !important;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 12px 16px;
+  
+   display: flex !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+
 .otp-button-content {
   display: flex;
   flex-direction: column; /* stack top + subtext */

@@ -18,8 +18,10 @@ import {
   FaBell,
   FaSearch,
   FaCloud,
+  FaUser,
   FaDollarSign,
 } from "react-icons/fa";
+import { Breadcrumb} from "antd";
 import { BiSupport } from "react-icons/bi";
 import { TfiMenuAlt } from "react-icons/tfi";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -30,6 +32,7 @@ import { MdSubscriptions } from "react-icons/md";
 import menucar_icon from "../assets/images/menucariocn.png";
 import { loginApi } from "../services/api";
 import PropTypes from 'prop-types';
+import Right from "../assets/images/Right.svg";
 const { Header, Sider, Content } = Layout;
 
 function AppLayout({ children }) {
@@ -38,6 +41,10 @@ function AppLayout({ children }) {
   const [, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isCreateNewAdmin = location.pathname === "/createNewAdmin";
+
+
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -120,6 +127,10 @@ function AppLayout({ children }) {
         key: "/user-management/dealer", 
         label: "Dealer",
       },
+      {
+        key: "/Admins", 
+        label: "Admin",
+      },
     ],
   },
     {
@@ -161,6 +172,10 @@ function AppLayout({ children }) {
   "/user-management/dealer": {
     title: "Dealer Users",
     tagline: "Manage dealer user accounts",
+  },
+  "/Admins": {
+    title: "User Management",
+    tagline: "Manage admin accounts and permissions",
   },
   "/settings": {
     title: "Support",
@@ -290,17 +305,67 @@ const currentHeader = headerTitles[location.pathname] || {
           <Header className="header">
             <div className="d-flex justify-content-between align-items-center w-100">
               <div className="d-flex align-items-center">
-                <Button
+               {!isCreateNewAdmin && (
+                 <Button
                   type="text"
                   icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                   onClick={toggleCollapsed}
                   className="trigger-btn"
-                />
+                 />
+                )}
+                
                 <div className="search-container ms-3">
+                 {isCreateNewAdmin ? (
+                  <Breadcrumb
+                   separator={
+                    <img
+                     src={Right}
+                     alt=""
+                     //style={{ width: 12, height: 12, margin: "0 4px" }}
+                    />
+                    }
+                    items={[
+                      { title: "User Management" },
+                      {
+                        title: (
+                          <span
+                            style={{ cursor: "pointer"}}
+                            onClick={() => navigate("/Admins")}
+                          >
+                            Admin Users
+                          </span>
+                        ),
+                      },
+                      { title: "Create New Admin User" },
+                    ]}
+                  />
+                ) : (
+
                   <div>
-                    <div className="card-number-total" style={{ color: '#000000', font: '24px', fontWeight: '700', lineHeight: '18px'}}>{currentHeader.title}</div>
-                     <div className="card-number-name" style={{ color: '#6B7280', font: '14px', fontWeight: '400', lineHeight: '14px'}}>{currentHeader.tagline}</div>
+                    <div
+                      className="card-number-total"
+                      style={{
+                        color: "#000000",
+                        fontSize: "20px",
+                        fontWeight: "700",
+                        lineHeight: "24px",
+                      }}
+                    >
+                      {currentHeader.title}
+                    </div>
+                    <div
+                      className="card-number-name"
+                      style={{
+                        color: "#6B7280",
+                        fontSize: "14px",
+                        fontWeight: "400",
+                        lineHeight: "20px",
+                      }}
+                    >
+                      {currentHeader.tagline}
+                    </div>
                   </div>
+                )}
                 </div>
               </div>
               <div className="d-flex align-items-center">

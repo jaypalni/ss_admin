@@ -32,6 +32,8 @@ import ListingDetails from "./pages/listingdetails";
 import OtpScreen from "./pages/otpscreen";
 import Individual from "./pages/Individual";
 import Individualdetails from "./pages/individualdetails";
+import CreateNewUserAdmin from "./pages/CreateNewUserAdmin";
+import GetAdminsData from "./pages/GetAdminsData";
 
 const AppRouter = () => {
   return (
@@ -120,8 +122,7 @@ const AppRouter = () => {
 />
 
          <Route
-          //path="/user-management/individual"
-          path=""
+          path="/user-management/individual"
           element={
             <AppLayout>
               <Individual />
@@ -201,27 +202,20 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
-        <Route
-          path="/content/websitecontent"
+         <Route
+          path="/createNewAdmin"
           element={
             <AppLayout>
-              <WebsiteContent />
+              <CreateNewUserAdmin />
             </AppLayout>
           }
         />
-        <Route
-          path="/content/managecountry"
+
+         <Route
+          path="/Admins"
           element={
             <AppLayout>
-              <ManageCountry />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/content/bannermanagement"
-          element={
-            <AppLayout>
-              <BannerManagement />
+              <GetAdminsData />
             </AppLayout>
           }
         />

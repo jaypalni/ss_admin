@@ -280,8 +280,6 @@ const OtpScreen = () => {
   </div>
            </Button>
 
-
-
         </div>
       </div>
     </div>
