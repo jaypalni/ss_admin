@@ -1,393 +1,351 @@
-import React, { useState,useEffect } from "react";
-import { Table, Avatar, Button, Modal,Tabs,Col,Row,message } from "antd";
-import moment from "moment";
-import CarDetails from "../components/cardetails";
-import { useNavigate } from "react-router-dom";
-import { userAPI } from "../services/api";
-import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import React, { useState } from "react";
+import { Row, Col, ProgressBar, Form } from "react-bootstrap";
+import { Card, Tag, Input, Select } from "antd";
 
-const getInitials = (firstName = "", lastName = "") => {
-  return `${firstName.charAt(0) || ""}${
-    lastName.charAt(0) || ""
-  }`.toUpperCase();
-};
+const { Option } = Select;
 
 function BestCars() {
-  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  const [userDetailsModalVisible, setUserDetailsModalVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("all");
-  const [, setCarDetailsModalVisible] = useState(false);
-  const [, setSelectedCar] = useState(null);
-  const [, setLoading] = useState(false);
-  const [, setIsBestCar] = useState(false);
-  const [customersData, setCustomersData] = useState([]);
-  const [paginationData, setPaginationData] = useState({});
-  const [currentPage,setCurrentPage]=useState(1)
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const API_BASE_URL = process.env.REACT_APP_API_URL
-
-    useEffect(() => {
-    setCurrentPage(1);
-    fetchCarDetailsData(1, 5);
-    }, [activeTab]);
-
-  const handleNameClick = (record) => {
-    setSelectedUser(record);
-    //setUserDetailsModalVisible(true);
-    navigate(`/customerdetails/${record}`)
-  };
-
-  const closeUserDetailsModal = () => {
-    setSelectedUser(null);
-    setUserDetailsModalVisible(false);
-  };
-
-  const handleCarClick = (record) => {
-    setSelectedCar(record);
-    setIsBestCar(false);
-    setCarDetailsModalVisible(true);
-    navigate(`/bestcars/${record}/CarDetails`);
-  };
-
-   const fetchCarDetailsData = async (page,limit) => {
-      try {
-        setLoading(true);
-        const response = await userAPI.carDetails(activeTab,page,limit);
-        const data1 = handleApiResponse(response);
-        const meta = data1?.data?.pagination || {};
-        setPaginationData(meta)
-        setCurrentPage(data1?.data?.pagination?.current_page)
-  
-        if (data1?.data?.cars) {
-          const formattedUsers = data1?.data?.cars.map((user) => ({
-          key: user.car_id,
-          name: `${user.first_name} ${user.last_name}`,
-          carImage: user.car_image || '',
-          carName: user.ad_title || '',
-          date: user.updated_at || null,
-          status: user.approval || '',
-          userId : user.user_id,
-        }));
-
-          setCustomersData(formattedUsers);
-        }
-  
-        message.success(data1.message || "Fetched successfully");
-      } catch (error) {
-        const errorData = handleApiError(error);
-        message.error(errorData.message || "Failed to load customers data");
-        setCustomersData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys) => {
-      setSelectedRowKeys(newSelectedRowKeys);
-      console.log("Selected Row Keys: ", newSelectedRowKeys);
-    },
-  };
-
-  const columns = [
+  const [cars, setCars] = useState([
     {
-      title: "User",
-      dataIndex: "name",
-      key: "name",
-     render: (text, record) => (
- <button
-  onClick={() => handleNameClick(record?.userId)}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    color: "#5c53e8",
-    cursor: "pointer",
-    background: "none",
-    border: "none", 
-    padding: 0,   
-    font: "inherit",
-  }}
-  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
->
-  {/* <Avatar src={record.avatar} style={{ marginRight: 8 }}>
-    {text.charAt(0)}
-  </Avatar> */}
-  <div style={{ fontWeight: 500 }}>{text}</div>
-</button>
-
-)
+      id: 1,
+      image:
+        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
+      makeModel: "2022 BMW 3 Series",
+      details: "320i M Sport • Automatic • 15,000 km",
+      price: "$45,000",
+      status: "Active",
+      statusColor: "#DCFCE7",
+      statusTextColor: "#166534",
+      premium: "Premium",
+      premiumColor: "#FEF3C7",
+      premiumTextColor: "#EA580C",
+      qualityScore: 9.2,
+      views: 1247,
+      bestPick: true,
     },
     {
-      title: "Car Name",
-      dataIndex: "carName",
-      key: "carName",
-      render: (text, record) => (
-  <button
-  onClick={() => handleCarClick(record?.key)}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    color: "#5c53e8",
-    cursor: "pointer",
-    background: "none", 
-    border: "none", 
-    padding: 0,     
-    font: "inherit",
-  }}
-  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
->
- <div style={{ fontWeight: 500 }}>{text}</div>
-</button>
+      id: 2,
+      image:
+        "https://cdn.pixabay.com/photo/2012/05/29/00/43/car-49278_1280.jpg",
+      makeModel: "2023 Toyota Camry",
+      details: "LE Hybrid • CVT • 8,500 km",
+      price: "$32,500",
+      status: "Active",
+      statusColor: "#DCFCE7",
+      statusTextColor: "#166534",
+      premium: "Featured",
+      premiumColor: "#E0F2FE",
+      premiumTextColor: "#1E40AF",
+      qualityScore: 7.5,
+      views: 892,
+      bestPick: false,
+    },
+    {
+      id: 3,
+      image:
+        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
+      makeModel: "2021 Mercedes GLC 300",
+      details: "4MATIC SUV • 9-Speed Automatic • 22,000 km",
+      price: "$52,000",
+      status: "Active",
+      statusColor: "#DCFCE7",
+      statusTextColor: "#166534",
+      premium: "Luxury",
+      premiumColor: "#FCE7F3",
+      premiumTextColor: "#9D174D",
+      qualityScore: 9.5,
+      views: 1567,
+      bestPick: true,
+    },
+  ]);
 
+  // Function to get progress color based on quality score
+  const getProgressColor = (score) => {
+    if (score >= 9) return "#22C55E"; // green
+    if (score >= 5) return "#FACC15"; // yellow
+    return "#DC2626"; // red
+  };
+
+  // Toggle Best Pick
+  const handleToggle = (id) => {
+    setCars((prevCars) =>
+      prevCars.map((car) =>
+        car.id === id ? { ...car, bestPick: !car.bestPick } : car
       )
+    );
+  };
 
-    },
-     {
-  title: "Car Image",
-  dataIndex: "carImage",
-  key: "carImage",
-render: (carImage) => (
-    <Avatar
-      src={`${API_BASE_URL}${carImage}`}
-      size={48}
-      shape="square"
-    />
-  )
-},
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-    },
-  ];
+  // Filter Cars
+  const filteredCars = cars.filter((car) => {
+    const matchesSearch = car.makeModel
+      .toLowerCase()
+      .includes(searchValue.toLowerCase());
 
+    const matchesCategory = categoryFilter
+      ? car.premium === categoryFilter
+      : true;
 
-  const data = [
-    {
-      key: "1",
-      name: "Warner",
-      carmakemodel: "Honda City",
-      yearmfg: "Manual, 2018",
-      carengine: "V8",
-      lastLogin: "2024-01-15 10:30",
-      avatar: "https://via.placeholder.com/40",
-      carImages: [
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-      ],
-      carDescription:
-        "A stylish and fuel-efficient sedan with spacious interiors.",
-      firstname: "David",
-      lastname: "Warner",
-      email: "warner@example.com",
-      date_of_birth: "1990-10-27",
-      country_code: "91",
-      phone_number: "9876543210",
-      address: "Sydney, Australia",
-      designation: "Cricketer",
-      industry: "Sports",
-      role: "Dealer",
-    },
-    {
-      key: "2",
-      name: "Jane Smith",
-      carmakemodel: "Hyundai i20",
-      yearmfg: "Manual, 2018",
-      carengine: "V8",
-      lastLogin: "2024-01-14 15:45",
-      avatar: "https://via.placeholder.com/40",
-      carImages: [
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-      ],
-      carDescription: "Compact hatchback offering premium features and safety.",
-      firstname: "Jane",
-      lastname: "Smith",
-      email: "jane@example.com",
-      date_of_birth: "1988-07-14",
-      country_code: "1",
-      phone_number: "1234567890",
-      address: "New York, USA",
-      designation: "Manager",
-      industry: "Tech",
-      role: "Dealer",
-    },
-    {
-      key: "3",
-      name: "Mike Johnson",
-      carmakemodel: "Tata Nexon",
-      yearmfg: "Manual, 2018",
-      carengine: "V8",
-      lastLogin: "2024-01-10 09:15",
-      avatar: "https://via.placeholder.com/40",
-      carImages: [
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
-      ],
-      carDescription: "Indian compact SUV known for safety and performance.",
-      firstname: "Mike",
-      lastname: "Johnson",
-      email: "mike@example.com",
-      date_of_birth: "1985-05-23",
-      country_code: "44",
-      phone_number: "1122334455",
-      address: "London, UK",
-      designation: "Engineer",
-      industry: "Automotive",
-      role: "Dealer",
-    },
-  ];
-  const handleTableChange = (newPagination ) => {
+    const matchesStatus = statusFilter ? car.status === statusFilter : true;
 
-    console.log('newPagination',newPagination)
-   
-    setCurrentPage(newPagination.current)
-    fetchCarDetailsData(newPagination?.current,newPagination?.pageSize)
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
-  }
   return (
-    <div className="content-wrapper">
-      <div className="content-body">
-        <div className="card">
-          <div className="card-body">
-            <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
-      <Col flex="auto">
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={[
-            { key: "all", label: "All" },
-            { key: "pending", label: "Pending" },
-            { key: "approved", label: "Approved" },
-            { key: "rejected", label: "Rejected" },
-             { key: "best_car", label: "Best Cars" },
-          ]}
+    <div className="container-fluid p-0" style={{ height: "calc(100vh - 70px)", 
+        overflowY: "auto",
+        padding: "20px",
+        }}>
+      {/* Search & Filters Section */}
+      <div
+  style={{
+    backgroundColor: "#fff",
+    marginTop: "0px",
+    marginLeft: "0px",
+    marginRight: "0px",
+    height: "100px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  <div style={{ width: "90%" }}>
+    <Row
+      className="w-100"
+      style={{ alignItems: "center", width: "100%" }}
+      gutter={16}
+    >
+      {/* Search */}
+      <Col md={3}>
+        <strong>Search</strong>
+        <Input
+          placeholder="Search Vehicles..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          style={{ marginTop: 6 }}
         />
       </Col>
 
-    </Row>
-            <Table
-            rowSelection={{
-            type: "checkbox",
-            ...rowSelection,
-            }}
-              columns={columns}
-              dataSource={customersData}
-           
-              pagination={{   current: currentPage,
-    pageSize: paginationData?.limit,
-    total: paginationData?.total_cars, }}
-              size="middle"
-              onChange={handleTableChange}
-            />
-          </div>
-        </div>
-      </div>
+      {/* Category Filter */}
+      <Col md={3}>
+        <strong>All Categories</strong>
+        <Select
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          style={{ width: "100%", marginTop: 6 }}
+          placeholder="Select Category"
+          allowClear
+        >
+          <Option value="">All Categories</Option>
+          <Option value="Premium">Premium</Option>
+          <Option value="Featured">Featured</Option>
+          <Option value="Luxury">Luxury</Option>
+        </Select>
+      </Col>
 
-      {/* User Details Modal */}
-      <Modal
-        open={userDetailsModalVisible}
-        onCancel={closeUserDetailsModal}
-        footer={[
-          <Button
-            key="close"
-            onClick={closeUserDetailsModal}
-            className="close-usermodal"
-          >
-            Close
-          </Button>,
-        ]}
-        centered
-        width={500}
+      {/* Status Filter */}
+      <Col md={3}>
+        <strong>All Status</strong>
+        <Select
+          value={statusFilter}
+          onChange={setStatusFilter}
+          style={{ width: "100%", marginTop: 6 }}
+          placeholder="Select Status"
+          allowClear
+        >
+          <Option value="">All Status</Option>
+          <Option value="Pending">Pending</Option>
+          <Option value="Approved">Approved</Option>
+          <Option value="Rejected">Rejected</Option>
+          <Option value="Active">Active</Option>
+        </Select>
+      </Col>
+
+      {/* Total and Best Picks */}
+      <Col
+        md={3}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          whiteSpace: "nowrap", 
+        }}
       >
-        {selectedUser && (
-          <div style={{ textAlign: "center" }}>
-            <Avatar
-              size={80}
-              style={{
-                backgroundColor: "#CE3A3B",
-                fontSize: 32,
-                marginBottom: 10,
-              }}
-            >
-              {getInitials(selectedUser.firstname, selectedUser.lastname)}
-            </Avatar>
-            <h2 style={{ marginBottom: 4 }}>
-              {selectedUser.firstname} {selectedUser.lastname}
-            </h2>
-            <p style={{ color: "gray", marginBottom: 20 }}>
-              {selectedUser.email}
-            </p>
+        {/* Total Vehicles */}
+        <div style={{ fontSize: 14, marginRight: "20px" }}>
+          Total: <strong>247 Vehicles</strong>
+        </div>
 
-            <div
-              style={{
-                border: "1px solid #f0f0f0",
-                borderRadius: 8,
-                padding: 16,
-                marginBottom: 16,
-                textAlign: "left",
-              }}
-            >
-              <h6 style={{ marginBottom: "16px" }}>User details:</h6>
+        {/* Best Picks Vehicles */}
+        <div style={{ fontSize: 14, marginRight: "12px" }}>
+          Best Picks:{" "}
+          <strong style={{ color: "#2563EB" }}>23 Vehicles</strong>
+        </div>
+      </Col>
+    </Row>
+  </div>
+</div>
 
-              {[
-                {
-                  label: "Full name",
-                  value: `${selectedUser.firstname} ${selectedUser.lastname}`,
-                },
-                {
-                  label: "Date of Birth",
-                  value: selectedUser.date_of_birth
-                    ? moment(selectedUser.date_of_birth).format("DD MMM YYYY")
-                    : "-",
-                },
-                {
-                  label: "Phone Number",
-                  value:
-                    selectedUser.country_code && selectedUser.phone_number
-                      ? `+${selectedUser.country_code} ${selectedUser.phone_number}`
-                      : "—",
-                },
-                {
-                  label: "Address",
-                  value: selectedUser.address || "—",
-                },
-                { label: "Role", value: selectedUser.role },
-              ].map((item, index) => (
-               <div key={item.name} style={{ display: "flex", marginBottom: "8px" }}>
 
-                  <div
+
+
+
+      {/* Cars Listing Section */}
+      <div className="container my-4">
+        {filteredCars.map((car) => (
+          <Card
+            key={car.id}
+            className="mb-3 shadow-sm"
+            style={{ borderRadius: "12px", padding: "16px" }}
+          >
+            <Row className="align-items-center">
+              {/* Left Section: Image */}
+              <Col xs={12} md={2} className="text-center">
+                <img
+                  src={car.image}
+                  alt={car.makeModel}
+                  className="img-fluid rounded"
+                  style={{ maxHeight: "100px", borderRadius: "8px" }}
+                />
+              </Col>
+
+              {/* Middle Section: Car Details */}
+              <Col xs={12} md={5}>
+                <h6 style={{ fontWeight: 600 }}>{car.makeModel}</h6>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#6B7280",
+                    marginBottom: "6px",
+                  }}
+                >
+                  {car.details}
+                </p>
+
+                {/* Price + Tags */}
+                <div className="d-flex align-items-center gap-2">
+                  <span
                     style={{
-                      width: "150px",
-                      fontWeight: "bold",
+                      color: "#2563EB",
+                      fontWeight: 600,
+                      fontSize: "16px",
                     }}
                   >
-                    {item.label}
-                  </div>
-                  <div style={{ width: "10px" }}>:</div>
-                  <div style={{ width: "260px" }}>{item.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </Modal>
+                    {car.price}
+                  </span>
 
-      {/* Car Details Modal */}
-      <CarDetails />
+                  <Tag
+                    style={{
+                      backgroundColor: car.statusColor,
+                      color: car.statusTextColor,
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "2px 8px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {car.status}
+                  </Tag>
+
+                  <Tag
+                    style={{
+                      backgroundColor: car.premiumColor,
+                      color: car.premiumTextColor,
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "2px 8px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {car.premium}
+                  </Tag>
+                </div>
+              </Col>
+
+              {/* Right Section: Quality Score, Views, Toggle */}
+              <Col xs={12} md={5} className="text-md-start mt-3 mt-md-0">
+                <Row>
+                  <Col xs={12} md={8}>
+                    {/* Quality Score */}
+                    <div className="d-flex justify-content-md-start align-items-center gap-2">
+                      <span style={{ fontSize: "14px", color: "#374151" }}>
+                        Quality Score:
+                      </span>
+                      <div style={{ width: "64px" }}>
+                      <ProgressBar
+  now={(car.qualityScore / 10) * 100}
+  style={{
+    height: "8px",
+    backgroundColor: "#E5E7EB", // track color
+  }}
+>
+  <div
+    style={{
+      width: `${(car.qualityScore / 10) * 100}%`,
+      backgroundColor: getProgressColor(car.qualityScore), // fill color
+      height: "100%",
+    }}
+  />
+</ProgressBar>
+
+                      </div>
+                      <span
+                        style={{
+                          color: getProgressColor(car.qualityScore),
+                          fontWeight: 600,
+                          fontSize: "14px",
+                        }}
+                      >
+                        {car.qualityScore}/10
+                      </span>
+                    </div>
+
+                    {/* Views */}
+                    <div
+                      style={{
+                        marginTop: "8px",
+                        color: "#6B7280",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Views:{" "}
+                      <strong style={{ color: "#111827" }}>
+                        {car.views.toLocaleString()}
+                      </strong>
+                    </div>
+                  </Col>
+
+                  {/* Best Pick Toggle */}
+                  <Col xs={12} md={4}>
+                    <div className="d-flex justify-content-md-end align-items-center gap-2 mt-2">
+                      <Form.Check
+                        type="switch"
+                        id={`switch-${car.id}`}
+                        checked={car.bestPick}
+                        onChange={() => handleToggle(car.id)}
+                        style={{
+                          accentColor: car.bestPick ? "#2563EB" : "#E5E7EB",
+                        }}
+                      />
+                      <span
+                        style={{
+                          color: car.bestPick ? "#2563EB" : "#6B7280",
+                          fontWeight: 600,
+                          fontSize: "14px",
+                        }}
+                      >
+                        Best Pick
+                      </span>
+                    </div>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

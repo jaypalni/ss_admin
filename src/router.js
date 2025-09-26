@@ -84,14 +84,6 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
-        <Route
-          path="/bestcars"
-          element={
-            <AppLayout>
-              <BestCars />
-            </AppLayout>
-          }
-        />
         <Route path="/bestcars/:car_id/CarDetails" element={ <AppLayout><CarDetails /></AppLayout>} />
         <Route
           path="/car-types"
@@ -106,6 +98,14 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <ListingManagement />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/listingmanagement/bestcars"
+          element={
+            <AppLayout>
+              <BestCars />
             </AppLayout>
           }
         />
