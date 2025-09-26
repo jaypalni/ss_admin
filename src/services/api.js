@@ -18,14 +18,22 @@ const api = axios.create({
   timeout: 30000, // 30 seconds timeout
 });
 
+let reduxStore = null;
+
+/**
+ * Call this from your entrypoint after creating the Redux store:
+ *   import { attachStore } from './services/api';
+ *   attachStore(store);
+ */
+export const attachStore = (store) => {
+  reduxStore = store;
+};
+
 // Add request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = store.getState().auth.token || localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log('Token sent with request:', token);
-    }
+    const token = reduxStore?.getState?.().auth?.token ?? null;
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => {
@@ -147,7 +155,11 @@ export const loginApi = {
   admincreate: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.ADMINCREATE, body),
    getadmindata: (page = 1, limit = 10) =>
-    api.post(API_CONFIG.ENDPOINTS.LOGIN.GETADMINDATA(page, limit)),
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.GETADMINDATA(page, limit)),
+   admindata: (id,body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.UPDATEADMINDATA(id),body),
+   editadmindata: (id) =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.EDITADMINDATA(id)),
 };
 export const bestcarAPI = {};
 

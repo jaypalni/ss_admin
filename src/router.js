@@ -194,8 +194,16 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
-         <Route
+        <Route
           path="/createNewAdmin"
+          element={
+            <AppLayout>
+              <CreateNewUserAdmin />
+            </AppLayout>
+          }
+        />
+         <Route
+          path="/createNewAdmin/:id"
           element={
             <AppLayout>
               <CreateNewUserAdmin />

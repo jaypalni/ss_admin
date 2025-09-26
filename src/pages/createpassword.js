@@ -45,8 +45,6 @@ const CreatePassword = () => {
     navigate("/OtpScreen");
   };
 
-  console.log("123456",email)
-
   const handleResetPassword = (e) => {
      if (e) {
       e.preventDefault();

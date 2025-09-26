@@ -37,6 +37,7 @@ import PropTypes from 'prop-types';
 import Right from "../assets/images/Right.svg";
 import { IoMdSettings } from "react-icons/io";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import { useSelector } from "react-redux";
 const { Header, Sider, Content } = Layout;
 
 function AppLayout({ children }) {
@@ -44,12 +45,23 @@ function AppLayout({ children }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [, setLoading] = useState(false);
   const navigate = useNavigate();
+  const {user} = useSelector((state) => state.auth);
   const location = useLocation();
 
-  const isCreateNewAdmin = location.pathname === "/createNewAdmin";
+  const pathname = location.pathname || "/";
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const routeBase = pathSegments[0] ? pathSegments[0].toLowerCase() : "";
+
+  const isCreateRoute = routeBase === "createadmin" || routeBase === "createnewadmin";
+  const hasId = pathSegments.length > 1 && pathSegments[1] !== "" && pathSegments[1] !== "undefined" && pathSegments[1] !== "null";
+
+  const isEdit = isCreateRoute && hasId;       
+  const isCreateNewAdmin = isCreateRoute && !hasId;
 
 
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  console.log("1234562345",user)
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -220,11 +232,15 @@ function AppLayout({ children }) {
   },
 };
 
-// In the Header section
-const currentHeader = headerTitles[location.pathname] || {
-  title: "Dashboard",
-  tagline: "",
-};
+const currentHeader =
+  headerTitles[location.pathname] ||
+  headerTitles[`/${pathSegments[0]}/${pathSegments[1]}`] ||
+  headerTitles[`/${pathSegments[0]}`] ||
+  {
+    title: "Dashboard",
+    tagline: "",
+  };
+
   // Create menu items with tooltips for collapsed state
   const menuItemsWithTooltips = sideMenuItems.map((item) => ({
     ...item,
@@ -283,7 +299,32 @@ const currentHeader = headerTitles[location.pathname] || {
 
   // Check if current route is listing details to hide header
   const isListingDetails = location.pathname.startsWith('/listingdetails/');
-
+let breadcrumbItems = null;
+if (isCreateNewAdmin) {
+  breadcrumbItems = [
+    { title: "User Management" },
+    {
+      title: (
+        <span style={{ cursor: "pointer" }} onClick={() => navigate("/Admins")}>
+          Admin Users
+        </span>
+      ),
+    },
+    { title: "Create New Admin User" },
+  ];
+} else if (isEdit) {
+  breadcrumbItems = [
+    { title: "User Management" },
+    {
+      title: (
+        <span style={{ cursor: "pointer" }} onClick={() => navigate("/Admins")}>
+          Admin Users
+        </span>
+      ),
+    },
+    { title: "Edit Admin User" },
+  ];
+}
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {contextHolder}
@@ -364,7 +405,7 @@ const currentHeader = headerTitles[location.pathname] || {
           <Header className="header">
             <div className="d-flex justify-content-between align-items-center w-100">
               <div className="d-flex align-items-center">
-               {!isCreateNewAdmin && (
+               {!breadcrumbItems && (
                  <Button
                   type="text"
                   icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -374,29 +415,10 @@ const currentHeader = headerTitles[location.pathname] || {
                 )}
                 
                 <div className="search-container ms-3">
-                 {isCreateNewAdmin ? (
+                 {breadcrumbItems ? (
                   <Breadcrumb
-                   separator={
-                    <img
-                     src={Right}
-                     alt=""
-                     //style={{ width: 12, height: 12, margin: "0 4px" }}
-                    />
-                    }
-                    items={[
-                      { title: "User Management" },
-                      {
-                        title: (
-                          <span
-                            style={{ cursor: "pointer"}}
-                            onClick={() => navigate("/Admins")}
-                          >
-                            Admin Users
-                          </span>
-                        ),
-                      },
-                      { title: "Create New Admin User" },
-                    ]}
+                  separator={<img src={Right} alt="" />}
+                  items={breadcrumbItems}
                   />
                 ) : (
 
@@ -455,7 +477,7 @@ const currentHeader = headerTitles[location.pathname] || {
                   <div className="user-profile">
                     <Avatar icon={<UserOutlined />} className="user-avatar" />
                     {/* {!collapsed && ( */}
-                    <span className="user-name ms-2">John Doe</span>
+                    <span className="user-name ms-2">{user}</span>
                     {/* )} */}
                   </div>
                 </Dropdown>

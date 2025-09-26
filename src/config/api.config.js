@@ -42,6 +42,8 @@ const API_CONFIG = {
       CREATENEWPASSWORD: "api/admin/update-password-initial",
       ADMINCREATE: "/api/admin/admins",
       GETADMINDATA:(page = 1, limit = 10) => `/api/admin/admins?page=${page}&limit=${limit}`,
+      UPDATEADMINDATA:(id) => `/api/admin/admins/${id}`,
+      EDITADMINDATA:(id) => `/api/admin/admins/${id}`,
     },
 
     BESTCAR: {},

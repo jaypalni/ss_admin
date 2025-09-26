@@ -44,41 +44,59 @@
 
 // export default store;
 
-import { createStore, combineReducers, applyMiddleware } from "redux";
-import { thunk } from "redux-thunk"; // named import
+// import { createStore, combineReducers, applyMiddleware } from "redux";
+// import { thunk } from "redux-thunk"; // named import
+// import authReducer from "./reducers/authReducer";
+
+// // Combine reducers
+// const rootReducer = combineReducers({
+//   auth: authReducer,
+// });
+
+// // Load persisted token
+// const persistedToken = localStorage.getItem("token");
+
+// // Initial state
+// const initialState = {
+//   auth: {
+//     user: null,
+//     token: persistedToken || null,
+//     email: null,
+//     loading: false,
+//     error: null,
+//     isAuthenticated: !!persistedToken,
+//   },
+// };
+
+// // Create store
+// const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
+
+// // Persist token to localStorage
+// store.subscribe(() => {
+//   const state = store.getState();
+//   console.log("satet12345",state)
+//   console.log("satet12345234",state.auth.token)
+//   if (state.auth.token) {
+//     // localStorage.setItem("token", state.auth.token);
+//   } else {
+//     localStorage.removeItem("token");
+//   }
+// });
+
+// export default store;
+
+import { createStore, applyMiddleware, combineReducers } from "redux";
+import { thunk } from "redux-thunk";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 import authReducer from "./reducers/authReducer";
 
-// Combine reducers
-const rootReducer = combineReducers({
-  auth: authReducer,
-});
+const rootReducer = combineReducers({ auth: authReducer });
 
-// Load persisted token
-const persistedToken = localStorage.getItem("token");
+const persistConfig = { key: "root", storage, whitelist: ["auth"] };
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// Initial state
-const initialState = {
-  auth: {
-    user: null,
-    token: persistedToken || null,
-    email: null,
-    loading: false,
-    error: null,
-    isAuthenticated: !!persistedToken,
-  },
-};
-
-// Create store
-const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
-
-// Persist token to localStorage
-store.subscribe(() => {
-  const state = store.getState();
-  if (state.auth.token) {
-    // localStorage.setItem("token", state.auth.token);
-  } else {
-    localStorage.removeItem("token");
-  }
-});
-
+export const store = createStore(persistedReducer, applyMiddleware(thunk));
+export const persistor = persistStore(store);
 export default store;
+

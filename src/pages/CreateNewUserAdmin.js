@@ -1,23 +1,70 @@
-import React, { useState } from "react";
-import { Card, Input, Row, Col, Divider, Button, Form, message, Select } from "antd";
-import { UserOutlined, MailOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  Input,
+  Row,
+  Col,
+  Divider,
+  Button,
+  Form,
+  message,
+  Radio,
+} from "antd";
+import { UserOutlined, MailOutlined, PlusOutlined } from "@ant-design/icons";
 import bluelogo_icon2 from "../assets/images/info.svg";
 import "../assets/styles/otp.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { loginApi } from "../services/api";
-
-
-const { Option } = Select;
 
 const CreateNewUserAdmin = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
 
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [statusFlag, setStatusFlag] = useState(null);
   const [form] = Form.useForm();
 
+  useEffect(() => {
+    if (!isEdit) return;
+
+    const fetchDetails = async () => {
+      try {
+        setFetching(true);
+        const res = await loginApi.editadmindata(id);
+        const data = res?.data;
+
+        if (data && (data.status_code === 200 || data.status === "success")) {
+          const user = data.data;
+          form.setFieldsValue({
+            firstName: user.first_name ?? "",
+            lastName: user.last_name ?? "",
+            email: user.email ?? "",
+            role: user.role ?? "",
+          });
+
+          const statusValue =
+            user.is_locked !== undefined && user.is_locked !== null
+              ? Number(user.is_locked)
+              : null;
+          setStatusFlag(statusValue);
+        } else {
+          messageApi.error(data?.message || "Failed to load admin details");
+        }
+      } catch (err) {
+        console.error("Fetch admin details error:", err);
+        messageApi.error(err?.message || "Something went wrong while fetching details");
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchDetails();
+  }, [id, isEdit, form, messageApi]);
+
   const handleSubmit = async (values) => {
-    console.log("Form Submitted:", values);
 
     const body = {
       first_name: values.firstName,
@@ -26,20 +73,40 @@ const CreateNewUserAdmin = () => {
       role: values.role,
     };
 
+    const body1 = {
+      email: values.email,
+      role: values.role,
+      is_locked: statusFlag,
+    };
+
+
     try {
       setLoading(true);
-      const response = await loginApi.admincreate(body);
-      const userData = response?.data
 
-      if (userData.status_code === 201 || userData.status_code === 200) {
-        messageApi.success(userData.message || "Admin created successfully");
-        form.resetFields();
+      if (isEdit) {
+        const res = await loginApi.admindata(id, body1);
+        const resData = res?.data;
+        if (resData?.status_code === 200) {
+          messageApi.success(resData.message || "Admin updated successfully");
+          navigate("/Admins");
+        } else {
+          messageApi.error(resData?.message || "Failed to update admin");
+        }
       } else {
-        messageApi.error(userData.error || userData.message || "Failed to create admin");
+        const res = await loginApi.admincreate(body);
+        const resData = res?.data;
+        if (resData?.status_code === 201 || resData?.status_code === 200) {
+          messageApi.success(resData.message || "Admin created successfully");
+          form.resetFields();
+          setStatusFlag(null);
+          navigate("/Admins");
+        } else {
+          messageApi.error(resData?.message || "Failed to create admin");
+        }
       }
-    } catch (error) {
-      console.error("Error:", error);
-      messageApi.error(error.message || "Something went wrong");
+    } catch (err) {
+      console.error("Submit error:", err);
+      messageApi.error(err?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -56,7 +123,7 @@ const CreateNewUserAdmin = () => {
           color: "#111827",
         }}
       >
-        Create New Admin User
+        {isEdit ? "Edit Admin User" : "Create New Admin User"}
       </h1>
       <p
         style={{
@@ -66,10 +133,17 @@ const CreateNewUserAdmin = () => {
           fontWeight: "400",
         }}
       >
-        Add a new administrator to the Souq Sayarat admin portal with appropriate access permissions.
+        {isEdit
+          ? "Update administrator details and permissions."
+          : "Add a new administrator to the Souq Sayarat admin portal with appropriate access permissions."}
       </p>
 
-      <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false} >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        requiredMark={false}
+      >
         <Card
           style={{
             width: "100%",
@@ -82,29 +156,32 @@ const CreateNewUserAdmin = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                 label={
-    <span>
-      First Name<span style={{ color: "red", marginLeft: 2 }}>*</span>
-    </span>
-  }
+                label={
+                  <span>
+                    First Name
+                    <span style={{ color: "red", marginLeft: 2 }}>*</span>
+                  </span>
+                }
                 name="firstName"
-                required='false'
                 rules={[{ required: true, message: "First name is required" }]}
               >
                 <Input
                   placeholder="Enter first name"
                   prefix={<UserOutlined style={{ color: "#E5E7EB" }} />}
                   style={{ height: "38px", backgroundColor: "transparent" }}
+                  disabled={isEdit}
                 />
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item
                 label={
-    <span>
-      Last Name<span style={{ color: "red", marginLeft: 2 }}>*</span>
-    </span>
-  }
+                  <span>
+                    Last Name
+                    <span style={{ color: "red", marginLeft: 2 }}>*</span>
+                  </span>
+                }
                 name="lastName"
                 rules={[{ required: true, message: "Last name is required" }]}
               >
@@ -112,6 +189,7 @@ const CreateNewUserAdmin = () => {
                   placeholder="Enter last name"
                   prefix={<UserOutlined style={{ color: "#E5E7EB" }} />}
                   style={{ height: "38px", backgroundColor: "transparent" }}
+                  disabled={isEdit}
                 />
               </Form.Item>
             </Col>
@@ -121,10 +199,11 @@ const CreateNewUserAdmin = () => {
             <Col span={12}>
               <Form.Item
                 label={
-    <span>
-      Email Address<span style={{ color: "red", marginLeft: 2 }}>*</span>
-    </span>
-  }
+                  <span>
+                    Email Address
+                    <span style={{ color: "red", marginLeft: 2 }}>*</span>
+                  </span>
+                }
                 name="email"
                 rules={[
                   { required: true, message: "Email is required" },
@@ -133,8 +212,9 @@ const CreateNewUserAdmin = () => {
               >
                 <Input
                   placeholder="Enter email address"
-                  prefix={<MailOutlined style={{ color: "#E5E7EB" }} />}
-                  style={{ height: "38px", backgroundColor: "transparent" }}
+                  prefix={<MailOutlined style={{ color: "#E5E7EB",marginRight:"2px" }} />}
+                  style={{ height: "38px", backgroundColor: "white" }}
+                  disabled={false}
                 />
               </Form.Item>
               <p style={{ fontSize: "10px", color: "#6B7280", marginTop: "-6px" }}>
@@ -142,44 +222,42 @@ const CreateNewUserAdmin = () => {
               </p>
             </Col>
 
-             <Col span={12}>
+            <Col span={12}>
               <Form.Item
-               label={
-    <span>
-      Role<span style={{ color: "red", marginLeft: 2 }}>*</span>
-    </span>
-  }
-                name="role"
-                rules={[
-                  { required: true, message: "Role is required" },
-                ]}
-              >
-                <Input
-                  placeholder="Enter Role"
-                  prefix={<MailOutlined style={{ color: "#E5E7EB" }} />}
-                 style={{ height: "38px", backgroundColor: "transparent" }}
-                />
-              </Form.Item>
-            </Col>
-
-            {/* <Col span={12}>
-              <Form.Item
-                label="Role"
+                label={
+                  <span>
+                    Role
+                    <span style={{ color: "red", marginLeft: 2 }}>*</span>
+                  </span>
+                }
                 name="role"
                 rules={[{ required: true, message: "Role is required" }]}
               >
-                <Select
-                  placeholder="Select role"
-                  style={{ height: "38px", width: "100%" }}
-                  suffixIcon={<TeamOutlined style={{ color: "#E5E7EB" }} />}
-                >
-                  <Option value="superadmin">Super Admin</Option>
-                  <Option value="admin">Admin</Option>
-                  <Option value="moderator">Moderator</Option>
-                </Select>
+                <Input
+                  placeholder="Enter Role"
+                  prefix={<MailOutlined style={{ color: "#E5E7EB",marginRight:"2px",marginTop:"2px" }} />}
+                  style={{ height: "38px", backgroundColor: "transparent" }}
+                  disabled={false}
+                />
               </Form.Item>
-            </Col> */}
+            </Col>
           </Row>
+{isEdit ? (
+  <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
+    <div style={{ marginLeft: 0 }}>
+      <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+        Is Locked In?
+      </label>
+      <Radio.Group
+        onChange={(e) => setStatusFlag(Number(e.target.value))}
+        value={statusFlag}
+      >
+        <Radio value={1} style={{ marginRight: 20 }}>Yes</Radio>
+        <Radio value={0}>No</Radio>
+      </Radio.Group>
+    </div>
+  </div>
+) : null}
 
           <Divider style={{ margin: "16px 0", borderWidth: "1.3px" }} />
 
@@ -194,7 +272,13 @@ const CreateNewUserAdmin = () => {
                   color: "#374151",
                   fontWeight: "500",
                 }}
-                onClick={() => form.resetFields()}
+                onClick={() => {
+                  form.resetFields();
+                  if (isEdit) {
+                    navigate("/Admins");
+                  }
+                }}
+                disabled={fetching || loading}
               >
                 Cancel
               </Button>
@@ -204,7 +288,7 @@ const CreateNewUserAdmin = () => {
                 type="primary"
                 htmlType="submit"
                 loading={loading}
-                icon={<PlusOutlined />}
+                icon={!isEdit ? <PlusOutlined /> : null}
                 style={{
                   height: "38px",
                   backgroundColor: "#008AD5",
@@ -214,7 +298,7 @@ const CreateNewUserAdmin = () => {
                   fontSize: "14px",
                 }}
               >
-                Create New User
+                {isEdit ? "Update User" : "Create New User"}
               </Button>
             </Col>
           </Row>

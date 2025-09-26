@@ -34,21 +34,21 @@ const fetchAdminData = async (page = 1, limit = 10) => {
       const response = await loginApi.getadmindata(page, limit);
       const data = handleApiResponse(response);
   
-      if (data?.data?.admins) {
-        const formattedData = data.data.admins.map((item) => ({
+      if (data?.admins) {
+        const formattedData = data.admins.map((item) => ({
           key: item.id,
-          firstname: item.karhtik,
+          firstname: item.first_name,
           lastname: item.last_name,
           emailaddress: item.email,
-          lastlogin: item.ad_title,
+          lastlogin: item.last_login,
         }));
   
         setTableData(formattedData);
   
         setPagination({
-          current: data.data.pagination.current_page,
-          pageSize: data.data.pagination.limit,
-          total: data.data.pagination.total_cars,
+          current: data.pagination.current_page,
+          pageSize: data.pagination.limit,
+          total: data.pagination.total_cars,
         });
       }
     } catch (error) {
@@ -114,7 +114,7 @@ const fetchAdminData = async (page = 1, limit = 10) => {
           fontSize: "12px",
           fontWeight: "400",
         }}
-        onClick={() => navigate("/createNewAdmin")}
+        onClick={() => navigate(`/createNewAdmin/${record.key}`)}
       >
         <img
          src={editIcon}
@@ -188,7 +188,7 @@ const fetchAdminData = async (page = 1, limit = 10) => {
     <Table
           dataSource={tableData}
           columns={columns}
-          rowKey="id"
+          rowKey="key"
           bordered={false}
            pagination={{
             current: pagination.current,
