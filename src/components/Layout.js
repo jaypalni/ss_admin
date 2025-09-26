@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Menu, Button, Avatar, Dropdown, Tooltip, message } from "antd";
+import { Layout, Menu, Button, Avatar, Dropdown, Tooltip, message, Modal } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -20,6 +20,8 @@ import {
   FaCloud,
   FaUser,
   FaDollarSign,
+  FaStar,
+  FaCarAlt,
 } from "react-icons/fa";
 import { Breadcrumb} from "antd";
 import { BiSupport } from "react-icons/bi";
@@ -28,11 +30,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { RiAdminFill } from "react-icons/ri";
 import "../assets/styles/layout.css";
 import { IoCarSharp } from "react-icons/io5";
-import { MdSubscriptions } from "react-icons/md";
+import { MdSubscriptions, MdLogout } from "react-icons/md";
 import menucar_icon from "../assets/images/menucariocn.png";
 import { loginApi } from "../services/api";
 import PropTypes from 'prop-types';
 import Right from "../assets/images/Right.svg";
+import { IoMdSettings } from "react-icons/io";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 const { Header, Sider, Content } = Layout;
 
 function AppLayout({ children }) {
@@ -45,6 +49,7 @@ function AppLayout({ children }) {
   const isCreateNewAdmin = location.pathname === "/createNewAdmin";
 
 
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -96,6 +101,19 @@ function AppLayout({ children }) {
       key: "/listingmanagement",
       icon: <TfiMenuAlt />,
       label: "Listing Management",
+      hasDropdown: true,
+    children: [
+      {
+        key: "/listingmanagement/bestcars", 
+         icon: <FaStar />,
+        label: "Best Cars",
+      },
+      {
+        key: "/listingmanagement", 
+        icon: <FaCarAlt />,
+        label: "All Listings",
+      },
+    ],
     },
      {
     key: "/financials",  
@@ -134,10 +152,25 @@ function AppLayout({ children }) {
     ],
   },
     {
-      key: "/settings",
+      key: "",
       icon: <BiSupport />,
       label: "Support",
     },
+    {
+      key: "/settings",
+      icon: <IoMdSettings />,
+      label: "Settings",
+    },
+    {
+  key: "",
+  label: (
+    <span style={{ color: "red", display: "flex", alignItems: "center", gap: "8px" }} onClick={() => setLogoutModalOpen(true)}>
+      <MdLogout style={{ color: "red" }} />
+      Logout
+    </span>
+  ),
+},
+
   ];
 
   const headerTitles = {
@@ -148,6 +181,10 @@ function AppLayout({ children }) {
   "/listingmanagement": {
     title: "Listing Management",
     tagline: "Review and moderate vehicle listings",
+  },
+  "/listingmanagement/bestcars": {
+    title: "Best Cars",
+    tagline: "Manage and highlight outstanding vehicle listings",
   },
   "/financials": {
     title: "Financials",
@@ -219,6 +256,28 @@ const currentHeader = headerTitles[location.pathname] || {
       console.error("Error during logout", error);
       message.error("Something went wrong. Please try again.");
       setLoading(false);
+    }
+  };
+
+  // User Logout API
+
+  const handleLogout = async () => {
+    try {
+      const response = await loginApi.logout({});
+      const data1 = handleApiResponse(response);
+      localStorage.clear();
+      navigate("/");
+      messageApi.open({
+        type: 'success',
+        content: data1?.message,
+      });
+     
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({
+        type: 'error',
+        content: errorData?.error,
+      });
     }
   };
 
@@ -407,6 +466,54 @@ const currentHeader = headerTitles[location.pathname] || {
         {/* Main Content */}
         <Content className="content">{children}</Content>
       </Layout>
+      <Modal
+        open={logoutModalOpen}
+        onCancel={() => setLogoutModalOpen(false)}
+        footer={null}
+        title={
+          <div className="brand-modal-title-row">
+            <span style={{ textAlign: 'center', margin: '15px 0px 0px 15px', fontWeight: 700 }}>
+              Are you sure you want to log out?
+            </span>
+          </div>
+        }
+        width={350}
+      >
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', padding: '2px', marginTop: '15px' }}>
+          <Button
+            onClick={() => setLogoutModalOpen(false)}
+            style={{
+              width: 120,
+              backgroundColor: '#ffffff',
+              color: '#008AD5',
+              borderColor: '#008AD5',
+              borderWidth: 1,
+              fontSize: '16px',
+              fontWeight: 700,
+              borderRadius: '24px',
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              setLogoutModalOpen(false);
+              handleLogout();
+            }}
+            style={{
+              width: 120,
+              backgroundColor: '#008AD5',
+              color: '#ffffff',
+              fontSize: '16px',
+              fontWeight: 700,
+              borderRadius: '24px',
+            }}
+          >
+            Confirm
+          </Button>
+        </div>
+      </Modal>
     </Layout>
   );
 }
