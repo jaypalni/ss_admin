@@ -324,7 +324,9 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
     fontWeight: 500,
   }}
 >
-  {carDetails?.approval || "Pending"}
+  {carDetails?.approval === "pending"
+    ? "Pending Review"
+    : carDetails?.approval || "Pending"}
 </Tag>
 
         </div>
