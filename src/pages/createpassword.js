@@ -192,13 +192,17 @@ const CreatePassword = () => {
           </div>
 
           <Button
-            type="primary"
             className="create-button"
             size="large"
             block
              htmlType="submit"
             loading={loading}
             disabled={loading || !allRequirementsMet || !passwordsMatch}
+             style={{
+    backgroundColor: newPassword && reenterPassword && allRequirementsMet && passwordsMatch ? "#008AD5" : "#E5E7EB", 
+    borderColor: newPassword && reenterPassword && allRequirementsMet && passwordsMatch ? "#008AD5" : "#E5E7EB",
+    color: "#fff",
+  }}
           >
             <img src={arrow_icon1} alt="arrow" style={{ width: "12px", height: "12px", marginTop: "2px" }} />
             <span className="create-text-otp">Reset Password</span>
