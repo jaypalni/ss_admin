@@ -1,6 +1,21 @@
-import React from "react";
+import React,{useEffect} from "react";
 
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 function Dashboard() {
+   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user,token } = useSelector(state => state.auth);
+const isLoggedIn = token && user
+   useEffect(() => {
+    console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      navigate('/');
+    } else {
+      console.log('User not logged in or coming from login flow, staying on OTP screen');
+    }
+  }, [isLoggedIn, navigate]);
   return (
     <div className="content-wrapper">
       <div className="page-header">

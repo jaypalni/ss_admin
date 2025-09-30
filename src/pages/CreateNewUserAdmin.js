@@ -15,6 +15,7 @@ import bluelogo_icon2 from "../assets/images/info.svg";
 import "../assets/styles/otp.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { loginApi } from "../services/api";
+import { useSelector } from 'react-redux';
 
 const CreateNewUserAdmin = () => {
   const navigate = useNavigate();
@@ -26,6 +27,20 @@ const CreateNewUserAdmin = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [statusFlag, setStatusFlag] = useState(null);
   const [form] = Form.useForm();
+
+
+  const { user,token } = useSelector(state => state.auth);
+  const isLoggedIn = token && user
+   useEffect(() => {
+    console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      navigate('/');
+    } else {
+      console.log('User not logged in or coming from login flow, staying on OTP screen');
+    }
+  }, [isLoggedIn, navigate]);
+
 
   useEffect(() => {
     if (!isEdit) return;

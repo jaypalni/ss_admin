@@ -28,6 +28,17 @@ const CreatePassword = () => {
 
   const allRequirementsMet = reqLength && reqUpper && reqLower && reqNumber && reqSpecial;
 
+   const isLoggedIn = email
+        useEffect(() => {
+         console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+         
+         if (!isLoggedIn) {
+           navigate('/');
+         } else {
+           console.log('User not logged in or coming from login flow, staying on OTP screen');
+         }
+       }, [isLoggedIn, navigate]);
+
   useEffect(() => {
     setReqLength(newPassword.length >= 8);
     setReqUpper(/[A-Z]/.test(newPassword));

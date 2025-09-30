@@ -7,12 +7,25 @@ import editIcon from "../assets/images/edit.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { FaTrash } from "react-icons/fa";
+import { useSelector } from 'react-redux';
 
 const GetAdminsData = () => {
 const navigate = useNavigate();
 const [loading, setLoading] = useState(false);
 const [messageApi, contextHolder] = message.useMessage();
 const [tableData, setTableData] = useState([]);
+
+const { user,token } = useSelector(state => state.auth);
+  const isLoggedIn = token && user
+   useEffect(() => {
+    console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      navigate('/');
+    } else {
+      console.log('User not logged in or coming from login flow, staying on OTP screen');
+    }
+  }, [isLoggedIn, navigate]);
 
  const [pagination, setPagination] = useState({
     current: 1,

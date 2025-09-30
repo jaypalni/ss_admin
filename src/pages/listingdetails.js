@@ -12,6 +12,7 @@ import "../assets/styles/listingdetails.css";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import shareicon from "../assets/images/share_icon.png";
+import { useDispatch, useSelector } from 'react-redux';
 
 const ListingDetails = () => {
   const { listingId } = useParams();
@@ -26,8 +27,17 @@ const [rejectReasonData, setRejectReasonData] = useState([]);
   const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchCalled = useRef(false)
   const [isBestCar, setIsBestCar] = useState(false);
-
-
+  const { user,token } = useSelector(state => state.auth);
+  const isLoggedIn = token && user
+   useEffect(() => {
+    console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      navigate('/');
+    } else {
+      console.log('User not logged in or coming from login flow, staying on OTP screen');
+    }
+  }, [isLoggedIn, navigate]);
 
 const showRejectModal = () => {
     getReasonRejection();
@@ -563,7 +573,7 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
     />
     <strong>Date of Approval/Reject:</strong>
   </div>
-  <span style={{ marginRight: 12 }}>
+  <span style={{ marginRight: 12 ,color: '#9CA3AF'}}>
     {carDetails?.approval === "pending"
       ? "Pending"
       : carDetails?.updated_at
@@ -588,7 +598,7 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
     />
     <strong>Date of Sale:</strong>
   </div>
-  <span style={{ marginRight: 12 }}>
+  <span style={{ marginRight: 12,color :'#9CA3AF' }}>
     {carDetails?.status === "unsold"
       ? "Not Sold"
       : carDetails?.status === "sold" && carDetails?.updated_at
@@ -613,81 +623,81 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
     <Col xs={24} md={8}>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Vehicle Type</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.vechile_type}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.vechile_type || 'N/A' }</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Body Type</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.body_type}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.body_type || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Make</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.make}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.make || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Model</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.model}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.model || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Trim</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.trim}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.trim || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Regional Specs</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.regional_specs}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.regional_specs || 'N/A'}</p>
       </div>
     </Col>
 
     <Col xs={24} md={8}>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Kilometers</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.kilometers}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.kilometers || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Year</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.year}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.year || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Condition</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.condition}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.condition || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Fuel Type</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.fuel_type}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.fuel_type || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Transmission</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.transmission_type}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.transmission_type || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Exterior Color</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.exterior_color}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.exterior_color || 'N/A'}</p>
       </div>
     </Col>
 
     <Col xs={24} md={8}>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Interior Color</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.interior_color}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.interior_color || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Seats</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.number_of_seats}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.number_of_seats || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Cylinders</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.no_of_cylinders}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.no_of_cylinders || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Engine</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.engine_cc}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.engine_cc || 'N/A'}</p>
       </div>
       <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Horse Power</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.horse_power}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.horse_power || 'N/A'}</p>
       </div>
        <div style={{ marginBottom: 12 }}>
         <p style={{ margin: 0, color: '#6B7280', fontSize: 14, fontWeight: 400 }}>Doors</p>
-        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.number_of_doors}</p>
+        <p style={{ margin: 0, color: '#000000', fontSize: 16, fontWeight: 500 }}>{carDetails?.number_of_doors || 'N/A'}</p>
       </div>
     </Col>
   </Row>

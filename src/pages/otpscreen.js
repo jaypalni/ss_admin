@@ -27,7 +27,16 @@ const OtpScreen = () => {
   const userData = JSON.parse(localStorage.getItem('userData'));
 
   const { email } = useSelector(state => state.auth);  
-   console.log("2134567895678",email)
+   const isLoggedIn = email
+      useEffect(() => {
+       console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+       
+       if (!isLoggedIn) {
+         navigate('/');
+       } else {
+         console.log('User not logged in or coming from login flow, staying on OTP screen');
+       }
+     }, [isLoggedIn, navigate]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
