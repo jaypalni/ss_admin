@@ -58,6 +58,7 @@ const PendingListings = () => {
   const fetchPendingListings = async (page = 1, limit = 10) => {
   try {
     setLoading(true);
+      const normalizedFilter = statusFilter ? statusFilter.toString().toLowerCase() : "";
 
     const body = {
       search: searchValue || "",
@@ -74,17 +75,44 @@ const PendingListings = () => {
     const data = handleApiResponse(response);
 
     if (data?.data?.cars) {
-      const formattedData = data.data.cars.map((item) => ({
-        key: item.car_id,
-        car_id: item.car_id,
-        referenceId: item.car_id,
-        dateSubmitted: dayjs(item.date_submitted).format("MMM DD, YYYY"),
-        listingTitle: item.ad_title,
-        sellerName: `${item.first_name} ${item.last_name}`,
-        location: item.location,
-        type: item.user_type === "dealer" ? "Dealer" : "Individual",
-        status: item.approval,
-      }));
+      const formattedData = data.data.cars
+     .filter((item) => {
+          if (!normalizedFilter) return true; 
+
+          const approval = (item.approval || "").toString().toLowerCase();
+          const status = (item.status || "").toString().toLowerCase();
+
+          if (normalizedFilter === "sold") {
+            return status === "sold";
+          }
+
+          if (["pending", "approved", "rejected"].includes(normalizedFilter)) {
+            return approval === normalizedFilter || (!approval && status === normalizedFilter);
+          }
+
+          return status === normalizedFilter || approval === normalizedFilter;
+        })
+      .map((item) => {
+        const approval = (item.approval || "").toString().toLowerCase();
+          const status = (item.status || "").toString().toLowerCase();
+
+         const displayedStatus =
+            normalizedFilter === "sold"
+              ? status || approval
+              : (approval || status);
+
+        return {
+          key: item.car_id,
+          car_id: item.car_id,
+          referenceId: item.car_id,
+          dateSubmitted: dayjs(item.date_submitted).format("MMM DD, YYYY"),
+          listingTitle: item.ad_title,
+          sellerName: `${item.first_name} ${item.last_name}`,
+          location: item.location,
+          type: item.user_type === "dealer" ? "Dealer" : "Individual",
+          status: displayedStatus,
+        };
+      });
 
       setTableData(formattedData);
 
