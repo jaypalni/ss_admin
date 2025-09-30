@@ -72,7 +72,6 @@ const CreatePassword = () => {
       return;
     }
     const body = {
-      email: email,
       new_password: newPassword,
     };
     setLoading(true);
@@ -81,12 +80,12 @@ const CreatePassword = () => {
 
   const updatePassword = async (body) => {
       try {
-        const response = await loginApi.createnewpassword(body);
+        const response = await loginApi.resetpassword(body);
         const userData = response.data;
         if (userData.status_code === 200) {
           messageApi.open({ type: 'success', content: userData.message  });
           setLoading(false);
-          navigate("/dashboard");
+          navigate("/");
         } else {
            messageApi.open({ type: 'error', content: userData.error  });
           setLoading(false);

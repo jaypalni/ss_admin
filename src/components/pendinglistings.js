@@ -261,7 +261,7 @@ const PendingListings = () => {
               label: "Status",
               component: (
                 <Select value={statusFilter} onChange={setStatusFilter} style={{ width: "100%" }}>
-                  <Option value="">All Status</Option>
+                  {/* <Option value="">All Status</Option> */}
                   <Option value="Pending">Pending</Option>
                   <Option value="Approved">Approved</Option>
                   <Option value="Rejected">Rejected</Option>
@@ -291,7 +291,9 @@ const PendingListings = () => {
 
         {/* Table Section */}
         <h3 style={{ marginBottom: 15, fontSize: "18px", fontWeight: "600" }}>
-          Pending Listings ({tableData.length})
+          {statusFilter 
+    ? `${statusFilter} Listings (${pagination.total})`
+    : `Pending Listings (${pagination.total})`}
         </h3>
 
         <Table

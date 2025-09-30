@@ -35,6 +35,7 @@ import menucar_icon from "../assets/images/menucariocn.png";
 import { loginApi } from "../services/api";
 import PropTypes from 'prop-types';
 import Right from "../assets/images/Right.svg";
+import dashboard_icon from "../assets/images/dashboard_icon.svg";
 import { IoMdSettings } from "react-icons/io";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { useSelector } from "react-redux";
@@ -45,7 +46,7 @@ function AppLayout({ children }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [, setLoading] = useState(false);
   const navigate = useNavigate();
-  const {user} = useSelector((state) => state.auth);
+  const {user,role} = useSelector((state) => state.auth);
   const location = useLocation();
 
   const pathname = location.pathname || "/";
@@ -61,7 +62,7 @@ function AppLayout({ children }) {
 
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-  console.log("1234562345",user)
+  console.log("1234562345",role)
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -106,7 +107,7 @@ function AppLayout({ children }) {
   const sideMenuItems = [
     {
       key: "/dashboard",
-      icon: <FaHome />,
+      icon:  <img src={dashboard_icon} alt="Dashboard" style={{ width: 12, height: 12 }} />,
       label: "Dashboard",
     },
      {
@@ -157,10 +158,15 @@ function AppLayout({ children }) {
         key: "/user-management/dealer", 
         label: "Dealer",
       },
-      {
+      ...(role === "super admin"
+      ? [
+          {
         key: "/Admins", 
         label: "Admin",
       },
+        ]
+      : []),
+      
     ],
   },
     {

@@ -44,6 +44,11 @@ const API_CONFIG = {
       GETADMINDATA:(page = 1, limit = 10) => `/api/admin/admins?page=${page}&limit=${limit}`,
       UPDATEADMINDATA:(id) => `/api/admin/admins/${id}`,
       EDITADMINDATA:(id) => `/api/admin/admins/${id}`,
+      DELETEDATA:(id) => `/api/admin/admins/${id}`,
+      FORGOTPASSWORD: "/api/admin/forgot-password",
+      VERIFYOTP: "/api/admin/verify-otp",
+      RESENDOTP: "/api/admin/resend-otp",
+      RESETPASSWORD:"api/admin/reset-password",
     },
 
     BESTCAR: {},

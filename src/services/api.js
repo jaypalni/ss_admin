@@ -18,6 +18,14 @@ const api = axios.create({
   timeout: 30000, // 30 seconds timeout
 });
 
+const api1 = axios.create({
+  baseURL: API_CONFIG.BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 30000, // 30 seconds timeout
+});
+
 let reduxStore = null;
 
 /**
@@ -43,6 +51,19 @@ api.interceptors.request.use(
   }
 );
 
+api1.interceptors.request.use(
+  (config) => {
+    const token = reduxStore?.getState?.().auth?.reset_token ?? null;
+    console.log("234567890987654",token)
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => {
+    return Promise.reject(
+      error instanceof Error ? error : new Error(error?.message || "Request failed")
+    );
+  }
+);
 
 // Add response interceptor to handle common errors
 api.interceptors.response.use(
@@ -160,6 +181,16 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.UPDATEADMINDATA(id),body),
    editadmindata: (id) =>
     api.get(API_CONFIG.ENDPOINTS.LOGIN.EDITADMINDATA(id)),
+    deletedata: (id) =>
+    api.delete(API_CONFIG.ENDPOINTS.LOGIN.DELETEDATA(id)),
+    forgotpassword: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.FORGOTPASSWORD,body),
+    verifyotp: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.VERIFYOTP,body),
+    resendotp: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.RESENDOTP,body),
+    resetpassword: (body) =>
+    api1.post(API_CONFIG.ENDPOINTS.LOGIN.RESETPASSWORD,body),
 };
 export const bestcarAPI = {};
 

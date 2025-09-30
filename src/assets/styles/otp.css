@@ -6,6 +6,21 @@
   color: #111827;
 }
 
+.logo-wrapper {
+  width: 50px;
+  height: 50px;
+  background-color: #008AD5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.logo-wrapper img {
+  width: 20px;
+  height: 20px;
+}
+
 .otp-page-wrapper {
   width: 100%;
   min-height: 100vh;            
@@ -368,4 +383,11 @@
   font-size: 13px;
   color: #6b7280; /* grey text */
   line-height: 1.4;
+}
+
+.otp-card {
+  width: 100%;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
 }

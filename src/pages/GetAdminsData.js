@@ -2,10 +2,11 @@ import React,{useState,useEffect} from 'react'
 import "../assets/styles/otp.css";
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "../services/api";
-import { Table, message } from "antd";
+import { Table, message,Button,Popconfirm } from "antd";
 import editIcon from "../assets/images/edit.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import { FaTrash } from "react-icons/fa";
 
 const GetAdminsData = () => {
 const navigate = useNavigate();
@@ -60,7 +61,31 @@ const fetchAdminData = async (page = 1, limit = 10) => {
     } finally {
       setLoading(false);
     }
-  };
+};
+
+const handleDelete = async (id) => {
+    try {
+      setLoading(true);
+  
+      const response = await loginApi.deletedata(id);
+      const data = handleApiResponse(response);
+  
+      if (data?.status_code == 200) {
+       messageApi.error(data?.message);
+        fetchAdminData()
+      }else {
+        messageApi.error(data?.message || "Failed to delete data");
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({
+        type: "error",
+        content: errorData?.message || "Failed to fetch pending cars",
+      });
+    } finally {
+      setLoading(false);
+    }
+};
 
    const columns = [
     {
@@ -93,17 +118,17 @@ const fetchAdminData = async (page = 1, limit = 10) => {
       key: "lastlogin",
       render: (text) => <span style={{ color: "#111827" }}>{text}</span>,
     },
-    {
-      title: () => (
-        <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 600 }}>
-          Actions
-        </span>
-      ),
-      key: "actions",
-      align: "center",
-      render: (_, record) => (
-        <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-          <button
+   {
+  title: () => (
+    <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: 600 }}>
+      Actions
+    </span>
+  ),
+  key: "actions",
+  align: "center",
+  render: (_, record) => (
+    <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+      <button
         style={{
           backgroundColor: "#E5E7EB",
           color: "#374151",
@@ -113,19 +138,39 @@ const fetchAdminData = async (page = 1, limit = 10) => {
           cursor: "pointer",
           fontSize: "12px",
           fontWeight: "400",
+          display: "flex",
+          alignItems: "center",
         }}
         onClick={() => navigate(`/createNewAdmin/${record.key}`)}
       >
         <img
-         src={editIcon}
-         alt="edit"
-        style={{ width: "12px", height: "12px",marginRight:"3px" }}
-       />
+          src={editIcon}
+          alt="edit"
+          style={{ width: "12px", height: "12px", marginRight: "3px" }}
+        />
         Edit
       </button>
-        </div>
-      ),
-    },
+
+      <Popconfirm
+                   title="Delete User"
+                   description="Are you sure you want to delete this user?."
+                    onConfirm={() => handleDelete(record.key)}
+                   okText="Yes"
+                   cancelText="No"
+                   okType="danger"
+                 >
+                   <Button 
+                     type="text" 
+                     icon={<FaTrash />} 
+                     size="small" 
+                     danger
+                     title="Delete User"
+                   />
+      </Popconfirm>
+    </div>
+  ),
+}
+
   ];
 
   return (

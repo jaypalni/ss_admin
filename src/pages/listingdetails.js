@@ -81,7 +81,7 @@ useEffect(() => {
       }
 
       if (result?.message) {
-        messageApi.open({ type: "success", content: result.message });
+       // messageApi.open({ type: "success", content: result.message });
       }
     } catch (error) {
       const errorData = handleApiError(error);
@@ -442,7 +442,7 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
           Boost Duration:
         </strong>
         <span style={{ fonSize: '16px', fontWeight: '600'}}>
-  March 15, 2024 - March 22, 2024
+  
 </span>
 
       </div>
@@ -777,7 +777,12 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
               </div>
               <Divider style={{ margin: "12px 0" }} />
               <p style={{ marginBottom: 8 }}>📞 {carDetails?.seller?.phone_number}</p>
-              <p style={{ marginBottom: 8 }}>✉️ {carDetails?.seller?.email || "N/A"}</p>
+              <div style={{ display: "flex", alignItems: "flex-start", marginBottom: 8 }}>
+  <span style={{ marginRight: 6 }}>✉️</span>
+  <span style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+    {carDetails?.seller?.email || "N/A"}
+  </span>
+</div>
               <p style={{ marginBottom: 0 }}><FaCalendar/>  Member since {carDetails?.seller?.member_since}</p>
             </Card>
 

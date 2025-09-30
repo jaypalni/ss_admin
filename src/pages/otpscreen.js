@@ -1,13 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../assets/styles/otp.css";
 import { message, Button } from "antd";
-import bluelogo_icon from "../assets/images/div.svg";
+import bluelogo_icon from "../assets/images/car.svg";
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import arrow_icon1 from "../assets/images/white_tick.svg";
 import bluelogo_icon1 from "../assets/images/black_arrow.svg";
 import bluelogo_icon2 from "../assets/images/Frame.svg";
+import { loginApi } from "../services/api";
+import { setResetLogin } from "../redux/actions/authActions";
 
 const OtpScreen = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
@@ -19,6 +23,11 @@ const OtpScreen = () => {
   const OTP_LENGTH = 4;
   const OTP_INPUT_IDS = Array.from({ length: OTP_LENGTH }, (_, i) => `otp-${i}`);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const [messageApi, contextHolder] = message.useMessage();
+  const userData = JSON.parse(localStorage.getItem('userData'));
+
+  const { email } = useSelector(state => state.auth);  
+   console.log("2134567895678",email)
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -66,7 +75,7 @@ const OtpScreen = () => {
     navigate("/ForgotPassword");
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     setOtpErrorMsg("");
     const joined = otp.join("");
     if (joined.length !== OTP_LENGTH) {
@@ -79,12 +88,31 @@ const OtpScreen = () => {
       setOtpErrorMsg("OTP should contain numbers only.");
       return;
     }
+     const body = { otp : joined, request_id: userData.request_id,};
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      message.success("OTP verified successfully.");
-      navigate("/CreatePassword");
-    }, 900);
+     try {
+          const response = await loginApi.verifyotp(body);
+          const userData = response.data;
+    
+          if (userData.status_code === 200) {
+            dispatch(setResetLogin(userData.reset_token));
+            messageApi.open({ type: "success", content: userData.message });
+            navigate("/CreatePassword");
+          } else {
+             setLoading(false);
+            messageApi.open({
+              type: "error",
+              content: userData.error || userData.message || "Unknown error",
+            });
+          }
+        } catch (error) {
+           setLoading(false);
+          console.error("Error during forgot API call:", error);
+          messageApi.open({
+            type: "error",
+            content: (error?.response?.data?.message) || error.message || "Network error",
+          });
+        }
   };
 
   const handleChange = (e, idx) => {
@@ -92,7 +120,6 @@ const OtpScreen = () => {
     const newOtp = [...otp];
 
     if (val) {
-      // take only last digit entered (handles paste of multiple digits into one input)
       newOtp[idx] = val[val.length - 1];
       setOtp(newOtp);
       setError("");
@@ -143,27 +170,38 @@ const OtpScreen = () => {
     }
   };
 
-  // Resend logic: disabled while timer is running
   const handleResend = async () => {
-    if (isTimerRunning) return; // double safety
-    setLoading(true);
     try {
-      // TODO: call your backend resend endpoint here, await result
-      // simulate network delay
-      await new Promise((res) => setTimeout(res, 700));
+      setLoading(true);
+      const emailToUse = email;
+      
+      if (!emailToUse) {
+        messageApi.error('Email not found. Please start over.');
+        return;
+      }
+      
+      const response = await loginApi.resendotp({ email: emailToUse });
+      const data = response.data;
 
-      // Reset timer and start again
-      const now = Date.now();
-      const newEndTime = now + 60 * 1000;
-      localStorage.setItem("otpEndTime", newEndTime);
-      setTimer(60);
-      setIsTimerRunning(true);
-      setOtp(["", "", "", ""]); // clear inputs
-      setIsOtpSent(true); // mark that OTP has been resent (optional)
-      setOtpErrorMsg("");
-      message.success("OTP resent.");
+      if (data) {
+        const newEndTime = Date.now() + 60 * 1000;
+        localStorage.setItem('otpEndTime', newEndTime);
+        localStorage.setItem('userData', JSON.stringify(data));
+        setOtp(["", "", "", ""]);
+      inputRefs.current.forEach((input) => {
+        if (input) input.value = "";
+      });
+        setTimer(60);
+        setIsTimerRunning(true);
+        messageApi.success(data.message);
+      }
     } catch (err) {
-      message.error("Failed to resend OTP. Try again.");
+       setLoading(false);
+          console.error("Error during forgot API call:", error);
+          messageApi.open({
+            type: "error",
+            content: (error?.response?.data?.message) || error.message || "Network error",
+          });
     } finally {
       setLoading(false);
     }
@@ -171,9 +209,12 @@ const OtpScreen = () => {
 
   return (
     <div className="otp-page-wrapper">
+      {contextHolder}
       <div className="otp-page">
         <div className="login-form">
-          <img src={bluelogo_icon} alt="Souq Sayarat logo" className="ssblue-logo1" />
+        <div className="logo-wrapper">
+  <img src={bluelogo_icon} alt="Souq Sayarat logo" />
+</div>
           <h2 className="otp-site-title">Souq Sayarat</h2>
           <h6 className="otp-site-subtitle">Verify Your Identity</h6>
 
@@ -231,14 +272,18 @@ const OtpScreen = () => {
   </div>
 
           <Button
-            type="primary"
             className="otp-button"
             size="large"
             block
             onClick={handleButtonClick}
             loading={loading}
-            disabled={loading}
+            disabled={loading || otp.join("").length !== OTP_LENGTH}
             aria-label={isOtpSent ? "Verify Code" : "Verify Code"}
+            style={{
+    backgroundColor: otp.join("").length === OTP_LENGTH ? "#008AD5" : "#E5E7EB", 
+    borderColor: otp.join("").length === OTP_LENGTH ? "#008AD5" : "#E5E7EB",
+    color: "#fff",
+  }}
           >
             <img src={arrow_icon1} alt="arrow" style={{ width: "12px", height: "12px", marginTop: "2px" }} />
             <span className="button-text-otp">{isOtpSent ? "Verify Code" : "Verify Code"}</span>
@@ -255,7 +300,6 @@ const OtpScreen = () => {
             <img src={bluelogo_icon1} alt="arrow" style={{ width: "12px", height: "12px", marginTop: "2px" }} />
             <span className="button-text-otp">Go Back</span>
           </Button>
-
            <Button
   type="default"
   className="otp-button-back-1"

@@ -106,7 +106,7 @@ const CreateNewUserAdmin = () => {
       }
     } catch (err) {
       console.error("Submit error:", err);
-      messageApi.error(err?.message || "Something went wrong");
+      messageApi.error(err?.response?.data?.message || err?.response?.data?.error || err?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -235,7 +235,7 @@ const CreateNewUserAdmin = () => {
               >
                 <Input
                   placeholder="Enter Role"
-                  prefix={<MailOutlined style={{ color: "#E5E7EB",marginRight:"2px",marginTop:"2px" }} />}
+                  prefix={<UserOutlined style={{ color: "#E5E7EB",marginRight:"2px",marginTop:"2px" }} />}
                   style={{ height: "38px", backgroundColor: "transparent" }}
                   disabled={false}
                 />
@@ -305,7 +305,7 @@ const CreateNewUserAdmin = () => {
         </Card>
       </Form>
 
-      {/* Info Box */}
+      {!isEdit ? (
       <Button
         type="default"
         className="otp-button-back-2"
@@ -330,6 +330,7 @@ const CreateNewUserAdmin = () => {
           </div>
         </div>
       </Button>
+      ): null}
     </div>
   );
 };

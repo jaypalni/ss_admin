@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../assets/styles/loginscreen.css";
 import { Input, Button, message } from "antd";
-import bluelogo_icon from "../assets/images/div.svg";
+import bluelogo_icon from "../assets/images/car.svg";
 import frame_icon from "../assets/images/Frame.svg";
 import arrow_icon from "../assets/images/arrow.svg";
 import { useNavigate } from "react-router-dom";
@@ -45,12 +45,12 @@ const LoginScreen = () => {
     }
     if (hasError) return;
     const domainValid = allowedDomains.some((d) => email.toLowerCase().endsWith(d));
-  if (!domainValid) {
-    setEmailErrorMsg(
-      "Use your company email (…@souqsayarat.com / …@souqsayarat.net / …@souqsayarat.iq)."
-    );
-    return;
-  }
+  // if (!domainValid) {
+  //   setEmailErrorMsg(
+  //     "Use your company email (…@souqsayarat.com / …@souqsayarat.net / …@souqsayarat.iq)."
+  //   );
+  //   return;
+  // }
     const body = {
       email: email,
       password: password,
@@ -70,7 +70,7 @@ const LoginScreen = () => {
           content: userData.message || 'Login successful!' 
         });
         dispatch(loginSuccess(userData?.data?.firstname, userData?.data?.access_token,
-           userData?.data?.email));
+           userData?.data?.email,userData?.data?.role));
         console.log('Token we need', userData?.data)
         setLoading(false);
         
@@ -102,7 +102,10 @@ const LoginScreen = () => {
       <div className="login-page1">
         <div className="left-side">
           <div className="brand-top">
-            <img src={bluelogo_icon} alt="Souq Sayarat logo" className="ssblue-logo1" />
+           <div className="logo-wrapper">
+  <img src={bluelogo_icon} alt="Souq Sayarat logo" />
+</div>
+
             <h2 className="site-title">Souq Sayarat</h2>
             <h6 className="site-subtitle">Admin Portal</h6>
           </div>
@@ -193,7 +196,8 @@ const LoginScreen = () => {
   <div className="forgot-password1">
     <a href="/ForgotPassword">Forgot password?</a>
   </div>
-</form>
+        </form>
+         <h6 className="site-title-copy">© 2025 Souq Sayarat. All rights reserved.</h6>
         </div>
       </div>
     </div>

@@ -39,7 +39,7 @@ function AllCarsDashboard() {
       }
 
       if (result?.message) {
-        messageApi.open({ type: "success", content: result.message });
+        //messageApi.open({ type: "success", content: result.message });
       }
     } catch (error) {
       const errorData = handleApiError(error);
@@ -69,7 +69,7 @@ function AllCarsDashboard() {
             <div className="card dashboard-card">
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
-                  <h5 className="card-title">Active Listings</h5>
+                  <h5 className="card-title-1">Active Listings</h5>
                   <p className="card-number" style={{ color: '#16A34A' }}>
                     {dashboardData.active_listings}
                   </p>
@@ -86,7 +86,7 @@ function AllCarsDashboard() {
             <div className="card dashboard-card">
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
-                  <h5 className="card-title">Pending Approval</h5>
+                  <h5 className="card-title-1">Pending Approval</h5>
                   <p className="card-number" style={{ color: '#CA8A04' }}>
                     {dashboardData.listings_pending_approval}
                   </p>
@@ -103,7 +103,7 @@ function AllCarsDashboard() {
             <div className="card dashboard-card">
               <div className="card-body dashboard-card-body">
                 <div className="card-text-container">
-                  <h5 className="card-title">Sold This Month</h5>
+                  <h5 className="card-title-1">Sold This Month</h5>
                   <p className="card-number" style={{ color: '#2563EB' }}>
                     {dashboardData.cars_sold_this_month}
                   </p>
@@ -120,7 +120,7 @@ function AllCarsDashboard() {
   <div className="card dashboard-card">
     <div className="card-body dashboard-card-body">
       <div className="card-text-container">
-        <h5 className="card-title">Total Model</h5>
+        <h5 className="card-title-1">Total Model</h5>
 
         {/* Tooltip with ellipsis for long text */}
         <Tooltip title={dashboardData.model_name}>
