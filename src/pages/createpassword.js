@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import bluelogo_icon1 from "../assets/images/black_arrow.svg";
 import bluelogo_icon2 from "../assets/images/Frame.svg";
 import arrow_icon1 from "../assets/images/svg.svg";
-import bluelogo_icon from "../assets/images/div.svg";
+import bluelogo_icon from "../assets/images/car.svg";
 import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
 
@@ -113,7 +113,9 @@ const CreatePassword = () => {
       {contextHolder}
       <div className="create-page">
         <div className="create-form">
-          <img src={bluelogo_icon} alt="Souq Sayarat logo" className="ssblue-create" />
+          <div className="logo-wrapper">
+  <img src={bluelogo_icon} alt="Souq Sayarat logo" />
+</div>
           <h2 className="create-site-title">Souq Sayarat</h2>
           <h2 className="create-title">Create New Password</h2>
           <h6 className="create-subtitle">Enter your new password to complete the reset process</h6>

@@ -142,23 +142,29 @@ const OtpScreen = () => {
     }
   };
 
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
-    const newOtp = [...otp];
+ const handlePaste = (e) => {
+  e.preventDefault();
+  const pasteData = (e.clipboardData || window.clipboardData)
+    .getData("text")
+    .replace(/\D/g, "") // keep only digits
+    .slice(0, OTP_LENGTH);
 
-    pasteData.split("").forEach((digit, i) => {
-      newOtp[i] = digit;
-      if (inputRefs.current[i]) {
-        inputRefs.current[i].value = digit;
-      }
-    });
+  if (!pasteData) return;
 
-    setOtp(newOtp);
+  // build array of exactly OTP_LENGTH entries
+  const newOtp = Array.from({ length: OTP_LENGTH }, (_, i) => pasteData[i] || "");
 
-    const nextIndex = pasteData.length < OTP_LENGTH ? pasteData.length : OTP_LENGTH - 1;
-    inputRefs.current[nextIndex]?.focus();
-  };
+  // update state (React will update the input values because they are controlled)
+  setOtp(newOtp);
+
+  // focus the next input after the last pasted digit
+  const nextIndex = Math.min(pasteData.length, OTP_LENGTH - 1);
+  setTimeout(() => {
+    inputRefs.current[nextIndex]?.focus?.();
+    inputRefs.current[nextIndex]?.select?.();
+  }, 0);
+};
+
 
   const handleKeyDown = (e, idx) => {
     if (e.key === "Backspace") {
