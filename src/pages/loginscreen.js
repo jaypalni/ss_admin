@@ -90,7 +90,7 @@ const LoginScreen = () => {
       console.error("Error during login", error);
       messageApi.open({ 
         type: 'error', 
-        content: error.error || error.message 
+       content: (error?.response?.data?.message) || error.message || "Network error",
       });
       setLoading(false);
     }
