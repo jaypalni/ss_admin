@@ -174,7 +174,7 @@ const siderWidth = collapsed ? collapsedSiderWidth : expandedSiderWidth;
     ],
   },
     {
-      key: "",
+      key: "/support",
       icon: <BiSupport />,
       label: "Support",
     },

@@ -39,23 +39,6 @@ function Dashboard() {
       />
     );
   }
-
-  if (!profileData) {
-    return (
-      <div style={{ padding: 24 }}>
-        <Empty description="No dashboard data available" />
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <Spin
-        tip="Loading Profile..."
-        style={{ display: "flex", justifyContent: "center", marginTop: 100 }}
-      />
-    );
-  }
   if (!profileData) {
     return (
       <div style={{ padding: 24 }}>

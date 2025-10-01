@@ -8,6 +8,7 @@ import {
   Button,
   Form,
   message,
+  Select,
   Radio,
 } from "antd";
 import { UserOutlined, MailOutlined, PlusOutlined } from "@ant-design/icons";
@@ -16,7 +17,7 @@ import "../assets/styles/otp.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { loginApi } from "../services/api";
 import { useSelector } from 'react-redux';
-
+const { Option } = Select;
 const CreateNewUserAdmin = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -237,25 +238,26 @@ const CreateNewUserAdmin = () => {
               </p>
             </Col>
 
-            <Col span={12}>
-              <Form.Item
-                label={
-                  <span>
-                    Role
-                    <span style={{ color: "red", marginLeft: 2 }}>*</span>
-                  </span>
-                }
-                name="role"
-                rules={[{ required: true, message: "Role is required" }]}
-              >
-                <Input
-                  placeholder="Enter Role"
-                  prefix={<UserOutlined style={{ color: "#E5E7EB",marginRight:"2px",marginTop:"2px" }} />}
-                  style={{ height: "38px", backgroundColor: "transparent" }}
-                  disabled={false}
-                />
-              </Form.Item>
-            </Col>
+<Col span={12}>
+  <Form.Item
+    label={
+      <span>
+        Role
+        <span style={{ color: "red", marginLeft: 2 }}>*</span>
+      </span>
+    }
+    name="role"
+    rules={[{ required: true, message: "Role is required" }]}
+  >
+    <Select
+      placeholder="Select Role"
+      style={{ height: "38px", backgroundColor: "transparent" }}
+    >
+      <Option value="admin">Admin</Option>
+    </Select>
+  </Form.Item>
+</Col>
+
           </Row>
 {isEdit ? (
   <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>

@@ -25,16 +25,20 @@ import CarDetails from "./components/cardetails";
 import Subcriptions from "./pages/subcriptions";
 import CustomerDetails from "./components/customerdetails";
 import Profile from "./components/profile";
+import Support from "./pages/Support";
 import CarTypes from "./pages/CarTypes";
 import ListingManagement from "./pages/listingmanagement";
 import CreateSubadmin from "./components/createsubadmin";
 import ListingDetails from "./pages/listingdetails";
 import OtpScreen from "./pages/otpscreen";
 import Individual from "./pages/Individual";
+import Dealer from "./pages/Dealer";
 import Individualdetails from "./pages/individualdetails";
 import CreateNewUserAdmin from "./pages/CreateNewUserAdmin";
 import GetAdminsData from "./pages/GetAdminsData";
 import ChangePassword from "./pages/ChangePassword";
+import Pricing from "./pages/Pricing";
+import TranscationsFin from "./pages/TranscationsFin";
 
 const AppRouter = () => {
   return (
@@ -131,6 +135,15 @@ const AppRouter = () => {
           }
         />
 
+        <Route
+          path="/user-management/dealer"
+          element={
+            <AppLayout>
+              <Dealer />
+            </AppLayout>
+          }
+        />
+
  <Route
   path="/user-management/individual/:individualId"
   element={
@@ -139,6 +152,24 @@ const AppRouter = () => {
     </AppLayout>
   }
 />
+
+ <Route
+          path="/financials/pricing"
+          element={
+            <AppLayout>
+              <Pricing />
+            </AppLayout>
+          }
+        />
+
+         <Route
+          path="/financials/transactions"
+          element={
+            <AppLayout>
+              <TranscationsFin />
+            </AppLayout>
+          }
+        />
         <Route
           path="/transactions"
           element={
@@ -152,6 +183,14 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <Subcriptions />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            <AppLayout>
+              <Support />
             </AppLayout>
           }
         />
