@@ -4,6 +4,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import {
   FaHome,
@@ -62,13 +63,16 @@ function AppLayout({ children }) {
 
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
+const headerHeight = 64; 
+const expandedSiderWidth = 200; 
+const collapsedSiderWidth = 55;
+const siderWidth = collapsed ? collapsedSiderWidth : expandedSiderWidth;
+
   console.log("1234562345",role)
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
-  const handleMenuClick = (e) => {
-    navigate(e.key);
-  };
+  
   const superAdmin = Number(localStorage.getItem("isSuperAdmin"));
   console.log("Superdamin", superAdmin);
 
@@ -79,7 +83,7 @@ function AppLayout({ children }) {
       label: "Profile",
     },
 
-    ...(superAdmin === 1
+    ...(role === "super admin"
       ? [
           {
             key: "subadmin",
@@ -175,9 +179,16 @@ function AppLayout({ children }) {
       label: "Support",
     },
     {
-      key: "/settings",
-      icon: <IoMdSettings />,
+      key: "/accountsettings",
+      icon: <FaCog />,
       label: "Settings",
+      hasDropdown: true,
+      children: [
+      {
+        key: "/accountsettings/changepassword", 
+        label: "Change Password",
+      },
+    ],
     },
     {
   key: "",
@@ -220,6 +231,7 @@ function AppLayout({ children }) {
     title: "User Management",
     tagline: "Manage individual and dealer users",
   },
+
   "/user-management/individual": {
     title: "User Management - Individual",
     tagline: "Manage individual user accounts and monitor platform activity",
@@ -232,9 +244,9 @@ function AppLayout({ children }) {
     title: "User Management",
     tagline: "Manage admin accounts and permissions",
   },
-  "/settings": {
-    title: "Support",
-    tagline: "Get help and support for the portal",
+  "/accountsettings": {
+    title: "Account Settings",
+    tagline: "Manage your password and security settings",
   },
 };
 
@@ -260,28 +272,23 @@ const currentHeader =
     label: collapsed ? "" : item.label,
   }));
 
-  const userlogoutAPI = async () => {
-    try {
-      setLoading(true);
-      const response = await loginApi.logout();
-      const userData = response?.data || response;
-      if (response.status_code === 200 || userData.status_code === 200) {
-          localStorage.clear();
-          navigate("/");
-          setTimeout(() => {
-          messageApi.open({ type: 'success', content: response.message });
-          }, 300);
-    } else {
-       messageApi.open({ type: 'error', content: response.error });
+  const handleMenuClick = ({ key }) => {
+    if (key === "logoutBottom") {
+      setLogoutModalOpen(true);
+      return;
     }
-    } catch (error) {
-      console.error("Error during logout", error);
-      message.error("Something went wrong. Please try again.");
-      setLoading(false);
-    }
+    navigate(key);
   };
 
-  // User Logout API
+  const handleUserMenuClick = ({ key }) => {
+    if (key === "logout") {
+      setLogoutModalOpen(true);
+      return;
+    }
+    if (key === "profile") navigate("/profile");
+    if (key === "subadmin") navigate("/createNewAdmin");
+    if (key === "settings") navigate("/accountsettings/changepassword");
+  };
 
   const handleLogout = async () => {
     try {
@@ -406,7 +413,6 @@ if (isCreateNewAdmin) {
         />
       </Sider>
       <Layout>
-        {/* Top Header - Conditionally rendered */}
         {!isListingDetails && (
           <Header className="header">
             <div className="d-flex justify-content-between align-items-center w-100">
@@ -464,18 +470,7 @@ if (isCreateNewAdmin) {
                 <Dropdown
                   menu={{
                     items: userMenuItems,
-                    onClick: ({ key }) => {
-                      if (key === "logout") {
-                        console.log("Logout clicked");
-                        userlogoutAPI();
-                      } else if (key === "profile") {
-                        console.log("Profile clicked");
-                        navigate("/profile");
-                      } else if (key === "subadmin") {
-                        console.log("Createadmin clicked");
-                        navigate("/createsubadmin");
-                      }
-                    },
+                    onClick: handleUserMenuClick,
                   }}
                   placement="bottomRight"
                   trigger={["click"]}
@@ -491,7 +486,6 @@ if (isCreateNewAdmin) {
             </div>
           </Header>
         )}
-        {/* Main Content */}
         <Content className="content">{children}</Content>
       </Layout>
       <Modal

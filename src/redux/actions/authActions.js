@@ -14,9 +14,9 @@ export const loginRequest = () => ({
   type: AUTH_LOGIN_REQUEST,
 });
 
-export const loginSuccess = (user, token, email,role) => ({
+export const loginSuccess = (user, token, email,role,need_password) => ({
   type: AUTH_LOGIN_SUCCESS,
-  payload: { user, token, email,role },
+  payload: { user, token, email,role,need_password },
 });
 
 export const setEmailLogin = (email) => ({
@@ -43,12 +43,12 @@ export const login = (credentials) => async (dispatch) => {
   try {
     dispatch(loginRequest());
     const response = await authAPI.login(credentials);
-    const { user, token, email, needs_password_update,role } = response.data;
+    const { user, token, email, needs_password_update,role,need_password } = response.data;
 
     // Save token in localStorage
     localStorage.setItem('token', token);
 
-    dispatch(loginSuccess(user, token, email,role));
+    dispatch(loginSuccess(user, token, email,role,need_password));
 
     return { success: true, needs_password_update };
   } catch (error) {

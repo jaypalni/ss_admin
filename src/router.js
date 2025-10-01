@@ -34,6 +34,7 @@ import Individual from "./pages/Individual";
 import Individualdetails from "./pages/individualdetails";
 import CreateNewUserAdmin from "./pages/CreateNewUserAdmin";
 import GetAdminsData from "./pages/GetAdminsData";
+import ChangePassword from "./pages/ChangePassword";
 
 const AppRouter = () => {
   return (
@@ -187,10 +188,10 @@ const AppRouter = () => {
           }
         />
         <Route
-          path="/settings"
+          path="/accountsettings/changepassword"
           element={
             <AppLayout>
-              <Settings />
+              <ChangePassword />
             </AppLayout>
           }
         />

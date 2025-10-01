@@ -17,7 +17,7 @@ const CreatePassword = () => {
   const [reenterpassworderrormsg, setReenterPasswordErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const {email,token} = useSelector((state) => state.auth);
+  const {email,token,need_password} = useSelector((state) => state.auth);
 
   const [reqLength, setReqLength] = useState(false);
   const [reqUpper, setReqUpper] = useState(false);
@@ -53,7 +53,7 @@ const CreatePassword = () => {
   }, [newPassword, reenterPassword]);
 
   const handleLoginClick = () => {
-    navigate("/OtpScreen");
+    navigate("/ForgotPassword");
   };
 
   const handleResetPassword = (e) => {
@@ -82,16 +82,46 @@ const CreatePassword = () => {
       setReenterPasswordErrorMsg("Passwords do not match.");
       return;
     }
+    const body1 = {
+      email:email,
+      new_password: newPassword,
+    };
     const body = {
       new_password: newPassword,
     };
     setLoading(true);
-    updatePassword(body);
+    if(need_password === 1){
+      updatePassword1(body1);
+    }else {
+      updatePassword(body);
+    }
+   
   };
 
   const updatePassword = async (body) => {
+
       try {
         const response = await loginApi.resetpassword(body);
+        const userData = response.data;
+        if (userData.status_code === 200) {
+          messageApi.open({ type: 'success', content: userData.message  });
+          setLoading(false);
+          navigate("/");
+        } else {
+           messageApi.open({ type: 'error', content: userData.error  });
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error during login", error);
+        messageApi.open({ type: 'error', content: error.message  });
+        setLoading(false);
+      }
+    };
+
+     const updatePassword1 = async (body) => {
+
+      try {
+        const response = await loginApi.createnewpassword(body);
         const userData = response.data;
         if (userData.status_code === 200) {
           messageApi.open({ type: 'success', content: userData.message  });

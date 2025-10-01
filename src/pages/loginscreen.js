@@ -70,7 +70,7 @@ const LoginScreen = () => {
           content: userData.message || 'Login successful!' 
         });
         dispatch(loginSuccess(userData?.data?.firstname, userData?.data?.access_token,
-           userData?.data?.email,userData?.data?.role));
+           userData?.data?.email,userData?.data?.role,userData?.data?.needs_password_update));
         console.log('Token we need', userData?.data)
         setLoading(false);
         

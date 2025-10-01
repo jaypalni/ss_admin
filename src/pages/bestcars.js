@@ -95,9 +95,10 @@ function BestCars() {
   });
 
   return (
-    <div className="container-fluid p-0" style={{ height: "calc(100vh - 70px)", 
-        overflowY: "auto",
-        padding: "20px",
+    <div className="container-fluid p-0" style={{ height: "calc(100vh - 80px)", 
+        padding: "4px",
+        overflowY: "auto",  
+        boxSizing: "border-box",
         }}>
       {/* Search & Filters Section */}
       <div

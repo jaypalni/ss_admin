@@ -49,6 +49,7 @@ const API_CONFIG = {
       VERIFYOTP: "/api/admin/verify-otp",
       RESENDOTP: "/api/admin/resend-otp",
       RESETPASSWORD:"api/admin/reset-password",
+      UPDATEPASSWORD:"/api/admin/update_password",
     },
 
     BESTCAR: {},

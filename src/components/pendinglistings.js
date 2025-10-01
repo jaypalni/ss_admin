@@ -201,7 +201,10 @@ const PendingListings = () => {
       } else if (status === "rejected") {
         bgColor = "#FFE4E6";
         textColor = "#B91C1C";
-      }
+      }else if (status === "sold") {
+        bgColor = "#DBEAFE";
+        textColor = "#1E40AF";
+      } 
 
       return (
         <span

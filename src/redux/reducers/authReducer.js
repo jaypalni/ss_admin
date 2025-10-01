@@ -13,6 +13,7 @@ const initialState = {
   token: localStorage.getItem('token'),
   email:null,
   role:null,
+  need_password:null,
   loading: false,
   error: null,
   isAuthenticated: !!localStorage.getItem('token'),
@@ -31,6 +32,7 @@ const authReducer = (state = initialState, action) => {
         token: action.payload.token,
         email:action.payload.email,
         role:action.payload.role,
+        need_password:action.payload.need_password,
         isAuthenticated: true,
         error: null,
       };
@@ -42,7 +44,7 @@ const authReducer = (state = initialState, action) => {
         isAuthenticated: false,
       };
     case AUTH_LOGOUT:
-      return { ...state, user: null, token: null,email:null,role: null, isAuthenticated: false, error: null };
+      return { ...state, user: null, token: null,email:null,role: null, need_password: null,isAuthenticated: false, error: null };
 
     case SET_EMAIL:
       return {

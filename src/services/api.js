@@ -191,6 +191,8 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.RESENDOTP,body),
     resetpassword: (body) =>
     api1.post(API_CONFIG.ENDPOINTS.LOGIN.RESETPASSWORD,body),
+    updatepassword: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.UPDATEPASSWORD,body),
 };
 export const bestcarAPI = {};
 
