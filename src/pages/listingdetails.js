@@ -115,10 +115,8 @@ useEffect(() => {
     return;
   }
 
-  // Find the selected reason object
   const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
 
-  // If "Other" is selected, comment becomes mandatory
   if (selectedReason?.rejected_reason.toLowerCase() === "other" && !comment?.trim()) {
     messageApi.open({ type: "warning", content: "Please add a comment for 'Other' reason." });
     return;
@@ -129,7 +127,7 @@ useEffect(() => {
     
     const body = {
       car_id: listingId,
-      rejection_reason: rejectionReason,
+      rejection_reason: selectedReason?.rejected_reason,
       admin_rejection_comment: comment || "",
     };
 
