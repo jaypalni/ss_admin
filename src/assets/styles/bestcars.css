@@ -1,0 +1,25 @@
+.custom-pagination .ant-pagination-item-active {
+  border-color: #008AD5 !important;
+  background-color: #008AD5 !important;
+}
+.custom-pagination .ant-pagination-item-active a {
+  color: #fff !important;
+}
+
+.custom-antd-switch.ant-switch-checked {
+  background-color: #008AD5 !important; /* blue track */
+}
+.custom-antd-switch {
+  background-color: #E5E7EB !important; /* black track when OFF */
+}
+
+/* Knob */
+.custom-antd-switch .ant-switch-handle {
+  background-color: none !important; 
+}
+
+.custom-switch .form-check-input::after {
+  background-color: transparent !important; 
+  border: none !important;  
+}
+

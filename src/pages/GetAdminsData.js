@@ -7,7 +7,7 @@ import editIcon from "../assets/images/edit.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { FaTrash } from "react-icons/fa";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const GetAdminsData = () => {
 const navigate = useNavigate();

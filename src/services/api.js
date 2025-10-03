@@ -193,6 +193,10 @@ export const loginApi = {
     api1.post(API_CONFIG.ENDPOINTS.LOGIN.RESETPASSWORD,body),
     updatepassword: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.UPDATEPASSWORD,body),
+    bestcarpick:  (page = 1, limit = 10) =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.BESTCARSPICK(page,limit)),
+    makedata: () =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.MAKEDATA),
 };
 export const bestcarAPI = {};
 
