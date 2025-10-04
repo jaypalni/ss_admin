@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginApi, userAPI } from "../services/api";
 import { Row, Col } from "react-bootstrap";
@@ -119,12 +119,15 @@ function BestCars() {
     };
   };
 
+  // Fetch list of makes (we'll use make.name as the Select value)
   const fetchMakeData = async () => {
     try {
       const res = await loginApi.makedata();
       const data = handleApiResponse(res);
       if (data?.data && Array.isArray(data.data)) {
-        setMakes(data.data);
+        // ensure each make has { id, name }
+        const normalized = data.data.map((m) => ({ id: m.id, name: m.name ?? String(m.id) }));
+        setMakes(normalized);
       } else {
         setMakes([]);
       }
@@ -137,11 +140,15 @@ function BestCars() {
   const fetchBestCarsData = async (page = 1, limit = 10, filters = {}) => {
     try {
       setLoading(true);
-      const response = await loginApi.bestcarpick(page, limit, {
-        make: filters.make || "",
-        search: filters.search || "",
-      });
 
+      const payload = {
+        make: filters.make ?? "",
+        search: filters.search ?? "",
+        page,
+        limit
+      };
+
+      const response = await loginApi.bestcarpick(payload);
       const data = handleApiResponse(response);
 
       if (data?.data && Array.isArray(data.data)) {
@@ -199,14 +206,18 @@ function BestCars() {
     }
   };
 
+  // Initial load
   useEffect(() => {
     fetchMakeData();
     fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // whenever filters change we request page 1 from server
   useEffect(() => {
     setPagination((p) => ({ ...p, current: 1 }));
     fetchBestCarsData(1, pagination.pageSize, { make: makeFilter, search: searchValue });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [makeFilter, searchValue]);
 
   const onChangePage = (page, newPageSize) => {
@@ -216,18 +227,13 @@ function BestCars() {
     fetchBestCarsData(effectivePage, effectivePageSize, { make: makeFilter, search: searchValue });
   };
 
-  const filteredCars = useMemo(() => {
-    return cars.filter((car) => {
-      if (!searchValue) return true;
-      return (car.makeModel + " " + car.details).toLowerCase().includes(searchValue.toLowerCase());
-    });
-  }, [cars, searchValue]);
+  const displayedCars = cars;
 
   const paginationTotal = pagination.total ?? 0;
   const current = pagination.current ?? 1;
   const pageSize = pagination.pageSize ?? 10;
   const startIndex = paginationTotal === 0 ? 0 : (current - 1) * pageSize;
-  const endIndex = Math.min(startIndex + (filteredCars.length || pageSize), paginationTotal);
+  const endIndex = Math.min(startIndex + (displayedCars.length || pageSize), paginationTotal);
 
   const handleToggle = async (id) => {
     const car = cars.find((c) => c.id === id);
@@ -259,6 +265,7 @@ function BestCars() {
           setBestPicksIsGlobal(true);
         }
 
+        // refresh current page from server to keep data consistent
         await fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
 
         if (data.message) {
@@ -342,7 +349,8 @@ function BestCars() {
                 >
                   <Option value="">All Makes</Option>
                   {makes.map((m) => (
-                    <Option key={m.id} value={m.name || m.id}>
+                    // IMPORTANT: use m.name as the value so selected value is not an id
+                    <Option key={m.id} value={m.name}>
                       {m.name}
                     </Option>
                   ))}
@@ -379,10 +387,10 @@ function BestCars() {
       >
         <div style={{ width: "90%", margin: "0 auto", padding: 0 }}>
           <div style={{ marginTop: 8 }}>
-            {filteredCars.length === 0 ? (
+            {displayedCars.length === 0 ? (
               <div style={{ padding: 24, textAlign: "center", color: "#6B7280" }}>No data found</div>
             ) : (
-              filteredCars.map((car) => (
+              displayedCars.map((car) => (
                 <Card
                   key={car.id}
                   className="mb-3 shadow-sm"
@@ -416,7 +424,7 @@ function BestCars() {
                       <p style={{ fontSize: "14px", fontWeight: 400, color: "#4B5563", marginBottom: "6px" }}>{car.details}</p>
 
                       <p style={{ fontSize: "13px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>
-                        {car.sellerName ? <>Seller: <span style={{ fontWeight: 400 }}>{car.sellerName}</span></> : null}
+                        {car.sellerName ? (<>Seller: <span style={{ fontWeight: 400 }}>{car.sellerName}</span></>) : null}
                         {car.sellerCity ? (
                           <>
                             {car.sellerName ? " • " : ""}
@@ -455,7 +463,11 @@ function BestCars() {
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
               <div style={{ color: "#6B7280" }}>
-                {paginationTotal === 0 ? <>Showing 0 results</> : <>Showing {startIndex + 1} to {endIndex} of {paginationTotal} vehicles</>}
+                {paginationTotal === 0 ? (
+                  <>Showing 0 results</>
+                ) : (
+                  <>Showing {startIndex + 1} to {endIndex} of {paginationTotal} vehicles</>
+                )}
               </div>
 
               <Pagination current={pagination.current} pageSize={pagination.pageSize} total={pagination.total} onChange={onChangePage} className="custom-pagination" />

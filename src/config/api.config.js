@@ -51,7 +51,7 @@ const API_CONFIG = {
       RESETPASSWORD:"api/admin/reset-password",
       UPDATEPASSWORD:"/api/admin/update_password",
       MAKEDATA:"/api/cars/makes",
-      BESTCARSPICK:(page = 1, limit = 10) => `/api/admin/cars/best-picks?page=${page}&limit=${limit}`,
+      BESTCARSPICK:  "/api/admin/cars/best-picks",
     },
 
     BESTCAR: {},
