@@ -309,28 +309,25 @@ const Pricing = () => {
 
         <h6 style={{ fontSize: "12px", fontWeight: "500", color: "#374151", marginBottom: 10 }}>Monthly Analytics</h6>
 
-        {/* Horizontal scroll container */}
         <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
             {tableData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
             ) : (
               (() => {
-                // cardsData = package cards (unchanged) + single Total summary card (last)
                 const cardsData = [
                   ...tableData,
                   {
                     key: "__total_summary__",
                     id: "__total_summary__",
                     name: "Total",
-                    total: totalActive, // EXACT API value (no fallback)
-                    percentage: totalPercentage, // EXACT API value (no fallback)
+                    total: totalActive, 
+                    percentage: totalPercentage, 
                     isSummary: true,
                   },
                 ];
 
                 return cardsData.map((item) => {
-                  // icon selection: force modelIcon for summary, else based on name
                   let icon = modelIcon;
                   if (!item.isSummary) {
                     const nameLower = (item.name || "").toLowerCase();
@@ -398,7 +395,6 @@ const Pricing = () => {
                         </div>
 
                         <div style={{ fontWeight: 700, fontSize: 18 }}>
-                          {/* package totals for packages, API total for the Total card */}
                           {item.isSummary ? item.total : item.total !== undefined && item.total !== null ? item.total : item.listings}
                         </div>
                       </div>
