@@ -197,6 +197,16 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.BESTCARSPICK,body),
     makedata: () =>
     api.get(API_CONFIG.ENDPOINTS.LOGIN.MAKEDATA),
+    getsubscriptionpackage: () =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.SUBSCRIPTIONPACKAGE),
+    editsubscriptionpackage: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.EDITSUBSCRIPTIONPACKAGE,body),
+    createsubscriptionpackage: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.CREATESUBSCRIPTIONPACKAGE,body),
+    deletesubscriptionpackage: (id) =>
+    api.delete(API_CONFIG.ENDPOINTS.LOGIN.DELETSUBSCRIPTIONPACKAGE(id)),
+    editsubscriptionpackagedata: (id) =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.EDITDATASUBSCRIPTIONPACKAGE(id)),
 };
 export const bestcarAPI = {};
 

@@ -52,6 +52,11 @@ const API_CONFIG = {
       UPDATEPASSWORD:"/api/admin/update_password",
       MAKEDATA:"/api/cars/makes",
       BESTCARSPICK:  "/api/admin/cars/best-picks",
+      SUBSCRIPTIONPACKAGE:  "/api/admin/subscription-packages",
+      EDITSUBSCRIPTIONPACKAGE:  "/api/admin/subscription-packages/edit",
+      CREATESUBSCRIPTIONPACKAGE:  "/api/admin/subscription-packages",
+      DELETSUBSCRIPTIONPACKAGE:(id) =>  `/api/admin/subscription-packages/${id}`,
+      EDITDATASUBSCRIPTIONPACKAGE:(id) =>  `/api/admin/subscription-packages/${id}`,
     },
 
     BESTCAR: {},

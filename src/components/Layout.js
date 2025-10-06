@@ -30,14 +30,12 @@ import { TfiMenuAlt } from "react-icons/tfi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RiAdminFill } from "react-icons/ri";
 import "../assets/styles/layout.css";
-import { IoCarSharp } from "react-icons/io5";
-import { MdSubscriptions, MdLogout } from "react-icons/md";
+import {  MdLogout } from "react-icons/md";
 import menucar_icon from "../assets/images/menucariocn.png";
 import { loginApi } from "../services/api";
 import PropTypes from 'prop-types';
 import Right from "../assets/images/Right.svg";
 import dashboard_icon from "../assets/images/dashboard_icon.svg";
-import { IoMdSettings } from "react-icons/io";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { useSelector } from "react-redux";
 const { Header, Sider, Content } = Layout;
@@ -223,6 +221,14 @@ const siderWidth = collapsed ? collapsedSiderWidth : expandedSiderWidth;
     title: "Pricing",
     tagline: "Manage pricing plans and rates",
   },
+   "/financials/pricing/createNewPackage": {
+    title: "Create New Pricing Package",
+    tagline: "Add a new pricing plan for car listings",
+  },
+  "/financials/pricing/createNewPackage/:id": {
+    title: "Edit Pricing Package",
+    tagline: "Edit a pricing plan for car listings",
+  },
   "/financials/transactions": {
     title: "Transactions",
     tagline: "Track all financial transactions",
@@ -250,7 +256,7 @@ const siderWidth = collapsed ? collapsedSiderWidth : expandedSiderWidth;
   },
 };
 
-const currentHeader =
+let currentHeader =
   headerTitles[location.pathname] ||
   headerTitles[`/${pathSegments[0]}/${pathSegments[1]}`] ||
   headerTitles[`/${pathSegments[0]}`] ||
@@ -258,6 +264,16 @@ const currentHeader =
     title: "Dashboard",
     tagline: "",
   };
+
+  if (
+  pathSegments.length >= 4 &&
+  pathSegments[0] === "financials" &&
+  pathSegments[1] === "pricing" &&
+  pathSegments[2] === "createNewPackage" &&
+  pathSegments[3]
+) {
+  currentHeader = headerTitles["/financials/pricing/createNewPackage/:id"] || currentHeader;
+}
 
   // Create menu items with tooltips for collapsed state
   const menuItemsWithTooltips = sideMenuItems.map((item) => ({

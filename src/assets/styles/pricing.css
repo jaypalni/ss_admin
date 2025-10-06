@@ -1,0 +1,20 @@
+.card-icon-wrapper-price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 38px;
+  border-radius: 8px;
+  margin-right: -5px;
+}
+
+.dashboard-summary-mini {
+  flex: 1 1 200px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

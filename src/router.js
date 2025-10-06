@@ -38,6 +38,7 @@ import CreateNewUserAdmin from "./pages/CreateNewUserAdmin";
 import GetAdminsData from "./pages/GetAdminsData";
 import ChangePassword from "./pages/ChangePassword";
 import Pricing from "./pages/Pricing";
+import CreateNewSubscription from "./pages/CreateNewSubscription";
 import TranscationsFin from "./pages/TranscationsFin";
 
 const AppRouter = () => {
@@ -153,11 +154,29 @@ const AppRouter = () => {
   }
 />
 
- <Route
+        <Route
           path="/financials/pricing"
           element={
             <AppLayout>
               <Pricing />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/financials/pricing/createNewPackage"
+          element={
+            <AppLayout>
+              <CreateNewSubscription />
+            </AppLayout>
+          }
+        />
+
+         <Route
+          path="/financials/pricing/createNewPackage/:id"
+          element={
+            <AppLayout>
+              <CreateNewSubscription />
             </AppLayout>
           }
         />

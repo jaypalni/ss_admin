@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginApi, userAPI } from "../services/api";
 import { Row, Col } from "react-bootstrap";
@@ -38,6 +38,7 @@ function BestCars() {
   const [cars, setCars] = useState([]);
   const [makes, setMakes] = useState([]);
 
+  // Best picks info (API-level if provided)
   const [bestPicksTotal, setBestPicksTotal] = useState(0);
   const [bestPicksIsGlobal, setBestPicksIsGlobal] = useState(false);
 
@@ -94,7 +95,7 @@ function BestCars() {
       details: [
         `${item.make ?? ""} ${item.model ?? ""}`.trim(),
         item.transmission_type,
-        item.kilometers ? `${item.kilometers.toLocaleString()} km` : null,
+        item.kilometers ? `${Number(item.kilometers).toLocaleString()} km` : null,
         item.location,
       ]
         .filter(Boolean)
@@ -119,13 +120,11 @@ function BestCars() {
     };
   };
 
-  // Fetch list of makes (we'll use make.name as the Select value)
   const fetchMakeData = async () => {
     try {
       const res = await loginApi.makedata();
       const data = handleApiResponse(res);
       if (data?.data && Array.isArray(data.data)) {
-        // ensure each make has { id, name }
         const normalized = data.data.map((m) => ({ id: m.id, name: m.name ?? String(m.id) }));
         setMakes(normalized);
       } else {
@@ -137,6 +136,12 @@ function BestCars() {
     }
   };
 
+  /**
+   * fetchBestCarsData
+   * - Uses API fields robustly:
+   *   - total_cars (preferred) else pagination.total
+   *   - best_pick (preferred) else total_best_picks / total_best / compute from page
+   */
   const fetchBestCarsData = async (page = 1, limit = 10, filters = {}) => {
     try {
       setLoading(true);
@@ -145,23 +150,24 @@ function BestCars() {
         make: filters.make ?? "",
         search: filters.search ?? "",
         page,
-        limit
+        limit,
       };
 
       const response = await loginApi.bestcarpick(payload);
       const data = handleApiResponse(response);
 
+      // map items -> cars UI model
       if (data?.data && Array.isArray(data.data)) {
         const mapped = data.data.map(mapApiItemToCar);
         setCars(mapped);
 
+        // total cars: prefer data.total_cars, otherwise pagination.total (robust)
         const apiTotalCars =
           typeof data.total_cars === "number"
             ? data.total_cars
             : typeof data.total_cars === "string"
             ? Number(data.total_cars)
             : undefined;
-        setTotalCars(apiTotalCars ?? (data.pagination?.total ?? data.pagination?.total_cars ?? 0));
 
         const paginationTotal =
           typeof data.pagination?.total === "number"
@@ -170,6 +176,9 @@ function BestCars() {
             ? data.pagination.total_cars
             : apiTotalCars ?? 0;
 
+        setTotalCars(apiTotalCars ?? paginationTotal ?? 0);
+
+        // build pagination state using whichever fields are available
         const p = data.pagination || {};
         setPagination({
           current: p.page ?? p.current ?? page,
@@ -177,23 +186,33 @@ function BestCars() {
           total: paginationTotal,
         });
 
-        if (typeof data.total_best_picks === "number") {
+        // BEST PICK total:
+        // prefer data.best_pick (explicit top-level), then data.total_best_picks / data.total_best,
+        // otherwise fall back to counting is_best_pick on this page (local)
+        if (typeof data.best_pick === "number") {
+          setBestPicksTotal(data.best_pick);
+          setBestPicksIsGlobal(true);
+        } else if (typeof data.total_best_picks === "number") {
           setBestPicksTotal(data.total_best_picks);
           setBestPicksIsGlobal(true);
         } else if (typeof data.total_best === "number") {
           setBestPicksTotal(data.total_best);
           setBestPicksIsGlobal(true);
         } else {
+          // fallback: count best picks on this page (not global)
           const pageBestCount = (data.data || []).reduce((acc, it) => acc + (Number(it.is_best_pick ?? 0) ? 1 : 0), 0);
           setBestPicksTotal(pageBestCount);
           setBestPicksIsGlobal(false);
         }
       } else {
+        // no data array -> clear
         setCars([]);
-        setPagination((prev) => ({ ...prev, total: 0 }));
-        setTotalCars(0);
-        setBestPicksTotal(0);
-        setBestPicksIsGlobal(false);
+        const p = data.pagination || {};
+        const pageTotal = typeof p.total === "number" ? p.total : 0;
+        setPagination((prev) => ({ ...prev, total: pageTotal }));
+        setTotalCars(typeof data.total_cars === "number" ? data.total_cars : pageTotal ?? 0);
+        setBestPicksTotal(typeof data.best_pick === "number" ? data.best_pick : 0);
+        setBestPicksIsGlobal(typeof data.best_pick === "number");
       }
     } catch (err) {
       const errorData = handleApiError(err);
@@ -206,15 +225,15 @@ function BestCars() {
     }
   };
 
-  // Initial load
   useEffect(() => {
     fetchMakeData();
+    // initial load with current pagination state
     fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // whenever filters change we request page 1 from server
   useEffect(() => {
+    // when filters change, reset to page 1 and fetch
     setPagination((p) => ({ ...p, current: 1 }));
     fetchBestCarsData(1, pagination.pageSize, { make: makeFilter, search: searchValue });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,16 +251,18 @@ function BestCars() {
   const paginationTotal = pagination.total ?? 0;
   const current = pagination.current ?? 1;
   const pageSize = pagination.pageSize ?? 10;
-  const startIndex = paginationTotal === 0 ? 0 : (current - 1) * pageSize;
-  const endIndex = Math.min(startIndex + (displayedCars.length || pageSize), paginationTotal);
+  const startIndex = totalCars === 0 ? 0 : (current - 1) * pageSize;
+  const endIndex = Math.min(startIndex + (displayedCars.length || pageSize), totalCars);
 
   const handleToggle = async (id) => {
     const car = cars.find((c) => c.id === id);
     if (!car) return;
     const newValue = !car.bestPick;
 
+    // optimistic UI update
     setCars((prev) => prev.map((c) => (c.id === id ? { ...c, bestPick: newValue } : c)));
 
+    // if best picks count is not global we update local count directly
     if (!bestPicksIsGlobal) {
       setBestPicksTotal((prev) => (newValue ? prev + 1 : Math.max(0, prev - 1)));
     }
@@ -257,7 +278,11 @@ function BestCars() {
       const data = handleApiResponse(response);
 
       if (data && (data.status_code === 200 || data.success === true)) {
-        if (typeof data.total_best_picks === "number") {
+        // If API responds with new global best pick total, use it
+        if (typeof data.best_pick === "number") {
+          setBestPicksTotal(data.best_pick);
+          setBestPicksIsGlobal(true);
+        } else if (typeof data.total_best_picks === "number") {
           setBestPicksTotal(data.total_best_picks);
           setBestPicksIsGlobal(true);
         } else if (typeof data.total_best === "number") {
@@ -265,13 +290,14 @@ function BestCars() {
           setBestPicksIsGlobal(true);
         }
 
-        // refresh current page from server to keep data consistent
+        // re-fetch page to ensure server state and counts are accurate
         await fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
 
         if (data.message) {
           messageApi.open({ type: "success", content: data.message });
         }
       } else {
+        // revert optimistic
         setCars((prev) => prev.map((c) => (c.id === id ? { ...c, bestPick: !newValue } : c)));
         if (!bestPicksIsGlobal) {
           setBestPicksTotal((prev) => (newValue ? Math.max(0, prev - 1) : prev + 1));
@@ -279,6 +305,7 @@ function BestCars() {
         messageApi.open({ type: "error", content: data?.message || "Failed to update Best Pick" });
       }
     } catch (err) {
+      // revert optimistic
       setCars((prev) => prev.map((c) => (c.id === id ? { ...c, bestPick: !newValue } : c)));
       if (!bestPicksIsGlobal) {
         setBestPicksTotal((prev) => (newValue ? Math.max(0, prev - 1) : prev + 1));
@@ -290,7 +317,6 @@ function BestCars() {
     }
   };
 
-  // checkbox handlers (top-left)
   const handleCardCheckboxChange = (carId, checked) => {
     setSelectedIds((prev) => {
       if (checked) {
@@ -349,7 +375,6 @@ function BestCars() {
                 >
                   <Option value="">All Makes</Option>
                   {makes.map((m) => (
-                    // IMPORTANT: use m.name as the value so selected value is not an id
                     <Option key={m.id} value={m.name}>
                       {m.name}
                     </Option>
@@ -463,14 +488,14 @@ function BestCars() {
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
               <div style={{ color: "#6B7280" }}>
-                {paginationTotal === 0 ? (
+                {totalCars === 0 ? (
                   <>Showing 0 results</>
                 ) : (
-                  <>Showing {startIndex + 1} to {endIndex} of {paginationTotal} vehicles</>
+                  <>Showing {startIndex + 1} to {endIndex} of {totalCars} vehicles</>
                 )}
               </div>
 
-              <Pagination current={pagination.current} pageSize={pagination.pageSize} total={pagination.total} onChange={onChangePage} className="custom-pagination" />
+              <Pagination current={pagination.current} pageSize={pagination.pageSize} total={totalCars} onChange={onChangePage} className="custom-pagination" />
             </div>
           </div>
         </div>
