@@ -218,8 +218,8 @@ const siderWidth = collapsed ? collapsedSiderWidth : expandedSiderWidth;
     tagline: "View financial transactions and pricing",
   },
   "/financials/pricing": {
-    title: "Pricing",
-    tagline: "Manage pricing plans and rates",
+    title: "Pricing Management",
+    tagline: "Manage subscription packages and featured listing pricing",
   },
    "/financials/pricing/createNewPackage": {
     title: "Create New Pricing Package",
@@ -275,7 +275,6 @@ let currentHeader =
   currentHeader = headerTitles["/financials/pricing/createNewPackage/:id"] || currentHeader;
 }
 
-  // Create menu items with tooltips for collapsed state
   const menuItemsWithTooltips = sideMenuItems.map((item) => ({
     ...item,
     icon: collapsed ? (
@@ -326,7 +325,6 @@ let currentHeader =
     }
   };
 
-  // Check if current route is listing details to hide header
   const isListingDetails = location.pathname.startsWith('/listingdetails/');
 let breadcrumbItems = null;
 if (isCreateNewAdmin) {
@@ -380,7 +378,6 @@ if (isCreateNewAdmin) {
     flexDirection: 'row',
   }}
 >
-  {/* Car Icon */}
   <img
     src={menucar_icon}
     alt="Car"
@@ -390,7 +387,6 @@ if (isCreateNewAdmin) {
     }}
   />
 
-  {/* Text Section */}
   {!collapsed && (
     <div
       style={{
