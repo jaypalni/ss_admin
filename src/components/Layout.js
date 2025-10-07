@@ -414,7 +414,7 @@ if (isCreateNewAdmin) {
         <Menu
           theme="light"
            mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[location.pathname.startsWith('/listingdetails/') ? '/listingmanagement' : location.pathname]}
           items={menuItemsWithTooltips}
           onClick={handleMenuClick}
           className="sidebar-menu"
