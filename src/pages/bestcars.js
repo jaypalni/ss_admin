@@ -21,6 +21,122 @@ import { SearchOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
+// Helper function to determine status label from approval value
+const getStatusLabel = (approval, status) => {
+  const approvalVal = (approval ?? "").toString().toLowerCase();
+  if (approvalVal === "approved") return "Active";
+  if (approvalVal === "pending") return "Pending";
+  return status ?? "N/A";
+};
+
+// Helper function to get status colors
+const getStatusColors = (statusLabel) => {
+  const statusLower = statusLabel.toString().toLowerCase();
+  
+  if (statusLower === "active") {
+    return { statusColor: "#DCFCE7", statusTextColor: "#166534" };
+  }
+  if (statusLower === "pending" || statusLower === "unsold") {
+    return { statusColor: "#FEF3C7", statusTextColor: "#92400E" };
+  }
+  return { statusColor: "#DCFCE7", statusTextColor: "#166534" };
+};
+
+// Helper function to get premium badge info
+const getPremiumBadge = (item) => {
+  if (item.is_featured) {
+    return {
+      premium: "Featured",
+      premiumColor: "#E0F2FE",
+      premiumTextColor: "#1E40AF",
+    };
+  }
+  if (item.is_best_pick) {
+    return {
+      premium: "Best Pick",
+      premiumColor: "#FEF3C7",
+      premiumTextColor: "#EA580C",
+    };
+  }
+  return {
+    premium: item.badges ?? "",
+    premiumColor: "#F3F4F6",
+    premiumTextColor: "#374151",
+  };
+};
+
+// Helper function to format seller information
+const formatSellerInfo = (userDetails) => {
+  const sellerFirst = userDetails?.first_name ?? "";
+  const sellerLast = userDetails?.last_name ?? "";
+  const sellerName = `${sellerFirst} ${sellerLast}`.trim();
+  const sellerCity = userDetails?.location && userDetails.location !== "" ? userDetails.location : "NA";
+  
+  return { sellerName, sellerCity };
+};
+
+// Helper function to safely parse numeric value
+const safeParseNumber = (value, fallback = 0) => {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Number(value);
+  return fallback;
+};
+
+// Helper function to extract best picks total from API response
+const extractBestPicksTotal = (data) => {
+  if (typeof data.best_pick === "number") {
+    return { total: data.best_pick, isGlobal: true };
+  }
+  if (typeof data.total_best_picks === "number") {
+    return { total: data.total_best_picks, isGlobal: true };
+  }
+  if (typeof data.total_best === "number") {
+    return { total: data.total_best, isGlobal: true };
+  }
+  
+  // Calculate from page data
+  const pageBestCount = (data.data || []).reduce(
+    (acc, it) => acc + (Number(it.is_best_pick ?? 0) ? 1 : 0),
+    0
+  );
+  return { total: pageBestCount, isGlobal: false };
+};
+
+// Helper function to extract pagination total from API response
+const extractPaginationTotal = (data) => {
+  const apiTotalCars = safeParseNumber(data.total_cars, undefined);
+  
+  const paginationTotal =
+    safeParseNumber(data.pagination?.total, undefined) ??
+    safeParseNumber(data.pagination?.total_cars, undefined) ??
+    apiTotalCars ??
+    0;
+  
+  return { apiTotalCars, paginationTotal };
+};
+
+// Helper function to update car best pick status in array
+const updateCarBestPick = (cars, carId, bestPickValue) => {
+  return cars.map((c) => (c.id === carId ? { ...c, bestPick: bestPickValue } : c));
+};
+
+// Helper function to update best picks count
+const updateBestPicksCount = (currentTotal, newValue, isGlobal) => {
+  if (isGlobal) return currentTotal;
+  return newValue ? currentTotal + 1 : Math.max(0, currentTotal - 1);
+};
+
+// Helper function to rollback best picks count
+const rollbackBestPicksCount = (currentTotal, newValue, isGlobal) => {
+  if (isGlobal) return currentTotal;
+  return newValue ? Math.max(0, currentTotal - 1) : currentTotal + 1;
+};
+
+// Helper function to check if API response is successful
+const isApiResponseSuccessful = (data) => {
+  return data && (data.status_code === 200 || data.success === true);
+};
+
 function BestCars() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
@@ -57,62 +173,37 @@ function BestCars() {
   };
 
   const mapApiItemToCar = (item) => {
-    const sellerFirst = item.user_details?.first_name ?? "";
-    const sellerLast = item.user_details?.last_name ?? "";
-    const sellerName = `${sellerFirst} ${sellerLast}`.trim();
-    let sellerCity = item.user_details?.location ?? "";
-    sellerCity = sellerCity !== "" ? sellerCity : "NA";
+    const { sellerName, sellerCity } = formatSellerInfo(item.user_details);
+    const statusLabel = getStatusLabel(item.approval, item.status);
+    const { statusColor, statusTextColor } = getStatusColors(statusLabel);
+    const premiumBadge = getPremiumBadge(item);
 
-    const approvalVal = (item.approval ?? "").toString().toLowerCase();
-    const statusLabel =
-      approvalVal === "approved"
-        ? "Active"
-        : approvalVal === "pending"
-        ? "Pending"
-        : item.status ?? "N/A";
+    const details = [
+      `${item.make ?? ""} ${item.model ?? ""}`.trim(),
+      item.transmission_type,
+      item.kilometers ? `${Number(item.kilometers).toLocaleString()} km` : null,
+      item.location,
+    ]
+      .filter(Boolean)
+      .join(" • ");
 
-    let statusColor;
-    let statusTextColor;
-    if (statusLabel.toString().toLowerCase() === "active") {
-      statusColor = "#DCFCE7";
-      statusTextColor = "#166534";
-    } else if (statusLabel.toString().toLowerCase() === "pending") {
-      statusColor = "#FEF3C7";
-      statusTextColor = "#92400E";
-    } else if (statusLabel.toString().toLowerCase() === "unsold") {
-      statusColor = "#FEF3C7";
-      statusTextColor = "#92400E";
-    } else {
-      statusColor = "#DCFCE7";
-      statusTextColor = "#166534";
-    }
+    const price = item.price
+      ? `IQD ${Number(item.price).toLocaleString()}`
+      : "N/A";
 
     return {
       id: item.id,
       image: buildImageUrl(item.car_image || item.image),
       makeModel: `${item.ad_title ?? ""}`.trim(),
-      details: [
-        `${item.make ?? ""} ${item.model ?? ""}`.trim(),
-        item.transmission_type,
-        item.kilometers ? `${Number(item.kilometers).toLocaleString()} km` : null,
-        item.location,
-      ]
-        .filter(Boolean)
-        .join(" • "),
-      price: item.price
-        ? typeof item.price === "string"
-          ? `IQD ${Number(item.price).toLocaleString()}`
-          : `IQD ${item.price}`
-        : "N/A",
+      details,
+      price,
       status: statusLabel,
       statusColor,
       statusTextColor,
-      premium: item.is_featured ? "Featured" : item.is_best_pick ? "Best Pick" : item.badges ?? "",
-      premiumColor: item.is_featured ? "#E0F2FE" : item.is_best_pick ? "#FEF3C7" : "#F3F4F6",
-      premiumTextColor: item.is_featured ? "#1E40AF" : item.is_best_pick ? "#EA580C" : "#374151",
+      ...premiumBadge,
       qualityScore: item.quality_score ?? (item.views ? Math.min(10, Math.round(item.views / 200)) : 7),
       views: item.views ?? 0,
-      bestPick: Boolean(Number(item.is_best_pick ?? (item.is_best_pick === true ? 1 : 0))),
+      bestPick: Boolean(Number(item.is_best_pick ?? 0)),
       sellerName,
       sellerCity,
       raw: item,
@@ -141,7 +232,7 @@ function BestCars() {
 
       const payload = {
         make: filters.make ?? "",
-        search: filters.search ?? "",
+        search_query: filters.search ?? "",
         page,
         limit,
       };
@@ -153,21 +244,8 @@ function BestCars() {
         const mapped = data.data.map(mapApiItemToCar);
         setCars(mapped);
 
-        const apiTotalCars =
-          typeof data.total_cars === "number"
-            ? data.total_cars
-            : typeof data.total_cars === "string"
-            ? Number(data.total_cars)
-            : undefined;
-
-        const paginationTotal =
-          typeof data.pagination?.total === "number"
-            ? data.pagination.total
-            : typeof data.pagination?.total_cars === "number"
-            ? data.pagination.total_cars
-            : apiTotalCars ?? 0;
-
-        setTotalCars(apiTotalCars ?? paginationTotal ?? 0);
+        const { apiTotalCars, paginationTotal } = extractPaginationTotal(data);
+        setTotalCars(apiTotalCars ?? paginationTotal);
 
         const p = data.pagination || {};
         setPagination({
@@ -176,28 +254,16 @@ function BestCars() {
           total: paginationTotal,
         });
 
-    
-        if (typeof data.best_pick === "number") {
-          setBestPicksTotal(data.best_pick);
-          setBestPicksIsGlobal(true);
-        } else if (typeof data.total_best_picks === "number") {
-          setBestPicksTotal(data.total_best_picks);
-          setBestPicksIsGlobal(true);
-        } else if (typeof data.total_best === "number") {
-          setBestPicksTotal(data.total_best);
-          setBestPicksIsGlobal(true);
-        } else {
-          const pageBestCount = (data.data || []).reduce((acc, it) => acc + (Number(it.is_best_pick ?? 0) ? 1 : 0), 0);
-          setBestPicksTotal(pageBestCount);
-          setBestPicksIsGlobal(false);
-        }
+        const bestPicksData = extractBestPicksTotal(data);
+        setBestPicksTotal(bestPicksData.total);
+        setBestPicksIsGlobal(bestPicksData.isGlobal);
       } else {
         setCars([]);
         const p = data.pagination || {};
-        const pageTotal = typeof p.total === "number" ? p.total : 0;
+        const pageTotal = safeParseNumber(p.total, 0);
         setPagination((prev) => ({ ...prev, total: pageTotal }));
-        setTotalCars(typeof data.total_cars === "number" ? data.total_cars : pageTotal ?? 0);
-        setBestPicksTotal(typeof data.best_pick === "number" ? data.best_pick : 0);
+        setTotalCars(safeParseNumber(data.total_cars, pageTotal));
+        setBestPicksTotal(safeParseNumber(data.best_pick, 0));
         setBestPicksIsGlobal(typeof data.best_pick === "number");
       }
     } catch (err) {
@@ -239,33 +305,24 @@ function BestCars() {
   const handleToggle = async (id) => {
     const car = cars.find((c) => c.id === id);
     if (!car) return;
+    
     const newValue = !car.bestPick;
 
-    setCars((prev) => prev.map((c) => (c.id === id ? { ...c, bestPick: newValue } : c)));
-
-    if (!bestPicksIsGlobal) {
-      setBestPicksTotal((prev) => (newValue ? prev + 1 : Math.max(0, prev - 1)));
-    }
+    // Optimistic UI update
+    setCars((prev) => updateCarBestPick(prev, id, newValue));
+    setBestPicksTotal((prev) => updateBestPicksCount(prev, newValue, bestPicksIsGlobal));
 
     try {
       setLoading(true);
-      const body = {
-        car_id: id,
-        is_best_pick: newValue ? 1 : 0,
-      };
+      const body = { car_id: id, is_best_pick: newValue ? 1 : 0 };
 
       const response = await userAPI.markasbestcar(body);
       const data = handleApiResponse(response);
 
-      if (data && (data.status_code === 200 || data.success === true)) {
-        if (typeof data.best_pick === "number") {
-          setBestPicksTotal(data.best_pick);
-          setBestPicksIsGlobal(true);
-        } else if (typeof data.total_best_picks === "number") {
-          setBestPicksTotal(data.total_best_picks);
-          setBestPicksIsGlobal(true);
-        } else if (typeof data.total_best === "number") {
-          setBestPicksTotal(data.total_best);
+      if (isApiResponseSuccessful(data)) {
+        const bestPicksData = extractBestPicksTotal(data);
+        if (bestPicksData.isGlobal) {
+          setBestPicksTotal(bestPicksData.total);
           setBestPicksIsGlobal(true);
         }
 
@@ -275,17 +332,15 @@ function BestCars() {
           messageApi.open({ type: "success", content: data.message });
         }
       } else {
-        setCars((prev) => prev.map((c) => (c.id === id ? { ...c, bestPick: !newValue } : c)));
-        if (!bestPicksIsGlobal) {
-          setBestPicksTotal((prev) => (newValue ? Math.max(0, prev - 1) : prev + 1));
-        }
+        // Rollback on failure
+        setCars((prev) => updateCarBestPick(prev, id, !newValue));
+        setBestPicksTotal((prev) => rollbackBestPicksCount(prev, newValue, bestPicksIsGlobal));
         messageApi.open({ type: "error", content: data?.message || "Failed to update Best Pick" });
       }
     } catch (err) {
-      setCars((prev) => prev.map((c) => (c.id === id ? { ...c, bestPick: !newValue } : c)));
-      if (!bestPicksIsGlobal) {
-        setBestPicksTotal((prev) => (newValue ? Math.max(0, prev - 1) : prev + 1));
-      }
+      // Rollback on error
+      setCars((prev) => updateCarBestPick(prev, id, !newValue));
+      setBestPicksTotal((prev) => rollbackBestPicksCount(prev, newValue, bestPicksIsGlobal));
       const errorData = handleApiError(err);
       messageApi.open({ type: "error", content: errorData?.message || "Failed to update Best Pick" });
     } finally {
@@ -460,19 +515,19 @@ function BestCars() {
               ))
             )}
 
-            <Divider />
+            {displayedCars.length > 0 && (
+              <>
+                <Divider />
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <div style={{ color: "#6B7280" }}>
-                {totalCars === 0 ? (
-                  <>Showing 0 results</>
-                ) : (
-                  <>Showing {startIndex + 1} to {endIndex} of {totalCars} vehicles</>
-                )}
-              </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                  <div style={{ color: "#6B7280" }}>
+                    Showing {startIndex + 1} to {endIndex} of {totalCars} vehicles
+                  </div>
 
-              <Pagination current={pagination.current} pageSize={pagination.pageSize} total={totalCars} onChange={onChangePage} className="custom-pagination" />
-            </div>
+                  <Pagination current={pagination.current} pageSize={pagination.pageSize} total={pagination.total} onChange={onChangePage} className="custom-pagination" />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

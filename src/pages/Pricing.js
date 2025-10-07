@@ -23,6 +23,151 @@ import editIcon from "../assets/images/edit.svg";
 import reject from "../assets/images/delete_icon.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
 
+// Helper function to get icon based on package name
+const getPackageIcon = (packageName, isSummary) => {
+  if (isSummary) return modelIcon;
+  
+  const nameLower = (packageName || "").toLowerCase();
+  if (nameLower.includes("basic")) return activeIcon;
+  if (nameLower.includes("premium")) return pendingIcon;
+  if (nameLower.includes("enterprise")) return soldIcon;
+  return modelIcon;
+};
+
+// Helper function to get icon background color
+const getIconBackgroundColor = (icon) => {
+  if (icon === activeIcon) return "#DBEAFE";
+  if (icon === pendingIcon) return "#DCFCE7";
+  if (icon === soldIcon) return "#F3E8FF";
+  return "#FFEDD5";
+};
+
+// Helper function to format percentage display
+const formatPercentage = (percentage) => {
+  const pct = Number(percentage) || 0;
+  const isPositive = pct >= 0;
+  return {
+    label: `${isPositive ? "+" : ""}${Number(pct).toFixed(2)}%`,
+    color: isPositive ? "#10B981" : "#DC2626",
+    backgroundColor: isPositive ? "#DCFCE7" : "#FEE2E2",
+    isPositive,
+  };
+};
+
+// Helper function to get display value for card
+const getCardDisplayValue = (item) => {
+  if (item.isSummary) return item.total;
+  if (item.total !== undefined && item.total !== null) return item.total;
+  return item.listings;
+};
+
+// Helper function to format API data into table format
+const formatSubscriptionData = (item) => {
+  return {
+    key: item.id,
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    listings: item.listing_limit,
+    duration: item.duration_days,
+    autoRenew: Number(item.Auto_renewed) === 1,
+    active: Number(item.is_active) === 1,
+    description: item.description,
+    raw: item,
+    total: item.active,
+    percentage: Number(item.percentage) || 0,
+    currency: item.currency || "IQD",
+    target_user_type: item.target_user_type || "",
+  };
+};
+
+// Helper function to safely parse numeric values
+const parseNumericValue = (value) => {
+  return value !== undefined && value !== null ? Number(value) : 0;
+};
+
+// Helper function to handle API error messages
+const getErrorMessage = (err) => {
+  return err?.response?.data?.message || 
+         err?.response?.data?.error || 
+         err?.message || 
+         "Something went wrong";
+};
+
+// Package Card Component
+const PackageCard = ({ item }) => {
+  const icon = getPackageIcon(item.name, item.isSummary);
+  const iconBgColor = getIconBackgroundColor(icon);
+  const percentageData = formatPercentage(item.percentage);
+  const displayValue = getCardDisplayValue(item);
+
+  return (
+    <div
+      key={item.key || item.id}
+      className="dashboard-summary-mini"
+      style={{
+        minWidth: 220,
+        padding: 12,
+        borderRadius: 8,
+        background: "#F8FAFC",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        flex: "0 0 auto",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: iconBgColor,
+          borderRadius: 8,
+          padding: 8,
+          width: 44,
+          height: 44,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <img src={icon} alt={item.name} style={{ width: 20, height: 20 }} />
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: "#6B7280",
+            marginBottom: 4,
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+          }}
+          title={item.name}
+        >
+          {item.name}
+        </div>
+
+        <div style={{ fontWeight: 700, fontSize: 18 }}>
+          {displayValue}
+        </div>
+      </div>
+
+      <div
+        style={{
+          fontSize: 12,
+          color: percentageData.color,
+          backgroundColor: percentageData.backgroundColor,
+          borderRadius: 12,
+          padding: "2px 6px",
+          alignSelf: "center",
+          fontWeight: 500,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {percentageData.label}
+      </div>
+    </div>
+  );
+};
+
 const Pricing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -54,39 +199,11 @@ const Pricing = () => {
       const data = handleApiResponse(response);
 
       if (data?.data && Array.isArray(data.data)) {
-        const formattedData = data.data.map((item) => {
-
-          return {
-            key: item.id,
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            listings: item.listing_limit,
-            duration: item.duration_days,
-            autoRenew: Number(item.Auto_renewed) === 1,
-            active: Number(item.is_active) === 1,
-            description: item.description,
-            raw: item,
-            total: item.active,
-            percentage: Number(item.percentage) || 0,
-            currency: item.currency || "IQD",
-            target_user_type: item.target_user_type || "",
-          };
-        });
-
-        const apiTotalActive =
-          data.total_active !== undefined && data.total_active !== null
-            ? Number(data.total_active)
-            : 0;
-
-        const apiTotalPercentage =
-          data.total_percentage !== undefined && data.total_percentage !== null
-            ? Number(data.total_percentage)
-            : 0;
+        const formattedData = data.data.map(formatSubscriptionData);
 
         setTableData(formattedData);
-        setTotalActive(apiTotalActive);
-        setTotalPercentage(apiTotalPercentage);
+        setTotalActive(parseNumericValue(data.total_active));
+        setTotalPercentage(parseNumericValue(data.total_percentage));
       } else {
         setTableData([]);
         setTotalActive(0);
@@ -121,12 +238,7 @@ const Pricing = () => {
       }
     } catch (err) {
       console.error("Submit error:", err);
-      messageApi.error(
-        err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          err?.message ||
-          "Something went wrong"
-      );
+      messageApi.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -147,12 +259,7 @@ const Pricing = () => {
       }
     } catch (err) {
       console.error("Submit error:", err);
-      messageApi.error(
-        err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          err?.message ||
-          "Something went wrong"
-      );
+      messageApi.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -314,109 +421,14 @@ const Pricing = () => {
             {tableData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
             ) : (
-              (() => {
-                const cardsData = [
-                  ...tableData,
-                  {
-                    key: "__total_summary__",
-                    id: "__total_summary__",
-                    name: "Total",
-                    total: totalActive, 
-                    percentage: totalPercentage, 
-                    isSummary: true,
-                  },
-                ];
-
-                return cardsData.map((item) => {
-                  let icon = modelIcon;
-                  if (!item.isSummary) {
-                    const nameLower = (item.name || "").toLowerCase();
-                    if (nameLower.includes("basic")) icon = activeIcon;
-                    else if (nameLower.includes("premium")) icon = pendingIcon;
-                    else if (nameLower.includes("enterprise")) icon = soldIcon;
-                    else icon = modelIcon;
-                  }
-
-                  const pct = Number(item.percentage) || 0;
-                  const pctIsPositive = pct >= 0;
-                  const pctLabel = `${pctIsPositive ? "+" : ""}${Number(pct).toFixed(2)}%`;
-                  const pctColor = pctIsPositive ? "#10B981" : "#DC2626";
-                  const pctBg = pctIsPositive ? "#DCFCE7" : "#FEE2E2";
-
-                  return (
-                    <div
-                      key={item.key || item.id}
-                      className="dashboard-summary-mini"
-                      style={{
-                        minWidth: 220,
-                        padding: 12,
-                        borderRadius: 8,
-                        background: "#F8FAFC",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        flex: "0 0 auto",
-                      }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor:
-                            icon === modelIcon
-                              ? "#FFEDD5"
-                              : icon === activeIcon
-                              ? "#DBEAFE"
-                              : icon === pendingIcon
-                              ? "#DCFCE7"
-                              : "#F3E8FF",
-                          borderRadius: 8,
-                          padding: 8,
-                          width: 44,
-                          height: 44,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <img src={icon} alt={item.name} style={{ width: 20, height: 20 }} />
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "#6B7280",
-                            marginBottom: 4,
-                            whiteSpace: "normal",
-                            wordBreak: "break-word",
-                          }}
-                          title={item.name}
-                        >
-                          {item.name}
-                        </div>
-
-                        <div style={{ fontWeight: 700, fontSize: 18 }}>
-                          {item.isSummary ? item.total : item.total !== undefined && item.total !== null ? item.total : item.listings}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: pctColor,
-                          backgroundColor: pctBg,
-                          borderRadius: 12,
-                          padding: "2px 6px",
-                          alignSelf: "center",
-                          fontWeight: 500,
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {pctLabel}
-                      </div>
-                    </div>
-                  );
-                });
-              })()
+              [...tableData, {
+                key: "__total_summary__",
+                id: "__total_summary__",
+                name: "Total",
+                total: totalActive,
+                percentage: totalPercentage,
+                isSummary: true,
+              }].map((item) => <PackageCard key={item.key || item.id} item={item} />)
             )}
           </div>
         </div>

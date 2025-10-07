@@ -9,6 +9,97 @@ import bluelogo_icon from "../assets/images/car.svg";
 import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
 
+// Helper function to validate password requirements
+const validatePasswordRequirements = (password) => {
+  return {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+};
+
+// Helper function to check if all requirements are met
+const areAllRequirementsMet = (requirements) => {
+  return requirements.length && requirements.upper && requirements.lower && 
+         requirements.number && requirements.special;
+};
+
+// Helper function to validate password form
+const validatePasswordForm = (newPassword, reenterPassword, allRequirementsMet) => {
+  if (!newPassword) {
+    return { field: "password", message: "Please enter a new password." };
+  }
+  if (!allRequirementsMet) {
+    return { field: "password", message: "Password does not meet all requirements." };
+  }
+  if (!reenterPassword) {
+    return { field: "reenter", message: "Please retype your password." };
+  }
+  if (newPassword !== reenterPassword) {
+    return { field: "reenter", message: "Passwords do not match." };
+  }
+  return null;
+};
+
+// Helper function to handle API response
+const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate) => {
+  try {
+    const response = await apiCall(body);
+    const userData = response.data;
+    
+    if (userData.status_code === 200) {
+      messageApi.open({ type: 'success', content: userData.message });
+      setLoading(false);
+      navigate("/");
+    } else {
+      messageApi.open({ type: 'error', content: userData.error });
+      setLoading(false);
+    }
+  } catch (error) {
+    console.error("Error during password update", error);
+    messageApi.open({ type: 'error', content: error.message });
+    setLoading(false);
+  }
+};
+
+// Helper function to check if submit button should be enabled
+const isSubmitEnabled = (newPassword, reenterPassword, allRequirementsMet, passwordsMatch) => {
+  return newPassword && reenterPassword && allRequirementsMet && passwordsMatch;
+};
+
+// Password Requirements Component
+const PasswordRequirements = ({ requirements }) => {
+  const requirementItems = [
+    { key: "length", met: requirements.length, text: "At least 8 characters long" },
+    { key: "upper", met: requirements.upper, text: "One uppercase letter" },
+    { key: "lower", met: requirements.lower, text: "One lowercase letter" },
+    { key: "number", met: requirements.number, text: "One number" },
+    { key: "special", met: requirements.special, text: "One special character" },
+  ];
+
+  return (
+    <div className="create-button-back-password" role="region" aria-label="Password requirements">
+      <div className="create-button-content-pass">
+        <div className="create-button-top">
+          <span className="create-text-otp-pass">Password Requirements:</span>
+        </div>
+        <div className="create-button-subtext-pass">
+          {requirementItems.map((item) => (
+            <div key={item.key} className="requirement-item">
+              <span className={`requirement-check ${item.met ? "met" : ""}`} aria-hidden>
+                {item.met ? "✓" : ""}
+              </span>
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CreatePassword = () => {
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
@@ -19,124 +110,61 @@ const CreatePassword = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const {email,token,need_password} = useSelector((state) => state.auth);
 
-  const [reqLength, setReqLength] = useState(false);
-  const [reqUpper, setReqUpper] = useState(false);
-  const [reqLower, setReqLower] = useState(false);
-  const [reqNumber, setReqNumber] = useState(false);
-  const [reqSpecial, setReqSpecial] = useState(false);
-  const [passwordsMatch, setPasswordsMatch] = useState(false);
+  const passwordRequirements = validatePasswordRequirements(newPassword);
+  const allRequirementsMet = areAllRequirementsMet(passwordRequirements);
+  const passwordsMatch = newPassword !== "" && newPassword === reenterPassword;
 
-  const allRequirementsMet = reqLength && reqUpper && reqLower && reqNumber && reqSpecial;
-
-   const isLoggedIn = email
-        useEffect(() => {
-         console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
-         
-         if (!isLoggedIn) {
-           navigate('/');
-         } else {
-           console.log('User not logged in or coming from login flow, staying on OTP screen');
-         }
-       }, [isLoggedIn, navigate]);
+  const isLoggedIn = email;
+  
+  useEffect(() => {
+    console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      navigate('/');
+    } else {
+      console.log('User not logged in or coming from login flow, staying on OTP screen');
+    }
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
-    setReqLength(newPassword.length >= 8);
-    setReqUpper(/[A-Z]/.test(newPassword));
-    setReqLower(/[a-z]/.test(newPassword));
-    setReqNumber(/\d/.test(newPassword));
-    setReqSpecial(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword));
-
-    setPasswordsMatch(newPassword !== "" && newPassword === reenterPassword);
-
     if (passworderrormsg) setPasswordErrorMsg("");
     if (reenterpassworderrormsg) setReenterPasswordErrorMsg("");
-  }, [newPassword, reenterPassword]);
+  }, [newPassword, reenterPassword, passworderrormsg, reenterpassworderrormsg]);
 
   const handleLoginClick = () => {
     navigate("/ForgotPassword");
   };
 
   const handleResetPassword = (e) => {
-     if (e) {
+    if (e) {
       e.preventDefault();
     }
+    
     setPasswordErrorMsg("");
     setReenterPasswordErrorMsg("");
 
-    if (!newPassword) {
-      setPasswordErrorMsg("Please enter a new password.");
+    // Validate form using helper function
+    const validationError = validatePasswordForm(newPassword, reenterPassword, allRequirementsMet);
+    if (validationError) {
+      if (validationError.field === "password") {
+        setPasswordErrorMsg(validationError.message);
+      } else if (validationError.field === "reenter") {
+        setReenterPasswordErrorMsg(validationError.message);
+      }
       return;
     }
 
-    if (!allRequirementsMet) {
-      setPasswordErrorMsg("Password does not meet all requirements.");
-      return;
-    }
-
-    if (!reenterPassword) {
-      setReenterPasswordErrorMsg("Please retype your password.");
-      return;
-    }
-
-    if (newPassword !== reenterPassword) {
-      setReenterPasswordErrorMsg("Passwords do not match.");
-      return;
-    }
-    const body1 = {
-      email:email,
-      new_password: newPassword,
-    };
-    const body = {
-      new_password: newPassword,
-    };
     setLoading(true);
-    if(need_password === 1){
-      updatePassword1(body1);
-    }else {
-      updatePassword(body);
+    
+    // Determine which API to call and prepare body
+    if (need_password === 1) {
+      const body = { email: email, new_password: newPassword };
+      handleApiResponse(loginApi.createnewpassword, body, messageApi, setLoading, navigate);
+    } else {
+      const body = { new_password: newPassword };
+      handleApiResponse(loginApi.resetpassword, body, messageApi, setLoading, navigate);
     }
-   
   };
-
-  const updatePassword = async (body) => {
-
-      try {
-        const response = await loginApi.resetpassword(body);
-        const userData = response.data;
-        if (userData.status_code === 200) {
-          messageApi.open({ type: 'success', content: userData.message  });
-          setLoading(false);
-          navigate("/");
-        } else {
-           messageApi.open({ type: 'error', content: userData.error  });
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error during login", error);
-        messageApi.open({ type: 'error', content: error.message  });
-        setLoading(false);
-      }
-    };
-
-     const updatePassword1 = async (body) => {
-
-      try {
-        const response = await loginApi.createnewpassword(body);
-        const userData = response.data;
-        if (userData.status_code === 200) {
-          messageApi.open({ type: 'success', content: userData.message  });
-          setLoading(false);
-          navigate("/");
-        } else {
-           messageApi.open({ type: 'error', content: userData.error  });
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error during login", error);
-        messageApi.open({ type: 'error', content: error.message  });
-        setLoading(false);
-      }
-    };
 
   return (
     <div className="create-page-wrapper">
@@ -193,48 +221,20 @@ const CreatePassword = () => {
             )}
           </div>
 
-          <div className="create-button-back-password" role="region" aria-label="Password requirements">
-            <div className="create-button-content-pass">
-              <div className="create-button-top">
-                <span className="create-text-otp-pass">Password Requirements:</span>
-              </div>
-              <div className="create-button-subtext-pass">
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqLength ? "met" : ""}`} aria-hidden>{reqLength ? "✓" : ""}</span>
-                  <span>At least 8 characters long</span>
-                </div>
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqUpper ? "met" : ""}`} aria-hidden>{reqUpper ? "✓" : ""}</span>
-                  <span>One uppercase letter</span>
-                </div>
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqLower ? "met" : ""}`} aria-hidden>{reqLower ? "✓" : ""}</span>
-                  <span>One lowercase letter</span>
-                </div>
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqNumber ? "met" : ""}`} aria-hidden>{reqNumber ? "✓" : ""}</span>
-                  <span>One number</span>
-                </div>
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqSpecial ? "met" : ""}`} aria-hidden>{reqSpecial ? "✓" : ""}</span>
-                  <span>One special character</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PasswordRequirements requirements={passwordRequirements} />
 
           <Button
             className="create-button"
             size="large"
             block
-             htmlType="submit"
+            htmlType="submit"
             loading={loading}
             disabled={loading || !allRequirementsMet || !passwordsMatch}
-             style={{
-    backgroundColor: newPassword && reenterPassword && allRequirementsMet && passwordsMatch ? "#008AD5" : "#E5E7EB", 
-    borderColor: newPassword && reenterPassword && allRequirementsMet && passwordsMatch ? "#008AD5" : "#E5E7EB",
-    color: "#fff",
-  }}
+            style={{
+              backgroundColor: isSubmitEnabled(newPassword, reenterPassword, allRequirementsMet, passwordsMatch) ? "#008AD5" : "#E5E7EB", 
+              borderColor: isSubmitEnabled(newPassword, reenterPassword, allRequirementsMet, passwordsMatch) ? "#008AD5" : "#E5E7EB",
+              color: "#fff",
+            }}
           >
             <img src={arrow_icon1} alt="arrow" style={{ width: "12px", height: "12px", marginTop: "2px" }} />
             <span className="create-text-otp">Reset Password</span>

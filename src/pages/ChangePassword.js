@@ -17,6 +17,76 @@ import lock from "../assets/images/Lock.svg";
 import bluelogo_icon2 from "../assets/images/Frame.svg";
 import { loginApi } from "../services/api";
 
+// Helper function to validate password requirements
+const validatePasswordRequirements = (password) => {
+  return {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+};
+
+// Helper function to check if all requirements are met
+const areAllRequirementsMet = (requirements) => {
+  return requirements.length && requirements.upper && requirements.lower && 
+         requirements.number && requirements.special;
+};
+
+// Helper function to validate form inputs
+const validatePasswordForm = (currentPassword, newPassword, reenterPassword, allRequirementsMet) => {
+  if (!currentPassword) {
+    return { field: "current", message: "Please enter your current password." };
+  }
+  if (!newPassword) {
+    return { field: "new", message: "Please enter a new password." };
+  }
+  if (!allRequirementsMet) {
+    return { field: "new", message: "Password does not meet all requirements." };
+  }
+  if (!reenterPassword) {
+    return { field: "reenter", message: "Please retype your password." };
+  }
+  if (newPassword !== reenterPassword) {
+    return { field: "reenter", message: "Passwords do not match." };
+  }
+  return null;
+};
+
+// Password Requirements Display Component
+const PasswordRequirements = ({ requirements }) => {
+  const requirementItems = [
+    { key: "length", met: requirements.length, text: "At least 8 characters long" },
+    { key: "upper", met: requirements.upper, text: "One uppercase letter" },
+    { key: "lower", met: requirements.lower, text: "One lowercase letter" },
+    { key: "number", met: requirements.number, text: "One number" },
+    { key: "special", met: requirements.special, text: "One special character" },
+  ];
+
+  return (
+    <div className="create-button-back-password-1" role="region" aria-label="Password must contain">
+      <div className="create-button-content-pass">
+        <div className="create-button-top">
+          <span style={{ fontWeight: 400, fontSize: "12px", color: "#6B7280" }}>
+            Password must contain:
+          </span>
+        </div>
+        <div className="create-button-subtext-pass-1">
+          {requirementItems.map((item) => (
+            <div key={item.key} className="requirement-item">
+              <span className={`requirement-check ${item.met ? "met" : ""}`} aria-hidden>
+                {item.met ? "✓" : ""}
+              </span>
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ChangePassword = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -35,34 +105,18 @@ const ChangePassword = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [reqLength, setReqLength] = useState(false);
-  const [reqUpper, setReqUpper] = useState(false);
-  const [reqLower, setReqLower] = useState(false);
-  const [reqNumber, setReqNumber] = useState(false);
-  const [reqSpecial, setReqSpecial] = useState(false);
-
-  const [passwordsMatch, setPasswordsMatch] = useState(false);
-
-  const allRequirementsMet =
-    reqLength && reqUpper && reqLower && reqNumber && reqSpecial;
-
   const [form] = Form.useForm();
 
-  // Keep requirement states updated when newPassword or reenterPassword changes
+  const passwordRequirements = validatePasswordRequirements(newPassword);
+  const allRequirementsMet = areAllRequirementsMet(passwordRequirements);
+  const passwordsMatch = newPassword !== "" && newPassword === reenterPassword;
+
+  // Clear inline error messages when user types
   useEffect(() => {
-    setReqLength(newPassword.length >= 8);
-    setReqUpper(/[A-Z]/.test(newPassword));
-    setReqLower(/[a-z]/.test(newPassword));
-    setReqNumber(/\d/.test(newPassword));
-    setReqSpecial(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword));
-
-    setPasswordsMatch(newPassword !== "" && newPassword === reenterPassword);
-
-    // Clear inline error messages when user types
     if (passworderrormsg && newPassword) setPasswordErrorMsg("");
     if (reenterpassworderrormsg && reenterPassword) setReenterPasswordErrorMsg("");
     if (currenterrormsg && currentPassword) setCurrenterrormsg("");
-  }, [newPassword, reenterPassword]); // eslint-disable-line
+  }, [newPassword, reenterPassword, currentPassword, passworderrormsg, reenterpassworderrormsg, currenterrormsg]);
 
   // Handler called by Form.onFinish (it receives values, but we use component state)
   const handleResetPassword = async (values) => {
@@ -71,25 +125,12 @@ const ChangePassword = () => {
     setPasswordErrorMsg("");
     setReenterPasswordErrorMsg("");
 
-    // Client-side validation
-    if (!currentPassword) {
-      setCurrenterrormsg("Please enter your current password.");
-      return;
-    }
-    if (!newPassword) {
-      setPasswordErrorMsg("Please enter a new password.");
-      return;
-    }
-    if (!allRequirementsMet) {
-      setPasswordErrorMsg("Password does not meet all requirements.");
-      return;
-    }
-    if (!reenterPassword) {
-      setReenterPasswordErrorMsg("Please retype your password.");
-      return;
-    }
-    if (newPassword !== reenterPassword) {
-      setReenterPasswordErrorMsg("Passwords do not match.");
+    // Client-side validation using helper function
+    const validationError = validatePasswordForm(currentPassword, newPassword, reenterPassword, allRequirementsMet);
+    if (validationError) {
+      if (validationError.field === "current") setCurrenterrormsg(validationError.message);
+      else if (validationError.field === "new") setPasswordErrorMsg(validationError.message);
+      else if (validationError.field === "reenter") setReenterPasswordErrorMsg(validationError.message);
       return;
     }
 
@@ -105,12 +146,10 @@ const ChangePassword = () => {
 
       if (userData?.status_code === 200) {
         messageApi.open({ type: "success", content: userData.message || "Password updated" });
-        // reset form/state if desired
         form.resetFields();
         setCurrentPassword("");
         setNewPassword("");
         setReenterPassword("");
-        // navigate away
         navigate("/dashboard");
       } else {
         messageApi.open({
@@ -249,52 +288,7 @@ const ChangePassword = () => {
             )}
           </div>
 
-          <div className="create-button-back-password-1" role="region" aria-label="Password must contain">
-            <div className="create-button-content-pass">
-              <div className="create-button-top">
-                <span style={{ fontWeight: 400, fontSize: "12px", color: "#6B7280" }}>
-                  Password must contain:
-                </span>
-              </div>
-
-              <div className="create-button-subtext-pass-1">
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqLength ? "met" : ""}`} aria-hidden>
-                    {reqLength ? "✓" : ""}
-                  </span>
-                  <span>At least 8 characters long</span>
-                </div>
-
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqUpper ? "met" : ""}`} aria-hidden>
-                    {reqUpper ? "✓" : ""}
-                  </span>
-                  <span>One uppercase letter</span>
-                </div>
-
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqLower ? "met" : ""}`} aria-hidden>
-                    {reqLower ? "✓" : ""}
-                  </span>
-                  <span>One lowercase letter</span>
-                </div>
-
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqNumber ? "met" : ""}`} aria-hidden>
-                    {reqNumber ? "✓" : ""}
-                  </span>
-                  <span>One number</span>
-                </div>
-
-                <div className="requirement-item">
-                  <span className={`requirement-check ${reqSpecial ? "met" : ""}`} aria-hidden>
-                    {reqSpecial ? "✓" : ""}
-                  </span>
-                  <span>One special character</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PasswordRequirements requirements={passwordRequirements} />
 
           <div className="form-group-create-1">
             <label htmlFor="confirm-password-input" className="create-label">

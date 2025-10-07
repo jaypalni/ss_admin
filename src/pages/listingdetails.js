@@ -14,6 +14,222 @@ import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import shareicon from "../assets/images/share_icon.png";
 import { useDispatch, useSelector } from 'react-redux';
 
+// Helper function to get approval status styling
+const getApprovalStatusStyle = (approval) => {
+  if (approval === "approved") {
+    return {
+      backgroundColor: "#d4edda",
+      color: "#155724",
+      border: "1px solid #c3e6cb",
+    };
+  }
+  if (approval === "rejected") {
+    return {
+      backgroundColor: "#f8d7da",
+      color: "#721c24",
+      border: "1px solid #f5c6cb",
+    };
+  }
+  return {
+    backgroundColor: "#fff3cd",
+    color: "#856404",
+    border: "1px solid #ffeaa7",
+  };
+};
+
+// Helper function to get approval status text
+const getApprovalStatusText = (approval) => {
+  return approval === "pending" ? "Pending Review" : approval || "Pending";
+};
+
+// Helper function to get boost status styling
+const getBoostStatusStyle = (isFeatured) => {
+  return {
+    backgroundColor: isFeatured === 1 ? "#DCFCE7" : "#FFF4E5",
+    color: isFeatured === 1 ? "#166534" : "#B45309",
+    borderRadius: "22px",
+    border: "none",
+    padding: "2px 10px",
+    fontWeight: 500,
+  };
+};
+
+// Helper function to format date
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+// Helper function to validate rejection reason
+const validateRejectionReason = (rejectionReason, rejectReasonData, comment, messageApi) => {
+  if (!rejectionReason) {
+    messageApi.open({ type: "warning", content: "Please select a rejection reason." });
+    return false;
+  }
+
+  const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
+
+  if (selectedReason?.rejected_reason.toLowerCase() === "other" && !comment?.trim()) {
+    messageApi.open({ type: "warning", content: "Please add a comment for 'Other' reason." });
+    return false;
+  }
+
+  return true;
+};
+
+// Status Tag Component
+const ApprovalStatusTag = ({ approval }) => {
+  const style = getApprovalStatusStyle(approval);
+  const text = getApprovalStatusText(approval);
+  
+  return (
+    <Tag
+      style={{
+        ...style,
+        borderRadius: 6,
+        padding: "4px 12px",
+        fontSize: "14px",
+        fontWeight: 500,
+      }}
+    >
+      {text}
+    </Tag>
+  );
+};
+
+// Boost Status Component
+const BoostStatus = ({ isFeatured }) => {
+  const style = getBoostStatusStyle(isFeatured);
+  
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <Tag style={style}>
+        {isFeatured === 1 ? "Active" : "Not Active"}
+      </Tag>
+      {isFeatured === 1 && (
+        <img
+          src={boosticon}
+          alt="Boost Icon"
+          style={{ width: 18, height: 18, marginLeft: 6 }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Timeline Item Component
+const TimelineItem = ({ label, date, color, isPending = false }) => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
+        <div
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: 12,
+            backgroundColor: color,
+          }}
+        />
+        <strong>{label}:</strong>
+      </div>
+      <span style={{ marginRight: 12, color: isPending ? '#9CA3AF' : 'inherit' }}>
+        {date}
+      </span>
+    </div>
+  );
+};
+
+// Action Buttons Component
+const ActionButtons = ({ approval, isBestCar, setIsBestCar, handleApprove, handleReject, handleMarkAsBest, loading, rejectionReason, comment }) => {
+  if (approval === "rejected") {
+    return (
+      <div
+        style={{
+          backgroundColor: "#fff6f6",
+          border: "1px solid #ffa39e",
+          borderRadius: "8px",
+          padding: "12px 16px",
+          color: "#cf1322",
+          lineHeight: "1.6",
+        }}
+      >
+        <p style={{ marginBottom: "8px", fontWeight: 500 }}>
+          <strong>Rejection Reason:</strong> {rejectionReason || "Not specified"}
+        </p>
+        {comment && (
+          <p style={{ marginBottom: 0 }}>
+            <strong>Comments:</strong> {comment}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (approval === "approved") {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Switch
+          checked={isBestCar}
+          onChange={(checked) => {
+            setIsBestCar(checked);
+            handleMarkAsBest(checked ? 1 : 0);
+          }}
+          style={{
+            backgroundColor: isBestCar ? "#52c41a" : "#d9d9d9",
+          }}
+        />
+        <span style={{ fontSize: "16px", fontWeight: 500 }}>Mark as Best Car</span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <Button
+        type="primary"
+        block
+        onClick={handleApprove}
+        loading={loading}
+        style={{
+          backgroundColor: "#28a745",
+          borderColor: "#28a745",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          fontWeight: 500,
+        }}
+      >
+        <img src={approveIcon} alt="approve" style={{ width: 16, height: 16 }} />
+        Approve Listing
+      </Button>
+
+      <Button
+        danger
+        block
+        onClick={handleReject}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          backgroundColor: "#DC2626",
+          borderColor: "#DC2626",
+          color: "#fff",
+          fontWeight: 500,
+        }}
+      >
+        <img src={rejectIcon} alt="reject" style={{ width: 16, height: 16 }} />
+        Reject Listing
+      </Button>
+    </div>
+  );
+};
+
 const ListingDetails = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
@@ -109,45 +325,35 @@ useEffect(() => {
   
 
   const handleRejectSubmit = async () => {
-  // Check if a reason is selected
-  if (!rejectionReason) {
-    messageApi.open({ type: "warning", content: "Please select a rejection reason." });
-    return;
-  }
-
-  const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
-
-  if (selectedReason?.rejected_reason.toLowerCase() === "other" && !comment?.trim()) {
-    messageApi.open({ type: "warning", content: "Please add a comment for 'Other' reason." });
-    return;
-  }
-
-  // Call the API
-  try {
-    
-    const body = {
-      car_id: listingId,
-      rejection_reason: selectedReason?.rejected_reason,
-      admin_rejection_comment: comment || "",
-    };
-
-    const response = await userAPI.rejectcar(body);
-    const data = handleApiResponse(response);
-
-    if (data.status_code === 200) {
-      messageApi.open({ type: "success", content: data.message });
-      setIsRejectModalVisible(false);
-      navigate("/listingmanagement");
-    } else {
-      messageApi.open({ type: "error", content: data?.message || "Failed to reject car" });
+    // Validate rejection reason using helper function
+    if (!validateRejectionReason(rejectionReason, rejectReasonData, comment, messageApi)) {
+      return;
     }
-  } catch (error) {
-    const errorData = handleApiError(error);
-    messageApi.open({ type: "error", content: errorData.message || "Failed to reject car" });
-  } finally {
-    // setLoading(false);
-  }
-};
+
+    const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
+
+    try {
+      const body = {
+        car_id: listingId,
+        rejection_reason: selectedReason?.rejected_reason,
+        admin_rejection_comment: comment || "",
+      };
+
+      const response = await userAPI.rejectcar(body);
+      const data = handleApiResponse(response);
+
+      if (data.status_code === 200) {
+        messageApi.open({ type: "success", content: data.message });
+        setIsRejectModalVisible(false);
+        navigate("/listingmanagement");
+      } else {
+        messageApi.open({ type: "error", content: data?.message || "Failed to reject car" });
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({ type: "error", content: errorData.message || "Failed to reject car" });
+    }
+  };
 
 
 // Approve Car API
@@ -306,36 +512,7 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
           </div>
           
           {/* Right Side - Status Tag */}
-         <Tag
-  style={{
-    backgroundColor:
-      carDetails?.approval === "approved"
-        ? "#d4edda" // Light green background
-        : carDetails?.approval === "rejected"
-        ? "#f8d7da" // Light red background
-        : "#fff3cd", // Light orange background (default for pending/others)
-    color:
-      carDetails?.approval === "approved"
-        ? "#155724" // Dark green text
-        : carDetails?.approval === "rejected"
-        ? "#721c24" // Dark red text
-        : "#856404", // Dark orange text
-    border:
-      carDetails?.approval === "approved"
-        ? "1px solid #c3e6cb" // Green border
-        : carDetails?.approval === "rejected"
-        ? "1px solid #f5c6cb" // Red border
-        : "1px solid #ffeaa7", // Orange border
-    borderRadius: 6,
-    padding: "4px 12px",
-    fontSize: "14px",
-    fontWeight: 500,
-  }}
->
-  {carDetails?.approval === "pending"
-    ? "Pending Review"
-    : carDetails?.approval || "Pending"}
-</Tag>
+          <ApprovalStatusTag approval={carDetails?.approval} />
 
         </div>
       </div>
@@ -416,27 +593,7 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
         >
           Boost Status:
         </strong>
-       <div style={{ display: "flex", alignItems: "center" }}>
-  <Tag
-    style={{
-      backgroundColor: carDetails?.is_featured === 1 ? "#DCFCE7" : "#FFF4E5", // green bg if active, light orange if not
-      color: carDetails?.is_featured === 1 ? "#166534" : "#B45309", // green text if active, orange if not
-      borderRadius: "22px",
-      border: "none",
-      padding: "2px 10px",
-      fontWeight: 500,
-    }}
-  >
-    {carDetails?.is_featured === 1 ? "Active" : "Not Active"}
-  </Tag>
-  {carDetails?.is_featured === 1 && (
-    <img
-      src={boosticon}
-      alt="Boost Icon"
-      style={{ width: 18, height: 18, marginLeft: 6 }}
-    />
-  )}
-</div>
+        <BoostStatus isFeatured={carDetails?.is_featured} />
 
       </div>
       <div style={{ marginBottom: 16 }}>
@@ -534,81 +691,23 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
 
   {/* Timeline Items */}
   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-    {/* Item 1 */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
-        <div
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 12,
-            backgroundColor: '#3B82F6', 
-          }}
-        />
-        <strong>Date of Creation:</strong>
-      </div>
-      <span style={{ marginRight: 12 }}>
-  {carDetails?.created_at
-    ? new Date(carDetails.created_at).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : ""}
-</span>
-    </div>
-
-    {/* Item 2 */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
-    <div
-      style={{
-        width: 12,
-        height: 12,
-        borderRadius: 12,
-        backgroundColor: '#EAB308', // Yellow dot
-      }}
+    <TimelineItem 
+      label="Date of Creation" 
+      date={formatDate(carDetails?.created_at)} 
+      color="#3B82F6" 
     />
-    <strong>Date of Approval/Reject:</strong>
-  </div>
-  <span style={{ marginRight: 12 ,color: '#9CA3AF'}}>
-    {carDetails?.approval === "pending"
-      ? "Pending"
-      : carDetails?.updated_at
-      ? new Date(carDetails.updated_at).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      : ""}
-  </span>
-</div>
-    {/* Item 3 */}
-   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, gap: 8 }}>
-    <div
-      style={{
-        width: 12,
-        height: 12,
-        borderRadius: 12,
-        backgroundColor: '#D1D5DB', // Red dot
-      }}
+    <TimelineItem 
+      label="Date of Approval/Reject" 
+      date={carDetails?.approval === "pending" ? "Pending" : formatDate(carDetails?.updated_at)} 
+      color="#EAB308" 
+      isPending={carDetails?.approval === "pending"}
     />
-    <strong>Date of Sale:</strong>
-  </div>
-  <span style={{ marginRight: 12,color :'#9CA3AF' }}>
-    {carDetails?.status === "unsold"
-      ? "Not Sold"
-      : carDetails?.status === "sold" && carDetails?.updated_at
-      ? new Date(carDetails.updated_at).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      : ""}
-  </span>
-</div>
-
+    <TimelineItem 
+      label="Date of Sale" 
+      date={carDetails?.status === "unsold" ? "Not Sold" : (carDetails?.status === "sold" ? formatDate(carDetails?.updated_at) : "")} 
+      color="#D1D5DB" 
+      isPending={carDetails?.status === "unsold"}
+    />
   </div>
 </Card>
           {/* Technical Specifications */}
@@ -797,101 +896,21 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
             </Card>
 
             <Card>
-  <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>
-  {carDetails?.approval === "rejected" ? "Reason" : "Actions"}
-</h3>
-
-  {/* Conditional Rendering */}
-  {carDetails?.approval === "rejected" ? (
-     // If approval is rejected -> show rejection reason and comment
-  <div
-    style={{
-      backgroundColor: "#fff6f6",
-      border: "1px solid #ffa39e",
-      borderRadius: "8px",
-      padding: "12px 16px",
-      color: "#cf1322",
-      lineHeight: "1.6",
-    }}
-  >
-    <p style={{ marginBottom: "8px", fontWeight: 500 }}>
-      <strong>Rejection Reason:</strong> {carDetails?.rejection_reason || "Not specified"}
-    </p>
-    {carDetails?.admin_rejection_comment && (
-      <p style={{ marginBottom: 0 }}>
-        <strong>Comments:</strong> {carDetails?.admin_rejection_comment}
-      </p>
-    )}
-  </div>
-
-  ) : carDetails?.approval === "approved" ? (
-    // If approval is approved -> show Toggle Button + Mark as Best Car text
-    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-      <Switch
-  checked={isBestCar}
-  onChange={(checked) => {
-    setIsBestCar(checked); // Update toggle instantly
-    handleMarkAsBestApi(checked ? 1 : 0); // Send 1 for ON, 0 for OFF
-  }}
-  style={{
-    backgroundColor: isBestCar ? "#52c41a" : "#d9d9d9",
-  }}
-/>
-      <span style={{ fontSize: "16px", fontWeight: 500 }}>Mark as Best Car</span>
-    </div>
-  ) : (
-    // Else (Pending or any other status) -> show Approve and Reject buttons
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {/* Approve Button */}
-      <Button
-        type="primary"
-        block
-        onClick={handleapproveapi}
-        loading={loading}
-        style={{
-          backgroundColor: "#28a745",
-          borderColor: "#28a745",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          fontWeight: 500,
-        }}
-      >
-        <img
-          src={approveIcon}
-          alt="approve"
-          style={{ width: 16, height: 16 }}
-        />
-        Approve Listing
-      </Button>
-
-      {/* Reject Button */}
-      <Button
-        danger
-        block
-        onClick={showRejectModal}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          backgroundColor: "#DC2626",
-          borderColor: "#DC2626",
-          color: "#fff",
-          fontWeight: 500,
-        }}
-      >
-        <img
-          src={rejectIcon}
-          alt="reject"
-          style={{ width: 16, height: 16 }}
-        />
-        Reject Listing
-      </Button>
-    </div>
-  )}
-</Card>
+              <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>
+                {carDetails?.approval === "rejected" ? "Reason" : "Actions"}
+              </h3>
+              <ActionButtons 
+                approval={carDetails?.approval}
+                isBestCar={isBestCar}
+                setIsBestCar={setIsBestCar}
+                handleApprove={handleapproveapi}
+                handleReject={showRejectModal}
+                handleMarkAsBest={handleMarkAsBestApi}
+                loading={loading}
+                rejectionReason={carDetails?.rejection_reason}
+                comment={carDetails?.admin_rejection_comment}
+              />
+            </Card>
 
 
           </div>
