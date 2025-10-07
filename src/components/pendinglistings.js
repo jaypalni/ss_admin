@@ -188,39 +188,51 @@ const PendingListings = () => {
     ),
   },
   {
-    title: <span style={headerStyle}>Status</span>,
-    dataIndex: "status",
-    key: "status",
-    render: (status) => {
-      let bgColor = "#FFF7E6";
-      let textColor = "#FAAD14";
+  title: <span style={headerStyle}>Status</span>,
+  dataIndex: "status",
+  key: "status",
+  render: (status) => {
+    // Normalize text
+    const normalizedStatus = (status || "").toLowerCase();
 
-      if (status === "approved") {
-        bgColor = "#DCFCE7";
-        textColor = "#166534";
-      } else if (status === "rejected") {
-        bgColor = "#FFE4E6";
-        textColor = "#B91C1C";
-      }else if (status === "sold") {
-        bgColor = "#DBEAFE";
-        textColor = "#1E40AF";
-      } 
+    let displayText = status; // Default text
+    let bgColor = "#FFF7E6";
+    let textColor = "#FAAD14";
 
-      return (
-        <span
-          style={{
-            backgroundColor: bgColor,
-            color: textColor,
-            padding: "2px 8px",
-            borderRadius: "8px",
-            fontSize: "12px",
-          }}
-        >
-          {status}
-        </span>
-      );
-    },
+    if (normalizedStatus === "approved") {
+      displayText = "Active"; 
+      bgColor = "#DCFCE7";
+      textColor = "#166534";
+    } else if (normalizedStatus === "rejected") {
+      displayText = "Rejected";
+      bgColor = "#FFE4E6";
+      textColor = "#B91C1C";
+    } else if (normalizedStatus === "sold") {
+      displayText = "Sold";
+      bgColor = "#DBEAFE";
+      textColor = "#1E40AF";
+    } else if (normalizedStatus === "pending") {
+      displayText = "Pending";
+      bgColor = "#FFF7E6";
+      textColor = "#FAAD14";
+    }
+
+    return (
+      <span
+        style={{
+          backgroundColor: bgColor,
+          color: textColor,
+          padding: "2px 8px",
+          borderRadius: "8px",
+          fontSize: "12px",
+        }}
+      >
+        {displayText}
+      </span>
+    );
   },
+},
+
   {
     title: <span style={headerStyle}>Actions</span>,
     key: "actions",

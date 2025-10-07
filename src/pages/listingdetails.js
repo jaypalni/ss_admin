@@ -798,13 +798,32 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
 
             <Card>
   <h3 style={{ marginBottom: 16, fontSize: '18px', fontWeight: '600' }}>
-    Actions
-  </h3>
+  {carDetails?.approval === "rejected" ? "Reason" : "Actions"}
+</h3>
 
   {/* Conditional Rendering */}
   {carDetails?.approval === "rejected" ? (
-    // If approval is rejected -> hide the entire card
-    null
+     // If approval is rejected -> show rejection reason and comment
+  <div
+    style={{
+      backgroundColor: "#fff6f6",
+      border: "1px solid #ffa39e",
+      borderRadius: "8px",
+      padding: "12px 16px",
+      color: "#cf1322",
+      lineHeight: "1.6",
+    }}
+  >
+    <p style={{ marginBottom: "8px", fontWeight: 500 }}>
+      <strong>Rejection Reason:</strong> {carDetails?.rejection_reason || "Not specified"}
+    </p>
+    {carDetails?.admin_rejection_comment && (
+      <p style={{ marginBottom: 0 }}>
+        <strong>Comments:</strong> {carDetails?.admin_rejection_comment}
+      </p>
+    )}
+  </div>
+
   ) : carDetails?.approval === "approved" ? (
     // If approval is approved -> show Toggle Button + Mark as Best Car text
     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

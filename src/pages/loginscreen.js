@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // ✅ make sure useEffect is imported
 import "../assets/styles/loginscreen.css";
 import { Input, Button, message } from "antd";
 import bluelogo_icon from "../assets/images/car.svg";
@@ -24,6 +24,22 @@ const LoginScreen = () => {
   "@souqsayarat.net",
   "@souqsayarat.iq"
 ];
+
+useEffect(() => {
+  // Disable browser back button
+  const handlePopState = () => {
+    window.history.pushState(null, "", window.location.href);
+  };
+
+  // Push a new state so back button won’t go back
+  window.history.pushState(null, "", window.location.href);
+  window.addEventListener("popstate", handlePopState);
+
+  return () => {
+    window.removeEventListener("popstate", handlePopState);
+  };
+}, []);
+
 
   const handleLogin = (e) => {
     // Prevent default form submission behavior
