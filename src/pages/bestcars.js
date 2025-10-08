@@ -21,7 +21,6 @@ import { SearchOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
-// Helper function to determine status label from approval value
 const getStatusLabel = (approval, status) => {
   const approvalVal = (approval ?? "").toString().toLowerCase();
   if (approvalVal === "approved") return "Active";
@@ -29,7 +28,6 @@ const getStatusLabel = (approval, status) => {
   return status ?? "N/A";
 };
 
-// Helper function to get status colors
 const getStatusColors = (statusLabel) => {
   const statusLower = statusLabel.toString().toLowerCase();
   
@@ -42,7 +40,6 @@ const getStatusColors = (statusLabel) => {
   return { statusColor: "#DCFCE7", statusTextColor: "#166534" };
 };
 
-// Helper function to get premium badge info
 const getPremiumBadge = (item) => {
   if (item.is_featured) {
     return {
@@ -65,7 +62,6 @@ const getPremiumBadge = (item) => {
   };
 };
 
-// Helper function to format seller information
 const formatSellerInfo = (userDetails) => {
   const sellerFirst = userDetails?.first_name ?? "";
   const sellerLast = userDetails?.last_name ?? "";
@@ -75,14 +71,12 @@ const formatSellerInfo = (userDetails) => {
   return { sellerName, sellerCity };
 };
 
-// Helper function to safely parse numeric value
 const safeParseNumber = (value, fallback = 0) => {
   if (typeof value === "number") return value;
   if (typeof value === "string") return Number(value);
   return fallback;
 };
 
-// Helper function to extract best picks total from API response
 const extractBestPicksTotal = (data) => {
   if (typeof data.best_pick === "number") {
     return { total: data.best_pick, isGlobal: true };
@@ -94,7 +88,6 @@ const extractBestPicksTotal = (data) => {
     return { total: data.total_best, isGlobal: true };
   }
   
-  // Calculate from page data
   const pageBestCount = (data.data || []).reduce(
     (acc, it) => acc + (Number(it.is_best_pick ?? 0) ? 1 : 0),
     0
@@ -102,7 +95,6 @@ const extractBestPicksTotal = (data) => {
   return { total: pageBestCount, isGlobal: false };
 };
 
-// Helper function to extract pagination total from API response
 const extractPaginationTotal = (data) => {
   const apiTotalCars = safeParseNumber(data.total_cars, undefined);
   
@@ -115,24 +107,20 @@ const extractPaginationTotal = (data) => {
   return { apiTotalCars, paginationTotal };
 };
 
-// Helper function to update car best pick status in array
 const updateCarBestPick = (cars, carId, bestPickValue) => {
   return cars.map((c) => (c.id === carId ? { ...c, bestPick: bestPickValue } : c));
 };
 
-// Helper function to update best picks count
 const updateBestPicksCount = (currentTotal, newValue, isGlobal) => {
   if (isGlobal) return currentTotal;
   return newValue ? currentTotal + 1 : Math.max(0, currentTotal - 1);
 };
 
-// Helper function to rollback best picks count
 const rollbackBestPicksCount = (currentTotal, newValue, isGlobal) => {
   if (isGlobal) return currentTotal;
   return newValue ? Math.max(0, currentTotal - 1) : currentTotal + 1;
 };
 
-// Helper function to check if API response is successful
 const isApiResponseSuccessful = (data) => {
   return data && (data.status_code === 200 || data.success === true);
 };
@@ -307,7 +295,6 @@ function BestCars() {
     
     const newValue = !car.bestPick;
 
-    // Optimistic UI update
     setCars((prev) => updateCarBestPick(prev, id, newValue));
     setBestPicksTotal((prev) => updateBestPicksCount(prev, newValue, bestPicksIsGlobal));
 

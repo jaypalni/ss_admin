@@ -81,42 +81,48 @@ const GetAdminsData = () => {
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
-    fetchAdminData(1, pagination.pageSize);
+   fetchAdminData(pagination.current, pagination.pageSize);
   }, []);
 
-  const fetchAdminData = async (page = 1, limit = 10) => {
-    try {
-      setLoading(true);
-      const response = await loginApi.getadmindata(page, limit);
-      const data = handleApiResponse(response);
+ const fetchAdminData = async (page = 1, limit = 10) => {
+  try {
+    setLoading(true);
+    const response = await loginApi.getadmindata(page, limit);
+    const data = handleApiResponse(response);
 
-      if (data?.admins) {
-        const formattedData = data.admins.map((item) => ({
+    const formattedData = Array.isArray(data?.admins)
+      ? data.admins.map((item) => ({
           key: item.id,
           firstname: item.first_name,
           lastname: item.last_name,
           emailaddress: item.email,
           lastlogin: item.last_login,
-        }));
+        }))
+      : [];
 
-        setTableData(formattedData);
+    setTableData(formattedData);
 
-        setPagination({
-          current: data.pagination.current_page,
-          pageSize: data.pagination.limit,
-          total: data.pagination.total_cars,
-        });
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      messageApi.open({
-        type: "error",
-        content: errorData?.message || "Failed to fetch admins",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    const apiPage = data?.pagination?.page ?? data?.pagination?.current_page ?? page;
+    const apiLimit = data?.pagination?.limit ?? limit;
+    const apiTotal = Number(data?.pagination?.total ?? data?.total_cars ?? data?.total ?? formattedData.length) || 0;
+
+    setPagination((prev) => ({
+      ...prev,
+      current: Number(apiPage),
+      pageSize: Number(apiLimit),
+      total: apiTotal,
+    }));
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({
+      type: "error",
+      content: errorData?.message || "Failed to fetch admins",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleDelete = async (id) => {
     try {
@@ -145,9 +151,12 @@ const GetAdminsData = () => {
     navigate(`/createNewAdmin/${id}`);
   };
 
-  const handleTableChange = (paginationInfo) => {
-    fetchAdminData(paginationInfo.current, paginationInfo.pageSize);
-  };
+ const handleTableChange = (newPagination) => {
+  const { current = 1, pageSize = pagination.pageSize } = newPagination;
+  setPagination((prev) => ({ ...prev, current, pageSize }));
+  fetchAdminData(current, pageSize);
+};
+
 
   const columns = [
     { title: 'ID', dataIndex: 'key', key: 'key' },
@@ -203,19 +212,20 @@ const GetAdminsData = () => {
       </div>
 
       <Table
-        dataSource={tableData}
-        columns={columns}
-        rowKey="key"
-        loading={loading}
-        onChange={handleTableChange}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: pagination.total,
-          showSizeChanger: false,
-          showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} results`,
-        }}
-      />
+  dataSource={tableData}
+  columns={columns}
+  rowKey="key"
+  loading={loading}
+  onChange={handleTableChange}
+  pagination={{
+    current: pagination.current,
+    pageSize: pagination.pageSize,
+    total: pagination.total,
+    showSizeChanger: false,
+    showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} results`,
+  }}
+/>
+
     </div>
   );
 };
