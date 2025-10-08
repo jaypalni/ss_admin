@@ -16,19 +16,20 @@ import change from "../assets/images/change.svg";
 import lock from "../assets/images/Lock.svg";
 import bluelogo_icon2 from "../assets/images/Frame.svg";
 import { loginApi } from "../services/api";
+import PropTypes from "prop-types";
 
-// Helper function to validate password requirements
+
 const validatePasswordRequirements = (password) => {
   return {
     length: password.length >= 8,
     upper: /[A-Z]/.test(password),
     lower: /[a-z]/.test(password),
     number: /\d/.test(password),
-    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    special: /[!@#$%^&*()_+\-={}[\]:;"\\|,.<>/?]/.test(password),
   };
 };
 
-// Helper function to check if all requirements are met
+
 const areAllRequirementsMet = (requirements) => {
   return requirements.length && requirements.upper && requirements.lower && 
          requirements.number && requirements.special;
@@ -89,11 +90,9 @@ const PasswordRequirements = ({ requirements }) => {
 
 const ChangePassword = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
+  const [fetching, ] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -396,4 +395,13 @@ const ChangePassword = () => {
   );
 };
 
+PasswordRequirements.propTypes = {
+  requirements: PropTypes.shape({
+    length: PropTypes.bool.isRequired,
+    upper: PropTypes.bool.isRequired,
+    lower: PropTypes.bool.isRequired,
+    number: PropTypes.bool.isRequired,
+    special: PropTypes.bool.isRequired,
+  }).isRequired,
+};
 export default ChangePassword;

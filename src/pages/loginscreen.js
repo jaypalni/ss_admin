@@ -60,13 +60,7 @@ useEffect(() => {
       hasError = true;
     }
     if (hasError) return;
-    const domainValid = allowedDomains.some((d) => email.toLowerCase().endsWith(d));
-  // if (!domainValid) {
-  //   setEmailErrorMsg(
-  //     "Use your company email (…@souqsayarat.com / …@souqsayarat.net / …@souqsayarat.iq)."
-  //   );
-  //   return;
-  // }
+
     const body = {
       email: email,
       password: password,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Empty,
   message,
@@ -10,7 +10,7 @@ import {
   Space,
 } from "antd";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import activeIcon from "../assets/images/star.svg";
 import pendingIcon from "../assets/images/premium.svg";
 import soldIcon from "../assets/images/enterprice.svg";
@@ -22,6 +22,7 @@ import { loginApi } from "../services/api";
 import editIcon from "../assets/images/edit.svg";
 import reject from "../assets/images/delete_icon.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
+import PropTypes from "prop-types";
 
 // Helper function to get icon based on package name
 const getPackageIcon = (packageName, isSummary) => {
@@ -169,12 +170,10 @@ const PackageCard = ({ item }) => {
 };
 
 const Pricing = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [tableData, setTableData] = useState([]);
-  // API-level totals (used only for the Total card)
   const [totalActive, setTotalActive] = useState(0);
   const [totalPercentage, setTotalPercentage] = useState(0);
 
@@ -233,27 +232,6 @@ const Pricing = () => {
       if (resData?.status_code === 200) {
         messageApi.success(resData.message || "Subscription updated successfully");
         setTableData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
-      } else {
-        messageApi.error(resData?.message || "Failed to update subscription");
-      }
-    } catch (err) {
-      console.error("Submit error:", err);
-      messageApi.error(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleAutoRenew = async (id, checked) => {
-    if (String(id) === "__total_summary__") return;
-    const body = { Auto_renewed: checked ? 1 : 0 };
-    try {
-      setLoading(true);
-      const res = await loginApi.editsubscriptionpackage(id, body);
-      const resData = res?.data;
-      if (resData?.status_code === 200) {
-        messageApi.success(resData.message || "Subscription updated successfully");
-        setTableData((prev) => prev.map((p) => (p.id === id ? { ...p, autoRenew: checked } : p)));
       } else {
         messageApi.error(resData?.message || "Failed to update subscription");
       }
@@ -444,6 +422,20 @@ const Pricing = () => {
       </div>
     </div>
   );
+};
+
+PackageCard.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    name: PropTypes.string.isRequired,
+    isSummary: PropTypes.bool,
+    percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    listing_limit: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    all_time_total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    target_user_type: PropTypes.string,
+    raw: PropTypes.object,
+  }).isRequired,
 };
 
 export default Pricing;

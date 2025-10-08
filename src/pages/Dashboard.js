@@ -4,9 +4,8 @@ import {
   Empty,
 } from "antd";
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import {  useSelector } from 'react-redux';
 function Dashboard() {
-   const dispatch = useDispatch();
   const navigate = useNavigate();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);

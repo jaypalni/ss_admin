@@ -8,6 +8,7 @@ import arrow_icon1 from "../assets/images/svg.svg";
 import bluelogo_icon from "../assets/images/car.svg";
 import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
 
 // Helper function to validate password requirements
 const validatePasswordRequirements = (password) => {
@@ -16,7 +17,7 @@ const validatePasswordRequirements = (password) => {
     upper: /[A-Z]/.test(password),
     lower: /[a-z]/.test(password),
     number: /\d/.test(password),
-    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    special: /[!@#$%^&*()_+\-={}[\]:;"\\|,.<>/?]/.test(password),
   };
 };
 
@@ -108,7 +109,7 @@ const CreatePassword = () => {
   const [reenterpassworderrormsg, setReenterPasswordErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const {email,token,need_password} = useSelector((state) => state.auth);
+  const {email,need_password} = useSelector((state) => state.auth);
 
   const passwordRequirements = validatePasswordRequirements(newPassword);
   const allRequirementsMet = areAllRequirementsMet(passwordRequirements);
@@ -276,6 +277,16 @@ const CreatePassword = () => {
       </div>
     </div>
   );
+};
+
+PasswordRequirements.propTypes = {
+  requirements: PropTypes.shape({
+    length: PropTypes.bool.isRequired,
+    upper: PropTypes.bool.isRequired,
+    lower: PropTypes.bool.isRequired,
+    number: PropTypes.bool.isRequired,
+    special: PropTypes.bool.isRequired,
+  }).isRequired,
 };
 
 export default CreatePassword;

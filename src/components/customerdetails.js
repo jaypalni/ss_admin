@@ -53,7 +53,6 @@ function CustomerDetails() {
 
       setRadioValue(defaultStatus);
       }
-     // messageApi.open({ type: 'success', content: result.message});
     } catch (error) {
       const errorData = handleApiError(error);
       messageApi.open({ type: 'error', content: errorData});

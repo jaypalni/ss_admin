@@ -134,22 +134,7 @@
   font-weight: 400;
   font-size: 13px;
 }
-.otp-timer-count {
-  font-weight: 600;
-  color: #0090d4;
 
-}
-
-/* resend button */
-.otp-resend {
-  color: #0090d4;
-  font-weight: 600;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-size: 15px;
-}
 
 /* buttons row */
 .otp-btn-row {
@@ -313,6 +298,7 @@
 .otp-timer-count {
   font-weight: 600;
   margin-left: 6px;
+  color: #0090d4;
 }
 
 /* second line: the "Resend" link (always visible) */
@@ -332,6 +318,10 @@
   border-radius: 4px;
   transition: color 0.15s ease, opacity 0.15s ease;
   user-select: none;
+  color: #0090d4;
+  cursor: pointer;
+  background: transparent;
+  border: none;
 }
 
 /* Disabled look while timer running */

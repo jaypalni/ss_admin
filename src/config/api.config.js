@@ -29,7 +29,6 @@ const API_CONFIG = {
       REASON_REJECTIONS:  "/api/admin/car-rejection-reasons",
       DASHBOARD_STATS: "/api/dashboard/stats",
       PENDING_CARS: (page = 1, limit = 10) => `/api/admin/pending-cars?page=${page}&limit=${limit}`,
-      GET_BY_ID: (id) => `/api/cars/details/${id}`,
       APPORVE_CAR: '/api/admin/cars/approve',
       REJECT_CAR: '/api/admin/cars/reject',
       MARKAS_BESTCAR: '/api/admin/cars/mark-best-pick'

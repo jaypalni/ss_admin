@@ -13,7 +13,7 @@ const CarTypes = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [uploading, setUploading] = useState(false);
-  const [uploadingBody, setUploadingBody] = useState(false);
+  const [uploadingBody, ] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [uploadedUrlBody, setUploadedUrlBody] = useState("");
   const columns = [
@@ -156,35 +156,38 @@ const CarTypes = () => {
             <Input placeholder="Enter Make" />
           </Form.Item>
 
-        <Form.Item>
-          <label
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              cursor: "pointer",
-              padding: "6px 12px",
-              border: "1px solid #d9d9d9",
-              borderRadius: "6px",
-              background: "#fafafa",
-            }}
-          >
-            {uploading ? (
-              <Spin size="small" />
-            ) : (
-              <>
-                <AiOutlineUpload style={{ marginRight: 8 }} />
-                {uploadedUrl ? "Change Image" : "Make Image"}
-              </>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              style={{ display: "none" }}
-              rules={[{ required: false, message: "Please upload make image!" }]}
-            />
-          </label>
-        </Form.Item>
+        <Form.Item
+  name="makeImage"
+  rules={[{ required: false, message: "Please upload make image!" }]}
+>
+  <label
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      cursor: "pointer",
+      padding: "6px 12px",
+      border: "1px solid #d9d9d9",
+      borderRadius: "6px",
+      background: "#fafafa",
+    }}
+  >
+    {uploading ? (
+      <Spin size="small" />
+    ) : (
+      <>
+        <AiOutlineUpload style={{ marginRight: 8 }} />
+        {uploadedUrl ? "Change Image" : "Make Image"}
+      </>
+    )}
+    <input
+      type="file"
+      accept="image/*"
+      onChange={handleFileUpload}
+      style={{ display: "none" }}
+    />
+  </label>
+</Form.Item>
+
 
           <Form.Item name="model" rules={[{ required: true, message: "Please enter car model!" }]}>
             <Input placeholder="Enter Model" />
@@ -194,7 +197,9 @@ const CarTypes = () => {
             <Input placeholder="Enter Year" />
           </Form.Item>
 
-           <Form.Item>
+           <Form.Item 
+           name="bodyImage"
+           rules={[{ required: false, message: "Please upload Body type image!" }]}>
           <label
             style={{
               display: "inline-flex",
@@ -219,7 +224,7 @@ const CarTypes = () => {
               accept="image/*"
               onChange={handleFileUpload1}
               style={{ display: "none"}}
-              rules={[{ required: false, message: "Please upload Body type image!" }]}
+              
             />
           </label>
            </Form.Item>

@@ -141,7 +141,7 @@ function BestCars() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   const [makeFilter, setMakeFilter] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
   const [pagination, setPagination] = useState({
@@ -296,7 +296,6 @@ function BestCars() {
 
   const displayedCars = cars;
 
-  const paginationTotal = pagination.total ?? 0;
   const current = pagination.current ?? 1;
   const pageSize = pagination.pageSize ?? 10;
   const startIndex = totalCars === 0 ? 0 : (current - 1) * pageSize;

@@ -28,9 +28,9 @@ const CreateNewSubscription = () => {
   const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
+  const [, setFetching] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [statusFlag, setStatusFlag] = useState(null);
+  const [, setStatusFlag] = useState(null);
   const [form] = Form.useForm();
 
   const { user, token } = useSelector((state) => state.auth);
@@ -60,17 +60,17 @@ const CreateNewSubscription = () => {
             numList: user.listing_limit ?? "",
             userType: user.target_user_type,
             autoRenew:
-            user.Auto_renewed === 1
-              ? "yes"
-              : user.Auto_renewed === 0
-              ? "no"
-              : null,
+              user.Auto_renewed === 1
+                ? "yes"
+                : user.Auto_renewed === 0
+                ? "no"
+                : null,
           });
-           const statusValue =
-          user.Auto_renewed !== undefined && user.Auto_renewed !== null
-            ? Number(user.Auto_renewed)
-            : null;
-        setStatusFlag(statusValue);
+          const statusValue =
+            user.Auto_renewed !== undefined && user.Auto_renewed !== null
+              ? Number(user.Auto_renewed)
+              : null;
+          setStatusFlag(statusValue);
         } else {
           messageApi.error(data?.message || "Failed to load admin details");
         }
@@ -88,17 +88,16 @@ const CreateNewSubscription = () => {
   }, [id, isEdit, form, messageApi]);
 
   const handleSubmit = async (values) => {
-    console.log("Form values on submit:", values);
     const body = {
-   ...(isEdit ? { id: id } : {}),
-    plan_name: values.namePlan,
-    price: Number(values.price),
-    duration_days: Number(values.duration),
-    number_of_listings: Number(values.numList),
-    auto_renewed_status: values.autoRenew === "yes" ? 1 : 0,
-    currency:"IQD",
-    targeted_user_type:values.userType
-  };
+      ...(isEdit ? { id: id } : {}),
+      plan_name: values.namePlan,
+      price: Number(values.price),
+      duration_days: Number(values.duration),
+      number_of_listings: Number(values.numList),
+      auto_renewed_status: values.autoRenew === "yes" ? 1 : 0,
+      currency: "IQD",
+      targeted_user_type: values.userType,
+    };
 
     try {
       setLoading(true);
@@ -141,6 +140,14 @@ const CreateNewSubscription = () => {
     navigate("/financials/pricing");
   };
 
+  // helper to render label with asterisk using inline-flex + gap (avoids ambiguous spacing)
+  const RequiredLabel = ({ text }) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+      <span>{text}</span>
+      <span style={{ color: "red" }}>*</span>
+    </span>
+  );
+
   return (
     <div
       style={{
@@ -156,19 +163,19 @@ const CreateNewSubscription = () => {
 
       <div style={{ width: "100%", maxWidth: 600 }}>
         <Breadcrumb
-        separator=">"
+          separator=">"
           items={[
             { title: "Financials" },
             {
-      title: (
-        <span
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/financials/pricing")}
-        >
-          Pricing
-        </span>
-      ),
-    },
+              title: (
+                <span
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/financials/pricing")}
+                >
+                  Pricing
+                </span>
+              ),
+            },
             { title: isEdit ? "Edit Package" : "Create New Package" },
           ]}
           style={{
@@ -205,12 +212,7 @@ const CreateNewSubscription = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  label={
-                    <span>
-                      Name of Plan
-                      <span style={{ color: "red", marginLeft: 2 }}>*</span>
-                    </span>
-                  }
+                  label={<RequiredLabel text="Name of Plan" />}
                   name="namePlan"
                   rules={[{ required: true, message: "Name of Plan is required" }]}
                 >
@@ -226,18 +228,15 @@ const CreateNewSubscription = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  label={
-                    <span>
-                      Price
-                      <span style={{ color: "red", marginLeft: 2 }}>*</span>
-                    </span>
-                  }
+                  label={<RequiredLabel text="Price" />}
                   name="price"
                   rules={[{ required: true, message: "Price is required" }]}
                 >
-                  <Input placeholder="0" style={{ height: "38px" }}
-                        suffix={<span style={{ color: "#6B7280", fontWeight: 500 }}>IQD</span>}
-                   />
+                  <Input
+                    placeholder="0"
+                    style={{ height: "38px" }}
+                    suffix={<span style={{ color: "#6B7280", fontWeight: 500 }}>IQD</span>}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -245,12 +244,7 @@ const CreateNewSubscription = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  label={
-                    <span>
-                      Number of Listings
-                      <span style={{ color: "red", marginLeft: 2 }}>*</span>
-                    </span>
-                  }
+                  label={<RequiredLabel text="Number of Listings" />}
                   name="numList"
                   rules={[{ required: true, message: "Number of Listings is required" }]}
                 >
@@ -262,12 +256,7 @@ const CreateNewSubscription = () => {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
-                  label={
-                    <span>
-                      Duration (in Days)
-                      <span style={{ color: "red", marginLeft: 2 }}>*</span>
-                    </span>
-                  }
+                  label={<RequiredLabel text="Duration (in Days)" />}
                   name="duration"
                   rules={[{ required: true, message: "Duration is required" }]}
                 >
@@ -276,46 +265,35 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
-          <Row gutter={16}>
-  <Col span={24}>
-    <Form.Item
-      label={
-        <span>
-          Auto Renew
-          <span style={{ color: "red", marginLeft: 2 }}>*</span>
-        </span>
-      }
-      name="autoRenew"
-      rules={[{ required: true, message: "Please choose Auto Renew option" }]}
-    >
-      <Select placeholder="Select Auto Renew" style={{ height: 38 }}>
-        <Option value="yes">Yes</Option>
-        <Option value="no">No</Option>
-      </Select>
-    </Form.Item>
-  </Col>
-          </Row>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  label={<RequiredLabel text="Auto Renew" />}
+                  name="autoRenew"
+                  rules={[{ required: true, message: "Please choose Auto Renew option" }]}
+                >
+                  <Select placeholder="Select Auto Renew" style={{ height: 38 }}>
+                    <Option value="yes">Yes</Option>
+                    <Option value="no">No</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
 
-          <Row gutter={16}>
-  <Col span={24}>
-    <Form.Item
-      label={
-        <span>
-          User Type
-          <span style={{ color: "red", marginLeft: 2 }}>*</span>
-        </span>
-      }
-      name="userType"
-      rules={[{ required: true, message: "Please select user type option" }]}
-    >
-      <Select placeholder="Select User Type" style={{ height: 38 }}>
-        <Option value="dealer">Dealer</Option>
-        <Option value="individual">Individual</Option>
-      </Select>
-    </Form.Item>
-  </Col>
-          </Row>
-
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  label={<RequiredLabel text="User Type" />}
+                  name="userType"
+                  rules={[{ required: true, message: "Please select user type option" }]}
+                >
+                  <Select placeholder="Select User Type" style={{ height: 38 }}>
+                    <Option value="dealer">Dealer</Option>
+                    <Option value="individual">Individual</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Divider style={{ margin: "16px 0" }} />
 

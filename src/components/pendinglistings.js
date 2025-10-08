@@ -56,195 +56,191 @@ const PendingListings = () => {
 
   // Fetch pending listings
   const fetchPendingListings = async (page = 1, limit = 10) => {
-  try {
-    setLoading(true);
-      const normalizedFilter = statusFilter ? statusFilter.toString().toLowerCase() : "";
+    try {
+      setLoading(true);
 
-    const body = {
-      search: searchValue || "",
-      city_filter: cityFilter || "",
-      date_range:
-    dateRange && dateRange.length === 2
-      ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(dateRange[1]).format("DD/MM/YYYY")}`
-      : "",
-      status: statusFilter || "",
-      seller_type: sellerType || "",
-    };
+      // prefer optional chaining + nullish coalescing
+      const normalizedFilter = statusFilter?.toString().toLowerCase() ?? "";
 
-    const response = await userAPI.pendingcars(body, page, limit);
-    const data = handleApiResponse(response);
+      const body = {
+        search: searchValue ?? "",
+        city_filter: cityFilter ?? "",
+        date_range:
+          dateRange && dateRange.length === 2
+            ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(dateRange[1]).format("DD/MM/YYYY")}`
+            : "",
+        status: statusFilter ?? "",
+        seller_type: sellerType ?? "",
+      };
 
-    if (data?.data?.cars) {
-      const formattedData = data.data.cars
-     .filter((item) => {
-          if (!normalizedFilter) return true; 
+      const response = await userAPI.pendingcars(body, page, limit);
+      const data = handleApiResponse(response);
 
-          const approval = (item.approval || "").toString().toLowerCase();
-          const status = (item.status || "").toString().toLowerCase();
+      if (data?.data?.cars) {
+        const formattedData = data.data.cars
+          .filter((item) => {
+            if (!normalizedFilter) return true;
 
-          if (normalizedFilter === "sold") {
-            return status === "sold";
-          }
+            const approval = item.approval?.toString().toLowerCase() ?? "";
+            const status = item.status?.toString().toLowerCase() ?? "";
 
-          if (["pending", "approved", "rejected"].includes(normalizedFilter)) {
-            return approval === normalizedFilter || (!approval && status === normalizedFilter);
-          }
+            if (normalizedFilter === "sold") {
+              return status === "sold";
+            }
 
-          return status === normalizedFilter || approval === normalizedFilter;
-        })
-      .map((item) => {
-        const approval = (item.approval || "").toString().toLowerCase();
-          const status = (item.status || "").toString().toLowerCase();
+            if (["pending", "approved", "rejected"].includes(normalizedFilter)) {
+              return approval === normalizedFilter || (!approval && status === normalizedFilter);
+            }
 
-         const displayedStatus =
-            normalizedFilter === "sold"
-              ? status || approval
-              : (approval || status);
+            return status === normalizedFilter || approval === normalizedFilter;
+          })
+          .map((item) => {
+            const approval = item.approval?.toString().toLowerCase() ?? "";
+            const status = item.status?.toString().toLowerCase() ?? "";
 
-        return {
-          key: item.car_id,
-          car_id: item.car_id,
-          referenceId: item.car_id,
-          dateSubmitted: dayjs(item.date_submitted).format("MMM DD, YYYY"),
-          listingTitle: item.ad_title,
-          sellerName: `${item.first_name} ${item.last_name}`,
-          location: item.location,
-          type: item.user_type === "dealer" ? "Dealer" : "Individual",
-          status: displayedStatus,
-        };
+            const displayedStatus =
+              normalizedFilter === "sold" ? status || approval : approval || status;
+
+            return {
+              key: item.car_id,
+              car_id: item.car_id,
+              referenceId: item.car_id,
+              dateSubmitted: item.date_submitted ? dayjs(item.date_submitted).format("MMM DD, YYYY") : "",
+              listingTitle: item.ad_title ?? "",
+              sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
+              location: item.location ?? "",
+              type: item.user_type === "dealer" ? "Dealer" : "Individual",
+              status: displayedStatus,
+            };
+          });
+
+        setTableData(formattedData);
+
+        // Update pagination using API pagination values if present
+        const p = data.data.pagination ?? {};
+        setPagination({
+          current: p.current_page ?? p.page ?? page,
+          pageSize: p.limit ?? limit,
+          total: p.total_cars ?? p.total ?? 0,
+        });
+      } else {
+        setTableData([]);
+        setPagination((prev) => ({ ...prev, total: 0 }));
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({
+        type: "error",
+        content: errorData?.message || "Failed to fetch pending cars",
       });
-
-      setTableData(formattedData);
-
-      // ✅ Update pagination
-      setPagination({
-        current: data.data.pagination.current_page,
-        pageSize: data.data.pagination.limit,
-        total: data.data.pagination.total_cars,
-      });
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    const errorData = handleApiError(error);
-    messageApi.open({
-      type: "error",
-      content: errorData?.message || "Failed to fetch pending cars",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-
-  // Call APIs on mount
+  // Call APIs on mount & when filters change
   useEffect(() => {
     fetchPendingListings(1, pagination.pageSize);
     fetchRegion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);
 
   const columns = [
-  {
-    title: <span style={headerStyle}>Reference ID</span>,
-    dataIndex: "referenceId",
-    key: "referenceId",
-    render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
-  },
-  {
-    title: <span style={headerStyle}>Date Submitted</span>,
-    dataIndex: "dateSubmitted",
-    key: "dateSubmitted",
-    render: (text) => <span style={{ color: "#6B7280" }}>{text}</span>,
-  },
-  {
-    title: <span style={headerStyle}>Seller Name</span>,
-    dataIndex: "sellerName",
-    key: "sellerName",
-  },
-  {
-    title: <span style={headerStyle}>Listing Title</span>,
-    dataIndex: "listingTitle",
-    key: "listingTitle",
-  },
-  {
-    title: <span style={headerStyle}>Location</span>,
-    dataIndex: "location",
-    key: "location",
-  },
-  {
-    title: <span style={headerStyle}>Type</span>,
-    dataIndex: "type",
-    key: "type",
-    render: (type) => (
-      <span
-        style={{
-          backgroundColor: type === "Individual" ? "#E6F4FF" : "#F3E8FF",
-          color: type === "Individual" ? "#1677FF" : "#722ED1",
-          padding: "2px 8px",
-          borderRadius: "8px",
-          fontSize: "12px",
-        }}
-      >
-        {type}
-      </span>
-    ),
-  },
-  {
-  title: <span style={headerStyle}>Status</span>,
-  dataIndex: "status",
-  key: "status",
-  render: (status) => {
-    // Normalize text
-    const normalizedStatus = (status || "").toLowerCase();
+    {
+      title: <span style={headerStyle}>Reference ID</span>,
+      dataIndex: "referenceId",
+      key: "referenceId",
+      render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
+    },
+    {
+      title: <span style={headerStyle}>Date Submitted</span>,
+      dataIndex: "dateSubmitted",
+      key: "dateSubmitted",
+      render: (text) => <span style={{ color: "#6B7280" }}>{text}</span>,
+    },
+    {
+      title: <span style={headerStyle}>Seller Name</span>,
+      dataIndex: "sellerName",
+      key: "sellerName",
+    },
+    {
+      title: <span style={headerStyle}>Listing Title</span>,
+      dataIndex: "listingTitle",
+      key: "listingTitle",
+    },
+    {
+      title: <span style={headerStyle}>Location</span>,
+      dataIndex: "location",
+      key: "location",
+    },
+    {
+      title: <span style={headerStyle}>Type</span>,
+      dataIndex: "type",
+      key: "type",
+      render: (type) => (
+        <span
+          style={{
+            backgroundColor: type === "Individual" ? "#E6F4FF" : "#F3E8FF",
+            color: type === "Individual" ? "#1677FF" : "#722ED1",
+            padding: "2px 8px",
+            borderRadius: "8px",
+            fontSize: "12px",
+          }}
+        >
+          {type}
+        </span>
+      ),
+    },
+    {
+      title: <span style={headerStyle}>Status</span>,
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        // Normalize text safely with optional chaining
+        const normalizedStatus = (status ?? "").toString().toLowerCase();
 
-    let displayText = status; // Default text
-    let bgColor = "#FFF7E6";
-    let textColor = "#FAAD14";
+        // single source of truth mapping to avoid redundant assignments
+        const statusMap = {
+          approved: { display: "Active", bg: "#DCFCE7", color: "#166534" },
+          rejected: { display: "Rejected", bg: "#FFE4E6", color: "#B91C1C" },
+          sold: { display: "Sold", bg: "#DBEAFE", color: "#1E40AF" },
+          pending: { display: "Pending", bg: "#FFF7E6", color: "#FAAD14" },
+        };
 
-    if (normalizedStatus === "approved") {
-      displayText = "Active"; 
-      bgColor = "#DCFCE7";
-      textColor = "#166534";
-    } else if (normalizedStatus === "rejected") {
-      displayText = "Rejected";
-      bgColor = "#FFE4E6";
-      textColor = "#B91C1C";
-    } else if (normalizedStatus === "sold") {
-      displayText = "Sold";
-      bgColor = "#DBEAFE";
-      textColor = "#1E40AF";
-    } else if (normalizedStatus === "pending") {
-      displayText = "Pending";
-      bgColor = "#FFF7E6";
-      textColor = "#FAAD14";
-    }
+        const { display, bg, color } = statusMap[normalizedStatus] ?? {
+          display: status || "Pending",
+          bg: "#FFF7E6",
+          color: "#FAAD14",
+        };
 
-    return (
-      <span
-        style={{
-          backgroundColor: bgColor,
-          color: textColor,
-          padding: "2px 8px",
-          borderRadius: "8px",
-          fontSize: "12px",
-        }}
-      >
-        {displayText}
-      </span>
-    );
-  },
-},
+        return (
+          <span
+            style={{
+              backgroundColor: bg,
+              color,
+              padding: "2px 8px",
+              borderRadius: "8px",
+              fontSize: "12px",
+            }}
+          >
+            {display}
+          </span>
+        );
+      },
+    },
 
-  {
-    title: <span style={headerStyle}>Actions</span>,
-    key: "actions",
-    align: "center",
-    render: (_, record) => (
-      <EyeOutlined
-        style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
-        onClick={() => navigate(`/listingdetails/${record.car_id}`)}
-      />
-    ),
-  },
-];
+    {
+      title: <span style={headerStyle}>Actions</span>,
+      key: "actions",
+      align: "center",
+      render: (_, record) => (
+        <EyeOutlined
+          style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
+          onClick={() => navigate(`/listingdetails/${record.car_id}`)}
+        />
+      ),
+    },
+  ];
 
   return (
     <div style={{ padding: "5px", background: "#f0f2f5" }}>
@@ -304,7 +300,7 @@ const PendingListings = () => {
               label: "Status",
               component: (
                 <Select value={statusFilter} onChange={setStatusFilter} style={{ width: "100%" }}>
-                   <Option value="">All</Option>
+                  <Option value="">All</Option>
                   <Option value="Pending">Pending</Option>
                   <Option value="Approved">Approved</Option>
                   <Option value="Sold">Sold</Option>
@@ -335,9 +331,7 @@ const PendingListings = () => {
 
         {/* Table Section */}
         <h3 style={{ marginBottom: 15, fontSize: "18px", fontWeight: "600" }}>
-          {statusFilter 
-    ? `${statusFilter} Listings (${pagination.total})`
-    : `All Listings (${pagination.total})`}
+          {statusFilter ? `${statusFilter} Listings (${pagination.total})` : `All Listings (${pagination.total})`}
         </h3>
 
         <Table

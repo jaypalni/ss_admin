@@ -43,7 +43,6 @@ const { Header, Sider, Content } = Layout;
 function AppLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [, setLoading] = useState(false);
   const navigate = useNavigate();
   const {user,role} = useSelector((state) => state.auth);
   const location = useLocation();
@@ -61,12 +60,6 @@ function AppLayout({ children }) {
 
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-const headerHeight = 64; 
-const expandedSiderWidth = 200; 
-const collapsedSiderWidth = 55;
-const siderWidth = collapsed ? collapsedSiderWidth : expandedSiderWidth;
-
-  console.log("1234562345",role)
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };

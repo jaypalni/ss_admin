@@ -21,7 +21,6 @@ import Transactions from "./pages/Transactions";
 import WebsiteContent from "./pages/WebsiteContent";
 import ManageCountry from "./pages/ManageCountry";
 import BannerManagement from "./pages/BannerManagement";
-import CarDetails from "./components/cardetails";
 import Subcriptions from "./pages/subcriptions";
 import CustomerDetails from "./components/customerdetails";
 import Profile from "./components/profile";
@@ -92,7 +91,6 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
-        <Route path="/bestcars/:car_id/CarDetails" element={ <AppLayout><CarDetails /></AppLayout>} />
         <Route
           path="/car-types"
           element={

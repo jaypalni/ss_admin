@@ -3,10 +3,9 @@ import AllCarsDashboard from '../components/allcarsdashboard';
 import PendingListings from "../components/pendinglistings";
 import MostPopularModels from "../components/mostpopularmodels";
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import {  useSelector } from 'react-redux';
 
 const ListingManagement = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user,token } = useSelector(state => state.auth);
   const isLoggedIn = token && user

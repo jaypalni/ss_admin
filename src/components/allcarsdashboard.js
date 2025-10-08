@@ -39,7 +39,6 @@ function AllCarsDashboard() {
       }
 
       if (result?.message) {
-        //messageApi.open({ type: "success", content: result.message });
       }
     } catch (error) {
       const errorData = handleApiError(error);
@@ -61,7 +60,6 @@ function AllCarsDashboard() {
 
   return (
     <div className="content-wrapper-allcardashboard">
-      {/* {contextHolder} */}
       <div className="content-body">
         <div className="row">
           {/* Active Listings */}

@@ -72,8 +72,6 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          //localStorage.removeItem("token");
-          // window.location.href = "/login";
           break;
         case 403:
           console.error("Access forbidden");
@@ -148,7 +146,6 @@ export const userAPI = {
     api.get(API_CONFIG.ENDPOINTS.USER.REASON_REJECTIONS),
     dashboardstats: () => 
       api.get(API_CONFIG.ENDPOINTS.USER.DASHBOARD_STATS),
-    // pendingcars: (body) => api.post(API_CONFIG.ENDPOINTS.USER.PENDING_CARS,body),
     pendingcars: (body, page = 1, limit = 10) => 
   api.post(API_CONFIG.ENDPOINTS.USER.PENDING_CARS(page, limit), body),
     getCarById: (id) => api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)),
