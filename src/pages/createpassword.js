@@ -178,7 +178,7 @@ const CreatePassword = () => {
           <h2 className="create-site-title">Souq Sayarat</h2>
           <h2 className="create-title">Create New Password</h2>
           <h6 className="create-subtitle">Enter your new password to complete the reset process</h6>
- <form className="login-card" onSubmit={handleResetPassword} aria-label="Login form">
+ <form className="" onSubmit={handleResetPassword} aria-label="Login form" style={{padding:"10px"}}>
           <div className="form-group-create">
             <label htmlFor="password-input" className="create-label">New Password</label>
             <Input.Password
@@ -259,16 +259,16 @@ const CreatePassword = () => {
             size="large"
             block
             onClick={() => {}}
-            aria-label="Security Notice"
+            aria-label="Security Tip"
           >
             <div className="create-button-content">
               <div className="create-button-top">
                 <img src={bluelogo_icon2} alt="icon" className="create-button-icon" />
-                <span className="create-text-otp">Security Notice</span>
+                <span className="create-text-otp">Security Tip</span>
               </div>
 
               <div className="create-button-subtext">
-                Never share your verification code with anyone. Our team will never ask for this code.
+               Choose a strong password that you haven't used elsewhere. Keep it safe and secure.
               </div>
             </div>
           </Button>

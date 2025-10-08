@@ -196,7 +196,6 @@ const OtpScreen = () => {
 
           {/* OTP Inputs */}
           <fieldset className="otp-inputs">
-            <legend className="sr-only">OTP inputs</legend>
             {otp.map((digit, idx) => {
               let inputClass = "otp-input";
               if (digit) inputClass += " filled";
