@@ -19,12 +19,6 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const allowedDomains = [
-  "@souqsayarat.com",
-  "@souqsayarat.net",
-  "@souqsayarat.iq"
-];
-
 useEffect(() => {
   // Disable browser back button
   const handlePopState = () => {
@@ -81,7 +75,6 @@ useEffect(() => {
         });
         dispatch(loginSuccess(userData?.data?.firstname, userData?.data?.access_token,
            userData?.data?.email,userData?.data?.role,userData?.data?.needs_password_update));
-        console.log('Token we need', userData?.data)
         setLoading(false);
         
         if (userData?.data?.needs_password_update === 1) {

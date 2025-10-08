@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from "prop-types";
 import "../assets/styles/otp.css";
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "../services/api";
@@ -9,7 +10,6 @@ import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { FaTrash } from "react-icons/fa";
 import { useSelector } from 'react-redux';
 
-// Extracted Action Buttons Component
 const ActionButtons = ({ record, onEdit, onDelete }) => (
   <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
     <button
@@ -50,6 +50,14 @@ const ActionButtons = ({ record, onEdit, onDelete }) => (
     </Popconfirm>
   </div>
 );
+
+ActionButtons.propTypes = {
+  record: PropTypes.shape({
+    key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }).isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+};
 
 const GetAdminsData = () => {
   const navigate = useNavigate();

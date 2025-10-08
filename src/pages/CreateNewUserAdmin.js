@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Card,
   Input,
@@ -20,13 +21,16 @@ import { useSelector } from 'react-redux';
 
 const { Option } = Select;
 
-// Component to handle labels with required asterisk
 const RequiredLabel = ({ text }) => (
   <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
     <span>{text}</span>
     <span style={{ color: "red" }}>*</span>
   </span>
 );
+
+RequiredLabel.propTypes = {
+  text: PropTypes.string.isRequired,
+};
 
 const CreateNewUserAdmin = () => {
   const navigate = useNavigate();

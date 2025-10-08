@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Card,
   Input,
@@ -12,15 +13,24 @@ import {
   Space,
   Breadcrumb,
 } from "antd";
-import {
-  PlusOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, SaveOutlined } from "@ant-design/icons";
 import "../assets/styles/otp.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
+
 const { Option } = Select;
+
+const RequiredLabel = ({ text }) => (
+  <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+    <span>{text}</span>
+    <span style={{ color: "red" }}>*</span>
+  </span>
+);
+
+RequiredLabel.propTypes = {
+  text: PropTypes.string.isRequired,
+};
 
 const CreateNewSubscription = () => {
   const navigate = useNavigate();
@@ -140,14 +150,6 @@ const CreateNewSubscription = () => {
     navigate("/financials/pricing");
   };
 
-  // helper to render label with asterisk using inline-flex + gap (avoids ambiguous spacing)
-  const RequiredLabel = ({ text }) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-      <span>{text}</span>
-      <span style={{ color: "red" }}>*</span>
-    </span>
-  );
-
   return (
     <div
       style={{
@@ -225,6 +227,7 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
+            {/* Price */}
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
@@ -241,6 +244,7 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
+            {/* Number of Listings */}
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
@@ -253,6 +257,7 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
+            {/* Duration */}
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
@@ -265,6 +270,7 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
+            {/* Auto Renew */}
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item
@@ -280,6 +286,7 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
+            {/* User Type */}
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item

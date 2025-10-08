@@ -38,8 +38,6 @@ function AllCarsDashboard() {
         setDashboardData(result.data);
       }
 
-      if (result?.message) {
-      }
     } catch (error) {
       const errorData = handleApiError(error);
       messageApi.open({ type: "error", content: errorData });
