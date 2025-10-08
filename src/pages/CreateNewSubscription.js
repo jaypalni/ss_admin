@@ -63,18 +63,16 @@ const CreateNewSubscription = () => {
 
         if (data && (data.status_code === 200 || data.status === "success")) {
           const user = data.data;
+          let autoRenewValue = null;
+        if (user.Auto_renewed === 1) autoRenewValue = "yes";
+        else if (user.Auto_renewed === 0) autoRenewValue = "no";
           form.setFieldsValue({
             namePlan: user.name ?? "",
             price: user.price ?? "",
             duration: user.duration_days ?? "",
             numList: user.listing_limit ?? "",
             userType: user.target_user_type,
-            autoRenew:
-              user.Auto_renewed === 1
-                ? "yes"
-                : user.Auto_renewed === 0
-                ? "no"
-                : null,
+            autoRenew: autoRenewValue,
           });
           const statusValue =
             user.Auto_renewed !== undefined && user.Auto_renewed !== null
@@ -165,27 +163,36 @@ const CreateNewSubscription = () => {
 
       <div style={{ width: "100%", maxWidth: 600 }}>
         <Breadcrumb
-          separator=">"
-          items={[
-            { title: "Financials" },
-            {
-              title: (
-                <span
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigate("/financials/pricing")}
-                >
-                  Pricing
-                </span>
-              ),
-            },
-            { title: isEdit ? "Edit Package" : "Create New Package" },
-          ]}
+  separator=">"
+  items={[
+    { title: "Financials" },
+    {
+      title: (
+        <button
+          type="button"
+          onClick={() => navigate("/financials/pricing")}
           style={{
-            marginBottom: 20,
-            fontWeight: 400,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
             fontSize: 14,
+            fontWeight: 400,
+            padding: 0,
           }}
-        />
+        >
+          Pricing
+        </button>
+      ),
+    },
+    { title: isEdit ? "Edit Package" : "Create New Package" },
+  ]}
+  style={{
+    marginBottom: 20,
+    fontWeight: 400,
+    fontSize: 14,
+  }}
+/>
+
 
         <Form
           form={form}

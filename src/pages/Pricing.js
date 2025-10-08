@@ -375,6 +375,7 @@ const Pricing = () => {
               backgroundColor: "#008AD5",
               color: "white",
               border: "none",
+              gap: 8,
               padding: "8px 18px",
               borderRadius: "6px",
               cursor: "pointer",
@@ -427,6 +428,7 @@ const Pricing = () => {
 PackageCard.propTypes = {
   item: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string.isRequired,
     isSummary: PropTypes.bool,
     percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

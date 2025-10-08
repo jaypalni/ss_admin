@@ -66,25 +66,26 @@ const PasswordRequirements = ({ requirements }) => {
   ];
 
   return (
-    <div className="create-button-back-password-1" role="region" aria-label="Password must contain">
-      <div className="create-button-content-pass">
-        <div className="create-button-top">
-          <span style={{ fontWeight: 400, fontSize: "12px", color: "#6B7280" }}>
-            Password must contain:
-          </span>
-        </div>
-        <div className="create-button-subtext-pass-1">
-          {requirementItems.map((item) => (
-            <div key={item.key} className="requirement-item">
-              <span className={`requirement-check ${item.met ? "met" : ""}`} aria-hidden>
-                {item.met ? "✓" : ""}
-              </span>
-              <span>{item.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <section aria-label="Password requirements" className="create-button-back-password-1">
+  <div className="create-button-content-pass">
+    <div className="create-button-top">
+      <span style={{ fontWeight: 400, fontSize: "12px", color: "#6B7280" }}>
+        Password must contain:
+      </span>
     </div>
+    <div className="create-button-subtext-pass-1">
+      {requirementItems.map((item) => (
+        <div key={item.key} className="requirement-item">
+          <span className={`requirement-check ${item.met ? "met" : ""}`} aria-hidden>
+            {item.met ? "✓" : ""}
+          </span>
+          <span>{item.text}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
   );
 };
 
@@ -169,52 +170,57 @@ const ChangePassword = () => {
       {contextHolder}
 
       <Breadcrumb
-        separator={<img src={Right} alt="" />}
-        style={{ marginBottom: 16 }}
-        items={[
-          {
-            title: (
-              <span
-                style={{
-                  color: "#6B7280",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                  fontWeight: "400",
-                }}
-                onClick={() => navigate("/dashboard")}
-              >
-                Dashboard
-              </span>
-            ),
-          },
-          {
-            title: (
-              <span
-                style={{
-                  color: "#6B7280",
-                  fontSize: "13px",
-                  fontWeight: "400",
-                }}
-              >
-                Account Settings
-              </span>
-            ),
-          },
-          {
-            title: (
-              <span
-                style={{
-                  color: "#000000",
-                  fontSize: "13px",
-                  fontWeight: "400",
-                }}
-              >
-                Change Password
-              </span>
-            ),
-          },
-        ]}
-      />
+  separator={<img src={Right} alt="" />}
+  style={{ marginBottom: 16 }}
+  items={[
+    {
+      title: (
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#6B7280",
+            cursor: "pointer",
+            fontSize: "13px",
+            fontWeight: "400",
+            padding: 0,
+          }}
+        >
+          Dashboard
+        </button>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{
+            color: "#6B7280",
+            fontSize: "13px",
+            fontWeight: "400",
+          }}
+        >
+          Account Settings
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{
+            color: "#000000",
+            fontSize: "13px",
+            fontWeight: "400",
+          }}
+        >
+          Change Password
+        </span>
+      ),
+    },
+  ]}
+/>
+
 
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px"  }}>
 

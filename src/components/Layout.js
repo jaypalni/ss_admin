@@ -184,10 +184,24 @@ function AppLayout({ children }) {
     {
   key: "",
   label: (
-    <span style={{ color: "red", display: "flex", alignItems: "center", gap: "8px" }} onClick={() => setLogoutModalOpen(true)}>
-      <MdLogout style={{ color: "red" }} />
-      Logout
-    </span>
+    <button
+    type="button"
+    onClick={() => setLogoutModalOpen(true)}
+    style={{
+      color: "red",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      background: "none",
+      border: "none",
+      padding: 0,
+      cursor: "pointer",
+      font: "inherit", 
+    }}
+  >
+    <MdLogout style={{ color: "red" }} />
+    Logout
+  </button>
   ),
 },
 
@@ -325,9 +339,20 @@ if (isCreateNewAdmin) {
     { title: "User Management" },
     {
       title: (
-        <span style={{ cursor: "pointer" }} onClick={() => navigate("/Admins")}>
+        <button
+          type="button"
+          onClick={() => navigate("/Admins")}
+          style={{
+            cursor: "pointer",
+            background: "none",
+            border: "none",
+            padding: 0,
+            margin: 0,
+            font: "inherit", 
+          }}
+        >
           Admin Users
-        </span>
+        </button>
       ),
     },
     { title: "Create New Admin User" },
@@ -337,14 +362,26 @@ if (isCreateNewAdmin) {
     { title: "User Management" },
     {
       title: (
-        <span style={{ cursor: "pointer" }} onClick={() => navigate("/Admins")}>
+        <button
+          type="button"
+          onClick={() => navigate("/Admins")}
+          style={{
+            cursor: "pointer",
+            background: "none",
+            border: "none",
+            padding: 0,
+            margin: 0,
+            font: "inherit",
+          }}
+        >
           Admin Users
-        </span>
+        </button>
       ),
     },
     { title: "Edit Admin User" },
   ];
 }
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {contextHolder}

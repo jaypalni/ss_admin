@@ -275,17 +275,17 @@ const OtpScreen = () => {
             <span className="button-text-otp">Go Back</span>
           </Button>
 
-          <div className="otp-button-back-1" role="region" aria-label="Security Notice">
-            <div className="otp-button-content">
-              <div className="otp-button-top">
-                <img src={bluelogo_icon2} alt="icon" className="otp-button-icon" />
-                <span className="button-text-otp">Security Notice</span>
-              </div>
-              <div className="otp-button-subtext">
-                Never share your verification code with anyone. Our team will never ask for this code.
-              </div>
-            </div>
-          </div>
+         <section className="otp-button-back-1" aria-label="Security Notice">
+  <div className="otp-button-content">
+    <div className="otp-button-top">
+      <img src={bluelogo_icon2} alt="Security icon" className="otp-button-icon" />
+      <span className="button-text-otp">Security Notice</span>
+    </div>
+    <div className="otp-button-subtext">
+      Never share your verification code with anyone. Our team will never ask for this code.
+    </div>
+  </div>
+</section>
 
         </div>
       </div>

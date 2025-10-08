@@ -65,6 +65,14 @@ function Users() {
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editForm] = Form.useForm();
+  let roleColor;
+if (selectedUser.role === "Admin") {
+  roleColor = "red";
+} else if (selectedUser.role === "Manager") {
+  roleColor = "blue";
+} else {
+  roleColor = "green";
+}
 
   // Handle edit user
   const handleEdit = (record) => {
@@ -350,17 +358,9 @@ function Users() {
 
             <Descriptions bordered column={2}>
               <Descriptions.Item label="Role" span={1}>
-                <Tag
-                  color={
-                    selectedUser.role === "Admin"
-                      ? "red"
-                      : selectedUser.role === "Manager"
-                      ? "blue"
-                      : "green"
-                  }
-                >
-                  {selectedUser.role}
-                </Tag>
+               <Tag color={roleColor}>
+  {selectedUser.role}
+</Tag>
               </Descriptions.Item>
 
               <Descriptions.Item label="Status" span={1}>

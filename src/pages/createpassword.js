@@ -81,23 +81,24 @@ const PasswordRequirements = ({ requirements }) => {
   ];
 
   return (
-    <div className="create-button-back-password" role="region" aria-label="Password requirements">
-      <div className="create-button-content-pass">
-        <div className="create-button-top">
-          <span className="create-text-otp-pass">Password Requirements:</span>
-        </div>
-        <div className="create-button-subtext-pass">
-          {requirementItems.map((item) => (
-            <div key={item.key} className="requirement-item">
-              <span className={`requirement-check ${item.met ? "met" : ""}`} aria-hidden>
-                {item.met ? "✓" : ""}
-              </span>
-              <span>{item.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+   <section className="create-button-back-password" aria-label="Password requirements">
+  <div className="create-button-content-pass">
+    <div className="create-button-top">
+      <span className="create-text-otp-pass">Password Requirements:</span>
     </div>
+    <div className="create-button-subtext-pass">
+      {requirementItems.map((item) => (
+        <div key={item.key} className="requirement-item">
+          <span className={`requirement-check ${item.met ? "met" : ""}`} aria-hidden>
+            {item.met ? "✓" : ""}
+          </span>
+          <span>{item.text}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
   );
 };
 

@@ -38,11 +38,11 @@ const PendingListings = () => {
       const response = await userAPI.regionslist({});
       const data1 = handleApiResponse(response);
 
-      if (!data1 || !data1.data) {
-        message.error("No location data received");
-        setCarLocation([]);
-        return;
-      }
+     if (!data1?.data) {
+  message.error("No location data received");
+  setCarLocation([]);
+  return;
+}
 
       setCarLocation(data1.data);
     } catch (error) {
@@ -319,8 +319,8 @@ const PendingListings = () => {
                 />
               ),
             },
-          ].map((item, index) => (
-            <Col key={index} flex="1" style={{ paddingLeft: 8, paddingRight: 8, marginBottom: 12 }}>
+          ].map((item) => (
+            <Col key={item.label} flex="1" style={{ paddingLeft: 8, paddingRight: 8, marginBottom: 12 }}>
               <div style={{ marginBottom: 6 }}>
                 <strong>{item.label}</strong>
               </div>
