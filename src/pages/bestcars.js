@@ -13,6 +13,7 @@ import {
   message,
   Tooltip,
   Checkbox,
+  Modal,
 } from "antd";
 import "../assets/styles/bestcars.css";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -129,8 +130,9 @@ function BestCars() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   const [makeFilter, setMakeFilter] = useState("");
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [headerChecked, setHeaderChecked] = useState(false);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -159,6 +161,32 @@ function BestCars() {
     const base = process.env.REACT_APP_API_URL || window.location.origin;
     return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
   };
+
+  const handleHeaderCheckboxChange = (e) => {
+  const checked = e.target.checked;
+
+  console.log("123456",setSelectedIds(cars.map((c) => c.id)))
+
+  Modal.confirm({
+    title: "Confirm",
+    content: checked
+      ? "Do you want to select all cars?"
+      : "Do you want to deselect all cars?",
+    okText: "Yes",
+    cancelText: "No",
+    onOk() {
+      if (checked) {
+        setSelectedIds(cars.map((c) => c.id));
+        setHeaderChecked(true);
+      } else {
+        setSelectedIds([]);
+        setHeaderChecked(false);
+      }
+    },
+    onCancel() {
+    },
+  });
+};
 
   const mapApiItemToCar = (item) => {
     const { sellerName, sellerCity } = formatSellerInfo(item.user_details);
@@ -282,13 +310,6 @@ function BestCars() {
     fetchBestCarsData(effectivePage, effectivePageSize, { make: makeFilter, search: searchValue });
   };
 
-  const displayedCars = cars;
-
-  const current = pagination.current ?? 1;
-  const pageSize = pagination.pageSize ?? 10;
-  const startIndex = totalCars === 0 ? 0 : (current - 1) * pageSize;
-  const endIndex = Math.min(startIndex + (displayedCars.length || pageSize), totalCars);
-
   const handleToggle = async (id) => {
     const car = cars.find((c) => c.id === id);
     if (!car) return;
@@ -334,15 +355,22 @@ function BestCars() {
     }
   };
 
-  const handleCardCheckboxChange = (carId, checked) => {
-    setSelectedIds((prev) => {
-      if (checked) {
-        return Array.from(new Set([...prev, carId]));
-      } else {
-        return prev.filter((id) => id !== carId);
-      }
-    });
-  };
+ const handleCardCheckboxChange = (carId, checked) => {
+  setSelectedIds((prev) => {
+    if (checked) {
+      return Array.from(new Set([...prev, carId]));
+    } else {
+      return prev.filter((id) => id !== carId);
+    }
+  });
+};
+
+  const displayedCars = cars;
+
+  const current = pagination.current ?? 1;
+  const pageSize = pagination.pageSize ?? 10;
+  const startIndex = totalCars === 0 ? 0 : (current - 1) * pageSize;
+  const endIndex = Math.min(startIndex + (displayedCars.length || pageSize), totalCars);
 
   return (
     <div
@@ -413,6 +441,13 @@ function BestCars() {
                   </Tooltip>
                 </div>
               </div>
+             
+                  <Checkbox
+  style={{ marginTop: "10px" }}
+  checked={headerChecked} 
+  onChange={handleHeaderCheckboxChange}
+/>
+
             </Col>
           </Row>
         </div>

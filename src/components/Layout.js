@@ -210,7 +210,7 @@ function AppLayout({ children }) {
   const headerTitles = {
   "/dashboard": {
     title: "Dashboard",
-    tagline: "Overview of all metrics and statistics",
+    tagline: "Real-time overview of platform activity",
   },
   "/listingmanagement": {
     title: "Listing Management",
@@ -250,8 +250,8 @@ function AppLayout({ children }) {
     tagline: "Manage individual user accounts and monitor platform activity",
   },
   "/user-management/dealer": {
-    title: "Dealer Users",
-    tagline: "Manage dealer user accounts",
+    title: "Dealer Management",
+    tagline: "Manage and monitor all registered dealer accounts",
   },
   "/Admins": {
     title: "User Management",

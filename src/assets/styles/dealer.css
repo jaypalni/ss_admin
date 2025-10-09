@@ -1,0 +1,38 @@
+.dealer-table .ant-table-cell {
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+.contact-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.1;
+}
+.contact-cell .contact-email {
+  font-size: 12px;
+  color: #0f172a;
+  font-weight: 500;
+}
+.contact-cell .contact-phone {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dealer-company {
+  font-weight: 500;
+  color: #111827; 
+  font-size: 14px;
+}
+
+.dealer-owner {
+  font-weight: 400;
+  color: #111827; 
+  font-size: 14px;
+}
+
+.dealer-registered {
+  font-weight: 400;
+  color: #111827; 
+  font-size: 13px;
+}

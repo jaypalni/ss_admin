@@ -1,0 +1,15 @@
+.card-icon-wrapper-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  margin-right: -5px;
+}
+
+.card-icon-dashboard {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
