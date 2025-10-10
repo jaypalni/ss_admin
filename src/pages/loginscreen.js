@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // ✅ make sure useEffect is imported
+import React, { useState, useEffect } from "react"; 
 import "../assets/styles/loginscreen.css";
 import { Input, Button, message } from "antd";
 import bluelogo_icon from "../assets/images/car.svg";
@@ -178,23 +178,42 @@ useEffect(() => {
   </div>
 
   <div className="button-row">
-    <Button
-      type="primary"
-      className="login-button1"
-      size="large"
-      block
-      htmlType="submit"
-      loading={loading}
-      aria-label="Sign in"
-    >
-      <span className="button-text">{loading ? "Signing in..." : "Sign In"}</span>
-      <img 
-      src={arrow_icon} 
-      alt="internal icon" 
-      className="btn-icon" 
+  <Button
+    type="primary"
+    className="login-button1"
+    size="large"
+    block
+    htmlType="submit"
+    loading={loading}
+    disabled={loading || !email.trim() || !password.trim()} 
+    aria-label="Sign in"
+    style={{
+      backgroundColor: !email.trim() || !password.trim() ? "#D1D5DB" : "#008AD5",
+      borderColor: !email.trim() || !password.trim() ? "#D1D5DB" : "#008AD5",
+      color: !email.trim() || !password.trim() ? "#9CA3AF" : "#ffffff",
+      cursor: !email.trim() || !password.trim() ? "not-allowed" : "pointer",
+      opacity: !email.trim() || !password.trim() ? 0.5 : 1,
+      borderRadius: 8,
+      height: 40,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      transition: "all 0.2s ease",
+    }}
+  >
+    <span className="button-text">{loading ? "Signing in..." : "Sign In"}</span>
+    <img
+      src={arrow_icon}
+      alt="arrow"
+      className="btn-icon"
+      style={{
+        opacity: !email.trim() || !password.trim() ? 0.4 : 1,
+      }}
     />
-    </Button>
-  </div>
+  </Button>
+</div>
+
 
   <div className="forgot-password1">
     <a href="/ForgotPassword">Forgot password?</a>

@@ -44,7 +44,6 @@ const validatePasswordForm = (newPassword, reenterPassword, allRequirementsMet) 
   return null;
 };
 
-// Helper function to handle API response
 const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate) => {
   try {
     const response = await apiCall(body);
@@ -65,7 +64,6 @@ const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate
   }
 };
 
-// Helper function to check if submit button should be enabled
 const isSubmitEnabled = (newPassword, reenterPassword, allRequirementsMet, passwordsMatch) => {
   return newPassword && reenterPassword && allRequirementsMet && passwordsMatch;
 };
