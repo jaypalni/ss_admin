@@ -39,6 +39,7 @@ import ChangePassword from "./pages/ChangePassword";
 import Pricing from "./pages/Pricing";
 import CreateNewSubscription from "./pages/CreateNewSubscription";
 import TranscationsFin from "./pages/TranscationsFin";
+import DealerDetails from "./pages/DealerDetails";
 
 const AppRouter = () => {
   return (
@@ -139,6 +140,15 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <Dealer />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/user-management/dealer/:dealerId"
+          element={
+            <AppLayout>
+              <DealerDetails />
             </AppLayout>
           }
         />

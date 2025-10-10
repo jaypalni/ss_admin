@@ -253,6 +253,10 @@ function AppLayout({ children }) {
     title: "Dealer Management",
     tagline: "Manage and monitor all registered dealer accounts",
   },
+  "/user-management/dealer/:dealerId": {
+    title: "",
+    tagline: "",
+  },
   "/Admins": {
     title: "User Management",
     tagline: "Manage admin accounts and permissions",

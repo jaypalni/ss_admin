@@ -122,7 +122,7 @@ const Dealer = () => {
               color: textColor,
               padding: "6px 10px",
               borderRadius: 8,
-              fontSize: 9,
+              fontSize: 10,
               whiteSpace: "normal", 
               maxWidth: 140,
               textAlign: "center",
@@ -141,7 +141,7 @@ const Dealer = () => {
       width: 140,
       render: (_, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-          <EyeOutlined style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }} onClick={() => navigate(`/user-management/individual/${record.id}`)} />
+          <EyeOutlined style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }} onClick={() => navigate(`/user-management/dealer/:dealerId`)} />
           <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => console.log(`Edit ${record.id}`)} />
           <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => console.log(`Delete ${record.id}`)} />
         </div>

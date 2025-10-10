@@ -22,9 +22,11 @@ import { loginApi } from "../services/api";
 import editIcon from "../assets/images/edit.svg";
 import reject from "../assets/images/delete_icon.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
+import Boost_3 from "../assets/images/3_boost.svg";
+import Boost_7 from "../assets/images/7_boost.svg";
+import Boost_14 from "../assets/images/14_boost.svg";
 import PropTypes from "prop-types";
 
-// Helper function to get icon based on package name
 const getPackageIcon = (packageName, isSummary) => {
   if (isSummary) return modelIcon;
   
@@ -35,7 +37,6 @@ const getPackageIcon = (packageName, isSummary) => {
   return modelIcon;
 };
 
-// Helper function to get icon background color
 const getIconBackgroundColor = (icon) => {
   if (icon === activeIcon) return "#DBEAFE";
   if (icon === pendingIcon) return "#DCFCE7";
@@ -43,7 +44,6 @@ const getIconBackgroundColor = (icon) => {
   return "#FFEDD5";
 };
 
-// Helper function to format percentage display
 const formatPercentage = (percentage) => {
   const pct = Number(percentage) || 0;
   const isPositive = pct >= 0;
@@ -55,14 +55,12 @@ const formatPercentage = (percentage) => {
   };
 };
 
-// Helper function to get display value for card
 const getCardDisplayValue = (item) => {
   if (item.isSummary) return item.total;
   if (item.total !== undefined && item.total !== null) return item.total;
   return item.listings;
 };
 
-// Helper function to format API data into table format
 const formatSubscriptionData = (item) => {
   return {
     key: item.id,
@@ -82,12 +80,10 @@ const formatSubscriptionData = (item) => {
   };
 };
 
-// Helper function to safely parse numeric values
 const parseNumericValue = (value) => {
   return value !== undefined && value !== null ? Number(value) : 0;
 };
 
-// Helper function to handle API error messages
 const getErrorMessage = (err) => {
   return err?.response?.data?.message || 
          err?.response?.data?.error || 
@@ -95,7 +91,6 @@ const getErrorMessage = (err) => {
          "Something went wrong";
 };
 
-// Package Card Component
 const PackageCard = ({ item }) => {
   const icon = getPackageIcon(item.name, item.isSummary);
   const iconBgColor = getIconBackgroundColor(icon);
@@ -351,6 +346,54 @@ const Pricing = () => {
     },
   ];
 
+  const columns_boost = [
+     {
+      title: "Duration (days)",
+      dataIndex: "duration",
+      key: "duration",
+      width: 150,
+    },
+    {
+      title: "Boost Price (IQD)",
+      dataIndex: "price",
+      key: "price",
+      width: 120,
+      render: (val) => <div style={{ fontWeight: 400 }}>{val}</div>,
+    },
+    {
+      title: "Active",
+      dataIndex: "active",
+      key: "active",
+      width: 100,
+      render: (val, record) => {
+        return (
+          <Switch
+            checked={!!val}
+            onChange={(checked) => handleToggleActive(record.id, checked)}
+            style={{ backgroundColor: !!val ? "#008AD5" : "#d9d9d9", borderColor: !!val ? "#008AD5" : "#d9d9d9" }}
+          />
+        );
+      },
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 140,
+      render: (text, record) => {
+        if (String(record.id) === "__total_summary__") return <span style={{ color: "#6B7280" }}>—</span>;
+        return (
+          <Space>
+            <Tooltip title="Edit">
+              <img src={editIcon} alt="edit" onClick={() => handleEdit(record)} style={{ width: 14, cursor: "pointer" }} />
+            </Tooltip>
+            <Popconfirm title={`Delete "${record.name}"?`} onConfirm={() => handleDelete(record)} okText="Yes" cancelText="No">
+              <img src={reject} alt="delete" style={{ width: 14, cursor: "pointer" }} />
+            </Popconfirm>
+          </Space>
+        );
+      },
+    },
+  ];
   return (
     <div style={{ padding: "20px" }}>
       {contextHolder}
@@ -367,7 +410,7 @@ const Pricing = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div>
             <h1 style={{ fontSize: "20px", fontWeight: "600", color: "#1F2937", marginBottom: 2 }}>Subscription Packages</h1>
-            <p style={{ fontSize: "15px", color: "#4B5563", margin: 0, fontWeight: "400" }}>Manage all subscription-based plans</p>
+            <p style={{ fontSize: "13px", color: "#4B5563", margin: 0, fontWeight: "400" }}>Manage all subscription-based plans</p>
           </div>
 
           <button
@@ -415,6 +458,74 @@ const Pricing = () => {
         <div>
           <Table
             columns={columns}
+            dataSource={tableData}
+            loading={loading}
+            locale={{ emptyText: <Empty description="No packages found" /> }}
+          />
+        </div>
+      </div>
+
+      <div
+        className="tile-card"
+        style={{
+          background: "#fff",
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
+          marginTop:"20px"
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div>
+            <h1 style={{ fontSize: "20px", fontWeight: "600", color: "#1F2937", marginBottom: 2 }}>Featured Listing Pricing Rules</h1>
+            <p style={{ fontSize: "13px", color: "#4B5563", margin: 0, fontWeight: "400" }}>Define pricing logic for boosted listings</p>
+          </div>
+
+          <button
+            style={{
+              backgroundColor: "#008AD5",
+              color: "white",
+              border: "none",
+              gap: 8,
+              padding: "8px 18px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "12px",
+              fontWeight: "500",
+              display: "flex",
+              alignItems: "center",
+            }}
+            onClick={() => navigate("/financials/pricing/createNewPackage")}
+          >
+            <img src={plusIcon} alt="add" style={{ width: "12px", height: "12px", marginRight: "8px", fontWeight: 400 }} />
+            Add New Boost Rule
+          </button>
+        </div>
+
+        <Divider style={{ margin: "0px 0 16px 0" }} />
+
+        <h6 style={{ fontSize: "12px", fontWeight: "500", color: "#374151", marginBottom: 10 }}>Monthly Featured Purchases</h6>
+
+        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
+            {tableData.length === 0 ? (
+              <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
+            ) : (
+              [...tableData, {
+                key: "__total_summary__",
+                id: "__total_summary__",
+                name: "Total",
+                total: totalActive,
+                percentage: totalPercentage,
+                isSummary: true,
+              }].map((item) => <PackageCard key={item.key || item.id} item={item} />)
+            )}
+          </div>
+        </div>
+
+        <div>
+          <Table
+            columns={columns_boost}
             dataSource={tableData}
             loading={loading}
             locale={{ emptyText: <Empty description="No packages found" /> }}
