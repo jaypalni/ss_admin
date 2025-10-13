@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import EditOutlined from "../assets/images/flag.svg";
 import DeleteOutlined from "../assets/images/banned.svg";
+import National from "../assets/images/warning.svg";
+import Info from "../assets/images/info_1.svg";
+import Clock from "../assets/images/clock_1.svg";
 import "../assets/styles/dealer.css";
 
 const { Option } = Select;
@@ -157,6 +160,143 @@ const Dealer = () => {
 
   return (
     <div style={{ padding: 20, background: "#f0f2f5" }}>
+
+       <Card style={{ marginBottom: 16, backgroundColor: "#FFF7ED", borderRadius: 6, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+        <Row justify="space-between" align="middle">
+          <Col
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  }}
+>
+  <img
+    src={National} 
+    alt="Pending icon"
+    style={{ width: 16, height: 16 }}
+  />
+  <h1
+    style={{
+      fontSize: "16px",
+      fontWeight: 600,
+      color: "#9A3412",
+      marginBottom: 0,
+    }}
+  >
+    Pending Actions Required
+  </h1>
+</Col>
+
+          <Col>
+  <div
+    style={{
+      backgroundColor: "#F97316", 
+      color: "white", 
+      width: 20,
+      height: 20,
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 12,
+      fontWeight: 500,
+    }}
+  >
+    3
+  </div>
+</Col>
+
+        </Row>
+
+        <Card
+  style={{
+    marginTop: 10,
+    backgroundColor: "white",
+    borderColor: "#FED7AA",
+    borderRadius: 6,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  }}
+   bodyStyle={{ padding: 12 }}  
+>
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <img
+        src={Clock} 
+        alt="alert"
+        style={{ width: 14, height: 14 }}
+      />
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>
+          Basra Auto Center - Verification Review
+        </div>
+        <div style={{ fontSize: 13, color: "#4B5563",fontWeight: 400, }}>
+          Submitted additional documents 2 days ago
+        </div>
+      </div>
+    </div>
+
+    <Button
+      type="primary"
+      style={{
+        backgroundColor: "#008AD5",
+        borderColor: "#008AD5",
+        borderRadius: 8,
+        color: "#FFFFFF",
+        fontWeight: 400,
+      }}
+      onClick={() => console.log("Review clicked")}
+    >
+      Review
+    </Button>
+  </div>
+        </Card>
+
+
+        <Card
+  style={{
+    marginTop: 10,
+    backgroundColor: "white",
+    borderColor: "#FED7AA",
+    borderRadius: 6,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  }}
+   bodyStyle={{ padding: 12 }}  
+>
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <img
+        src={Info} 
+        alt="alert"
+        style={{ width: 14, height: 14 }}
+      />
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>
+         Najaf Motors - Information Request Response
+        </div>
+        <div style={{ fontSize: 13, color: "#4B5563",fontWeight: 400, }}>
+          Responded to info request 1 day ago
+        </div>
+      </div>
+    </div>
+
+    <Button
+      type="primary"
+      style={{
+        backgroundColor: "#008AD5",
+        borderColor: "#008AD5",
+        borderRadius: 8,
+        color: "#FFFFFF",
+        fontWeight: 400,
+      }}
+      onClick={() => console.log("Review clicked")}
+    >
+      Review
+    </Button>
+  </div>
+        </Card>
+
+      </Card>
+
       <Card style={{ marginBottom: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
         <Row justify="space-between" align="middle">
           <Col style={{ display: "flex", gap: 12 }}>

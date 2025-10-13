@@ -29,7 +29,6 @@ import Dealer from "../assets/images/img.svg";
 import National from "../assets/images/national.svg";
 import pdf from "../assets/images/pdf.svg";
 import warning from "../assets/images/warning.svg";
-import plusIcon from "../assets/images/plus_icon.svg";
 import {  useSelector } from "react-redux";
 import activeIcon from "../assets/images/star.svg";
 import editIcon from "../assets/images/edit.svg";

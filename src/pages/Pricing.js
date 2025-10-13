@@ -22,14 +22,22 @@ import { loginApi } from "../services/api";
 import editIcon from "../assets/images/edit.svg";
 import reject from "../assets/images/delete_icon.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
-import Boost_3 from "../assets/images/3_boost.svg";
-import Boost_7 from "../assets/images/7_boost.svg";
-import Boost_14 from "../assets/images/14_boost.svg";
+import boostIcon3 from "../assets/images/3_boost.svg";
+import boostIcon7 from "../assets/images/7_boost.svg";
+import boostIcon14 from "../assets/images/14_boost.svg";
 import PropTypes from "prop-types";
 
-const getPackageIcon = (packageName, isSummary) => {
+const getBoostIconByDuration = (duration) => {
+  if (duration <= 5) return boostIcon3;
+  if (duration >= 6 && duration <= 10) return boostIcon7;
+  return boostIcon14;
+};
+
+const getPackageIcon = (packageName, isSummary, isBoost = false, duration = 0) => {
   if (isSummary) return modelIcon;
-  
+
+  if (isBoost) return getBoostIconByDuration(duration);
+
   const nameLower = (packageName || "").toLowerCase();
   if (nameLower.includes("basic")) return activeIcon;
   if (nameLower.includes("premium")) return pendingIcon;
@@ -37,12 +45,24 @@ const getPackageIcon = (packageName, isSummary) => {
   return modelIcon;
 };
 
-const getIconBackgroundColor = (icon) => {
+const getIconBackgroundColor = (icon, duration = null, isBoost = false, isSummary = false) => {
+ if (isBoost && !isSummary) {
+    const d = Number(duration);
+    if (!Number.isFinite(d)) {
+      return "#FFEDD5";
+    }
+    if (d <= 5) return "#DBEAFE";
+    if (d >= 6 && d <= 10) return "#DCFCE7";
+    if (d > 10) return "#F3E8FF";
+    return "#FFEDD5";
+  }
+
   if (icon === activeIcon) return "#DBEAFE";
   if (icon === pendingIcon) return "#DCFCE7";
   if (icon === soldIcon) return "#F3E8FF";
   return "#FFEDD5";
 };
+
 
 const formatPercentage = (percentage) => {
   const pct = Number(percentage) || 0;
@@ -91,10 +111,11 @@ const getErrorMessage = (err) => {
          "Something went wrong";
 };
 
-const PackageCard = ({ item }) => {
-  const icon = getPackageIcon(item.name, item.isSummary);
-  const iconBgColor = getIconBackgroundColor(icon);
+const PackageCard = ({ item, isBoost = false }) => {
+  const icon = getPackageIcon(item.name, item.isSummary, isBoost, item.duration);
+  const iconBgColor = getIconBackgroundColor(icon, item.duration, isBoost,item.isSummary);
   const percentageData = formatPercentage(item.percentage);
+
   const displayValue = getCardDisplayValue(item);
 
   return (
@@ -128,18 +149,28 @@ const PackageCard = ({ item }) => {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: 12,
-            color: "#6B7280",
-            marginBottom: 4,
-            whiteSpace: "normal",
-            wordBreak: "break-word",
-          }}
-          title={item.name}
-        >
-          {item.name}
-        </div>
+       <div
+  style={{
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 4,
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+  }}
+  title={
+    isBoost
+      ? item.isSummary
+        ? "Total"
+        : `${item.duration}-Day Boost`
+      : item.name
+  }
+>
+  {isBoost
+    ? item.isSummary
+      ? "Total"
+      : `${item.duration}-Day Boost`
+    : item.name}
+       </div>
 
         <div style={{ fontWeight: 700, fontSize: 18 }}>
           {displayValue}
@@ -169,8 +200,13 @@ const Pricing = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [tableData, setTableData] = useState([]);
-  const [totalActive, setTotalActive] = useState(0);
-  const [totalPercentage, setTotalPercentage] = useState(0);
+  const [listingData, setListingData] = useState([]);
+  const [boostingData, setBoostingData] = useState([]);
+  const [totalListingActive, setTotalListingActive] = useState(0);
+  const [totalListingPercentage, setTotalListingPercentage] = useState(0);
+  const [totalBoostingActive, setTotalBoostingActive] = useState(0);
+  const [totalBoostingPercentage, setTotalBoostingPercentage] = useState(0);
+
 
   const { user, token } = useSelector((state) => state.auth);
   const isLoggedIn = token && user;
@@ -186,57 +222,92 @@ const Pricing = () => {
   }, []);
 
   const fetchAdminData = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
+    const response = await loginApi.getsubscriptionpackage();
+    const data = handleApiResponse(response);
 
-      const response = await loginApi.getsubscriptionpackage();
-      const data = handleApiResponse(response);
+    if (data?.data) {
+      const listings = (data.data.listings || []).map(formatSubscriptionData);
+      const boostings = (data.data.boostings || []).map(formatSubscriptionData);
 
-      if (data?.data && Array.isArray(data.data)) {
-        const formattedData = data.data.map(formatSubscriptionData);
+      setListingData(listings);
+      setBoostingData(boostings);
 
-        setTableData(formattedData);
-        setTotalActive(parseNumericValue(data.total_active));
-        setTotalPercentage(parseNumericValue(data.total_percentage));
-      } else {
-        setTableData([]);
-        setTotalActive(0);
-        setTotalPercentage(0);
-      }
-    } catch (error) {
-      const errorData = handleApiError(error);
-      messageApi.open({
-        type: "error",
-        content: errorData?.message || "Failed to fetch subscription packages",
-      });
-    } finally {
-      setLoading(false);
+      setTotalListingActive(parseNumericValue(data.total_listing_active));
+      setTotalListingPercentage(parseNumericValue(data.total_listing_percentage));
+
+      setTotalBoostingActive(parseNumericValue(data.total_boosting_active));
+      setTotalBoostingPercentage(parseNumericValue(data.total_boosting_percentage));
+    } else {
+      setListingData([]);
+      setBoostingData([]);
+      setTotalListingActive(0);
+      setTotalListingPercentage(0);
+      setTotalBoostingActive(0);
+      setTotalBoostingPercentage(0);
     }
-  };
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({
+      type: "error",
+      content: errorData?.message || "Failed to fetch subscription packages",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
+ const handleToggleActive = async (id, checked) => {
+  const isInListing = listingData.some((p) => p.id === id);
+  const isInBoosting = boostingData.some((p) => p.id === id);
 
-  const handleToggleActive = async (id, checked) => {
-    const body = { 
-      id:id,
-      is_active: checked ? 1 : 0
-     };
-    try {
-      setLoading(true);
-      const res = await loginApi.editsubscriptionpackage( body);
-      const resData = res?.data;
-      if (resData?.status_code === 200) {
-        messageApi.success(resData.message || "Subscription updated successfully");
-        setTableData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
-      } else {
-        messageApi.error(resData?.message || "Failed to update subscription");
-      }
-    } catch (err) {
-      console.error("Submit error:", err);
-      messageApi.error(getErrorMessage(err));
-    } finally {
-      setLoading(false);
+  const prevListingData = listingData;
+  const prevBoostingData = boostingData;
+  const prevTotalListing = totalListingActive;
+  const prevTotalBoosting = totalBoostingActive;
+
+  if (isInListing) {
+    setListingData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
+    setTotalListingActive((prev) => Math.max(0, prev + (checked ? 1 : -1)));
+  }
+
+  if (isInBoosting) {
+    setBoostingData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
+    setTotalBoostingActive((prev) => Math.max(0, prev + (checked ? 1 : -1)));
+  }
+
+  if (!isInListing && !isInBoosting && typeof setTableData === "function") {
+    setTableData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
+  }
+
+  const body = { id, is_active: checked ? 1 : 0 };
+  try {
+    setLoading(true);
+    const res = await loginApi.editsubscriptionpackage(body);
+    const resData = res?.data;
+
+    if (resData?.status_code === 200) {
+      messageApi.success(resData.message || "Subscription updated successfully");
+    } else {
+      setListingData(prevListingData);
+      setBoostingData(prevBoostingData);
+      setTotalListingActive(prevTotalListing);
+      setTotalBoostingActive(prevTotalBoosting);
+      messageApi.error(resData?.message || "Failed to update subscription");
     }
-  };
+  } catch (err) {
+    setListingData(prevListingData);
+    setBoostingData(prevBoostingData);
+    setTotalListingActive(prevTotalListing);
+    setTotalBoostingActive(prevTotalBoosting);
+
+    console.error("Submit error:", err);
+    messageApi.error(getErrorMessage(err));
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEdit = (record) => {
     if (String(record.id) === "__total_summary__") return;
@@ -440,15 +511,15 @@ const Pricing = () => {
 
         <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
-            {tableData.length === 0 ? (
+            {listingData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
             ) : (
-              [...tableData, {
+              [...listingData, {
                 key: "__total_summary__",
                 id: "__total_summary__",
                 name: "Total",
-                total: totalActive,
-                percentage: totalPercentage,
+                total: totalListingActive,
+                percentage: totalListingPercentage,
                 isSummary: true,
               }].map((item) => <PackageCard key={item.key || item.id} item={item} />)
             )}
@@ -458,7 +529,7 @@ const Pricing = () => {
         <div>
           <Table
             columns={columns}
-            dataSource={tableData}
+            dataSource={listingData}
             loading={loading}
             locale={{ emptyText: <Empty description="No packages found" /> }}
           />
@@ -508,17 +579,18 @@ const Pricing = () => {
 
         <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
-            {tableData.length === 0 ? (
+            {boostingData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
             ) : (
-              [...tableData, {
+              [...boostingData, {
                 key: "__total_summary__",
                 id: "__total_summary__",
                 name: "Total",
-                total: totalActive,
-                percentage: totalPercentage,
+                total: totalBoostingActive,
+                percentage: totalBoostingPercentage,
                 isSummary: true,
-              }].map((item) => <PackageCard key={item.key || item.id} item={item} />)
+                
+              }].map((item) => <PackageCard key={item.key || item.id} item={item} isBoost={true} />)
             )}
           </div>
         </div>
@@ -526,7 +598,7 @@ const Pricing = () => {
         <div>
           <Table
             columns={columns_boost}
-            dataSource={tableData}
+            dataSource={boostingData}
             loading={loading}
             locale={{ emptyText: <Empty description="No packages found" /> }}
           />

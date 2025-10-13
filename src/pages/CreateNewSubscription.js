@@ -66,6 +66,14 @@ const CreateNewSubscription = () => {
           let autoRenewValue = null;
         if (user.Auto_renewed === 1) autoRenewValue = "yes";
         else if (user.Auto_renewed === 0) autoRenewValue = "no";
+        let planTypeValue = "";
+  if (user.subscription_type) {
+    planTypeValue = user.subscription_type.toLowerCase(); 
+  } else if (user.name?.toLowerCase().includes("boost")) {
+    planTypeValue = "boosting";
+  } else {
+    planTypeValue = "listing";
+  }
           form.setFieldsValue({
             namePlan: user.name ?? "",
             price: user.price ?? "",
@@ -73,6 +81,7 @@ const CreateNewSubscription = () => {
             numList: user.listing_limit ?? "",
             userType: user.target_user_type,
             autoRenew: autoRenewValue,
+            planType: planTypeValue,
           });
           const statusValue =
             user.Auto_renewed !== undefined && user.Auto_renewed !== null
@@ -105,6 +114,7 @@ const CreateNewSubscription = () => {
       auto_renewed_status: values.autoRenew === "yes" ? 1 : 0,
       currency: "IQD",
       targeted_user_type: values.userType,
+      plan_type: values.planType,
     };
 
     try {
@@ -234,6 +244,31 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
+          <Row gutter={16}>
+  <Col span={24}>
+    <Form.Item
+      label={<RequiredLabel text="Plan Type" />}
+      name="planType"
+      rules={[{ required: true, message: "Please select Plan Type" }]}
+      style={{ marginBottom: 8 }}
+    >
+      <Select
+        placeholder="Select Plan Type"
+        style={{ height: 38 }}
+        disabled={isEdit} 
+        onChange={(val) => {
+          if (val !== "listings") {
+            form.setFieldsValue({ autoRenew: undefined, userType: undefined });
+          }
+        }}
+      >
+        <Option value="listing">Listing</Option>
+        <Option value="boosting">Boosting</Option>
+      </Select>
+    </Form.Item>
+  </Col>
+</Row>
+
             {/* Price */}
             <Row gutter={16}>
               <Col span={24}>
@@ -277,37 +312,55 @@ const CreateNewSubscription = () => {
               </Col>
             </Row>
 
-            {/* Auto Renew */}
-            <Row gutter={16}>
-              <Col span={24}>
-                <Form.Item
-                  label={<RequiredLabel text="Auto Renew" />}
-                  name="autoRenew"
-                  rules={[{ required: true, message: "Please choose Auto Renew option" }]}
-                >
-                  <Select placeholder="Select Auto Renew" style={{ height: 38 }}>
-                    <Option value="yes">Yes</Option>
-                    <Option value="no">No</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
+<Row gutter={[12, 8]} align="middle" style={{ marginBottom: 8 }}>
+  <Col xs={24} sm={12}>
+    <Form.Item shouldUpdate={(prev, cur) => prev.planType !== cur.planType}>
+      {() => {
+        const isListings = form.getFieldValue("planType") === "listing";
+        return (
+          <Form.Item
+            label={isListings ? <RequiredLabel text="Auto Renew" /> : <span>Auto Renew</span>}
+            name="autoRenew"
+            rules={
+              isListings
+                ? [{ required: true, message: "Please choose Auto Renew option" }]
+                : []
+            }
+            style={{ marginBottom: 0 }}
+          >
+            <Select placeholder="Select Auto Renew" style={{ height: 38 }}>
+              <Option value="yes">Yes</Option>
+              <Option value="no">No</Option>
+            </Select>
+          </Form.Item>
+        );
+      }}
+    </Form.Item>
+  </Col>
 
-            {/* User Type */}
-            <Row gutter={16}>
-              <Col span={24}>
-                <Form.Item
-                  label={<RequiredLabel text="User Type" />}
-                  name="userType"
-                  rules={[{ required: true, message: "Please select user type option" }]}
-                >
-                  <Select placeholder="Select User Type" style={{ height: 38 }}>
-                    <Option value="dealer">Dealer</Option>
-                    <Option value="individual">Individual</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
+  <Col xs={24} sm={12}>
+    <Form.Item shouldUpdate={(prev, cur) => prev.planType !== cur.planType}>
+      {() => {
+        const isListings = form.getFieldValue("planType") === "listings";
+        return (
+          <Form.Item
+            label={isListings ? <RequiredLabel text="User Type" /> : <span>User Type</span>}
+            name="userType"
+            rules={
+              isListings ? [{ required: true, message: "Please select user type option" }] : []
+            }
+            style={{ marginBottom: 0 }}
+          >
+            <Select placeholder="Select User Type" style={{ height: 38 }}>
+              <Option value="dealer">Dealer</Option>
+              <Option value="individual">Individual</Option>
+            </Select>
+          </Form.Item>
+        );
+      }}
+    </Form.Item>
+  </Col>
+</Row>
 
             <Divider style={{ margin: "16px 0" }} />
 
