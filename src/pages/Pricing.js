@@ -509,7 +509,7 @@ const Pricing = () => {
 
         <h6 style={{ fontSize: "12px", fontWeight: "500", color: "#374151", marginBottom: 10 }}>Monthly Analytics</h6>
 
-        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
+        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16, scrollbarWidth: "none",msOverflowStyle: "none", }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
             {listingData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
@@ -577,7 +577,7 @@ const Pricing = () => {
 
         <h6 style={{ fontSize: "12px", fontWeight: "500", color: "#374151", marginBottom: 10 }}>Monthly Featured Purchases</h6>
 
-        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
+        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16,scrollbarWidth: "none",msOverflowStyle: "none", }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
             {boostingData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
