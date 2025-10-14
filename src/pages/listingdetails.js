@@ -977,7 +977,7 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
       onChange={(e) => setComment(e.target.value)}
     />
   </div>
-</Modal>
+      </Modal>
 
     </div>
   );

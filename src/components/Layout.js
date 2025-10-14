@@ -179,6 +179,10 @@ function AppLayout({ children }) {
         key: "/accountsettings/changepassword", 
         label: "Change Password",
       },
+      {
+        key: "/FAQ'S", 
+        label: "FAQ'S",
+      },
     ],
     },
     {
@@ -264,6 +268,10 @@ function AppLayout({ children }) {
   "/accountsettings": {
     title: "Account Settings",
     tagline: "Manage your password and security settings",
+  },
+   "/FAQ'S": {
+    title: "FAQ'S",
+    tagline: "",
   },
 };
 
