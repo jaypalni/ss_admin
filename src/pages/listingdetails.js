@@ -15,7 +15,6 @@ import shareicon from "../assets/images/share_icon.png";
 import { useSelector } from 'react-redux';
 import PropTypes from "prop-types";
 
-// Helper function to get approval status styling
 const getApprovalStatusStyle = (approval) => {
   if (approval === "approved") {
     return {
@@ -38,12 +37,10 @@ const getApprovalStatusStyle = (approval) => {
   };
 };
 
-// Helper function to get approval status text
 const getApprovalStatusText = (approval) => {
   return approval === "pending" ? "Pending Review" : approval || "Pending";
 };
 
-// Helper function to get boost status styling
 const getBoostStatusStyle = (isFeatured) => {
   return {
     backgroundColor: isFeatured === 1 ? "#DCFCE7" : "#FFF4E5",
@@ -55,7 +52,6 @@ const getBoostStatusStyle = (isFeatured) => {
   };
 };
 
-// Helper function to format date
 const formatDate = (dateString) => {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("en-GB", {
@@ -65,7 +61,6 @@ const formatDate = (dateString) => {
   });
 };
 
-// Helper function to validate rejection reason
 const validateRejectionReason = (rejectionReason, rejectReasonData, comment, messageApi) => {
   if (!rejectionReason) {
     messageApi.open({ type: "warning", content: "Please select a rejection reason." });
@@ -82,7 +77,6 @@ const validateRejectionReason = (rejectionReason, rejectReasonData, comment, mes
   return true;
 };
 
-// Status Tag Component
 const ApprovalStatusTag = ({ approval }) => {
   const style = getApprovalStatusStyle(approval);
   const text = getApprovalStatusText(approval);
@@ -102,7 +96,6 @@ const ApprovalStatusTag = ({ approval }) => {
   );
 };
 
-// Boost Status Component
 const BoostStatus = ({ isFeatured }) => {
   const style = getBoostStatusStyle(isFeatured);
   
@@ -124,7 +117,6 @@ const BoostStatus = ({ isFeatured }) => {
 
 BoostStatus.propTypes = { isFeatured: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]).isRequired };
 
-// Timeline Item Component
 const TimelineItem = ({ label, date, color, isPending = false }) => {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -154,7 +146,6 @@ TimelineItem.propTypes = {
 };
 TimelineItem.defaultProps = { isPending: false };
 
-// Action Buttons Component
 const ActionButtons = ({ approval, isBestCar, setIsBestCar, handleApprove, handleReject, handleMarkAsBest, loading, rejectionReason, comment }) => {
   if (approval === "rejected") {
     return (
@@ -269,6 +260,7 @@ const [rejectReasonData, setRejectReasonData] = useState([]);
   const [isBestCar, setIsBestCar] = useState(false);
   const { user,token } = useSelector(state => state.auth);
   const isLoggedIn = token && user
+  const { confirm } = Modal;
    useEffect(() => {
     console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
     
@@ -289,6 +281,21 @@ const handleRejectCancel = () => {
   setRejectionReason(null);
   setComment("");
 };
+
+const handleRejectSubmitConfirm = () => {
+  Modal.confirm({
+    title: "Are you sure you want to reject this listing?",
+    content: "This action cannot be undone.",
+    okText: "Yes, Reject",
+    okType: "danger",
+    cancelText: "Cancel",
+    onOk() {
+      handleRejectSubmit();
+    },
+    getContainer: () => document.body, 
+  });
+};
+
 
 const getReasonRejection = async () => {
   try {
@@ -337,13 +344,9 @@ useEffect(() => {
 
   fetchCarDetails();
 }, [listingId]);
-
-
-// Reject Car API
   
 
   const handleRejectSubmit = async () => {
-    // Validate rejection reason using helper function
     if (!validateRejectionReason(rejectionReason, rejectReasonData, comment, messageApi)) {
       return;
     }
@@ -363,7 +366,9 @@ useEffect(() => {
       if (data.status_code === 200) {
         messageApi.open({ type: "success", content: data.message });
         setIsRejectModalVisible(false);
-        navigate("/listingmanagement");
+         setTimeout(() => {
+      navigate("/listingmanagement");
+    }, 1000);
       } else {
         messageApi.open({ type: "error", content: data?.message || "Failed to reject car" });
       }
@@ -373,20 +378,19 @@ useEffect(() => {
     }
   };
 
-
-// Approve Car API
-
 const handleapproveapi = async () => {
   try {
     setLoading(true);
-    const body = { car_id: listingId }; // send car_id
+    const body = { car_id: listingId };
     const response = await userAPI.approvecar(body);
     const data = handleApiResponse(response);
 
     if (data.status_code === 200) {
       if (data?.message) {
         messageApi.open({ type: "success", content: data.message });
-        navigate("/listingmanagement")
+         setTimeout(() => {
+      navigate("/listingmanagement");
+    }, 1000);
       }
     } else {
       messageApi.open({ type: "error", content: data?.message || "Failed to approve car" });
@@ -954,7 +958,6 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
   style={{ width: "100%" }}
   value={rejectionReason}
   onChange={(value) => setRejectionReason(value)}
-//   loading={loading} // Show loading spinner while fetching
 >
   {rejectReasonData.length > 0 ? (
     rejectReasonData.map((reason) => (

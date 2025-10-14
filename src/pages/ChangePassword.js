@@ -20,22 +20,25 @@ import PropTypes from "prop-types";
 
 
 const validatePasswordRequirements = (password) => {
+  const allowedSpecial = "@#$%&";
+  const hasAllowedSpecial = new RegExp(`[${allowedSpecial}]`).test(password);
+  const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(password);
+
   return {
     length: password.length >= 8,
     upper: /[A-Z]/.test(password),
     lower: /[a-z]/.test(password),
     number: /\d/.test(password),
-    special: /[!@#$%^&*()_+\-={}[\]:;"\\|,.<>/?]/.test(password),
+    special: hasAllowedSpecial && !hasInvalidSpecial,
+    invalidSpecial: hasInvalidSpecial,
   };
 };
-
 
 const areAllRequirementsMet = (requirements) => {
   return requirements.length && requirements.upper && requirements.lower && 
          requirements.number && requirements.special;
 };
 
-// Helper function to validate form inputs
 const validatePasswordForm = (currentPassword, newPassword, reenterPassword, allRequirementsMet) => {
   if (!currentPassword) {
     return { field: "current", message: "Please enter your current password." };
@@ -55,7 +58,6 @@ const validatePasswordForm = (currentPassword, newPassword, reenterPassword, all
   return null;
 };
 
-// Password Requirements Display Component
 const PasswordRequirements = ({ requirements }) => {
   const requirementItems = [
     { key: "length", met: requirements.length, text: "At least 8 characters long" },
@@ -103,6 +105,10 @@ const ChangePassword = () => {
   const [passworderrormsg, setPasswordErrorMsg] = useState("");
   const [reenterpassworderrormsg, setReenterPasswordErrorMsg] = useState("");
 
+  const [invalidSpecialError, setInvalidSpecialError] = useState("");
+  const [invalidSpecialConfirmError, setInvalidSpecialConfirmError] = useState("");
+
+
   const [messageApi, contextHolder] = message.useMessage();
 
   const [form] = Form.useForm();
@@ -111,21 +117,17 @@ const ChangePassword = () => {
   const allRequirementsMet = areAllRequirementsMet(passwordRequirements);
   const passwordsMatch = newPassword !== "" && newPassword === reenterPassword;
 
-  // Clear inline error messages when user types
   useEffect(() => {
     if (passworderrormsg && newPassword) setPasswordErrorMsg("");
     if (reenterpassworderrormsg && reenterPassword) setReenterPasswordErrorMsg("");
     if (currenterrormsg && currentPassword) setCurrenterrormsg("");
   }, [newPassword, reenterPassword, currentPassword, passworderrormsg, reenterpassworderrormsg, currenterrormsg]);
 
-  // Handler called by Form.onFinish (it receives values, but we use component state)
   const handleResetPassword = async (values) => {
-    // Clear previous error messages
     setCurrenterrormsg("");
     setPasswordErrorMsg("");
     setReenterPasswordErrorMsg("");
 
-    // Client-side validation using helper function
     const validationError = validatePasswordForm(currentPassword, newPassword, reenterPassword, allRequirementsMet);
     if (validationError) {
       if (validationError.field === "current") setCurrenterrormsg(validationError.message);
@@ -150,7 +152,7 @@ const ChangePassword = () => {
         setCurrentPassword("");
         setNewPassword("");
         setReenterPassword("");
-        navigate("/dashboard");
+        navigate("/");
       } else {
         messageApi.open({
           type: "error",
@@ -273,25 +275,43 @@ const ChangePassword = () => {
           </div>
 
           <div className="form-group-create-1">
-            <label htmlFor="password-input" className="create-label">
-              New Password
-            </label>
-            <Input.Password
-              id="password-input"
-              placeholder="Enter your new password"
-              className="create-field1"
-              size="large"
-              value={newPassword}
-              aria-label="New Password"
-              aria-describedby={passworderrormsg ? "new-password-error" : undefined}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            {passworderrormsg && (
-              <div id="new-password-error" className="passworderror-msg">
-                {passworderrormsg}
-              </div>
-            )}
+  <label htmlFor="password-input" className="create-label">
+    New Password
+  </label>
+  <Input.Password
+  id="password-input"
+  placeholder="Enter your new password"
+  className="create-field1"
+  size="large"
+  value={newPassword}
+  aria-label="New Password"
+  aria-describedby={passworderrormsg || invalidSpecialError ? "new-password-error" : undefined}
+  onChange={(e) => {
+    const value = e.target.value;
+    const allowedSpecial = "@#$%&";
+    const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(value);
+
+    setNewPassword(value);
+
+    if (hasInvalidSpecial) {
+      setInvalidSpecialError(`Only ${allowedSpecial.split("").join(", ")} are allowed as special characters.`);
+    } else {
+      setInvalidSpecialError("");
+    }
+  }}
+/>
+{passworderrormsg && (
+  <div id="new-password-error" className="passworderror-msg">
+    {passworderrormsg}
+  </div>
+)}
+{invalidSpecialError && (
+  <div id="new-password-error" className="passworderror-msg">
+    {invalidSpecialError}
+  </div>
+)}
           </div>
+
 
           <PasswordRequirements requirements={passwordRequirements} />
 
@@ -299,26 +319,47 @@ const ChangePassword = () => {
             <label htmlFor="confirm-password-input" className="create-label">
               Repeat Password
             </label>
-            <Input.Password
-              id="confirm-password-input"
-              placeholder="Confirm your new password"
-              className="create-field1"
-              size="large"
-              value={reenterPassword}
-              aria-label="Confirm Password"
-              aria-describedby={reenterpassworderrormsg ? "reenter-password-error" : undefined}
-              onChange={(e) => setReenterPassword(e.target.value)}
-            />
-            {reenterpassworderrormsg && (
-              <div id="reenter-password-error" className="passworderror-msg">
-                {reenterpassworderrormsg}
-              </div>
-            )}
-            {reenterPassword.length > 0 && (
-              <div style={{ marginTop: 6, color: passwordsMatch ? "#10B981" : "#EF4444", fontSize: 13 }}>
-                {passwordsMatch ? "Passwords match" : "Passwords do not match"}
-              </div>
-            )}
+           <Input.Password
+  id="confirm-password-input"
+  placeholder="Confirm your new password"
+  className="create-field1"
+  size="large"
+  value={reenterPassword}
+  aria-label="Confirm Password"
+  aria-describedby={
+    reenterpassworderrormsg || invalidSpecialConfirmError ? "reenter-password-error" : undefined
+  }
+  onChange={(e) => {
+    const value = e.target.value;
+    const allowedSpecial = "@#$%&";
+    const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(value);
+
+    setReenterPassword(value);
+
+    if (hasInvalidSpecial) {
+      setInvalidSpecialConfirmError(
+        `Only ${allowedSpecial.split("").join(", ")} are allowed as special characters.`
+      );
+    } else {
+      setInvalidSpecialConfirmError("");
+    }
+  }}
+/>
+{reenterpassworderrormsg && (
+  <div id="reenter-password-error" className="passworderror-msg">
+    {reenterpassworderrormsg}
+  </div>
+)}
+{invalidSpecialConfirmError && (
+  <div id="reenter-password-error" className="passworderror-msg">
+    {invalidSpecialConfirmError}
+  </div>
+)}
+{reenterPassword.length > 0 && !invalidSpecialConfirmError && (
+  <div style={{ marginTop: 6, color: passwordsMatch ? "#10B981" : "#EF4444", fontSize: 13 }}>
+    {passwordsMatch ? "Passwords match" : "Passwords do not match"}
+  </div>
+)}
           </div>
 
           <Divider style={{ margin: "16px 0", borderWidth: "1.3px" }} />

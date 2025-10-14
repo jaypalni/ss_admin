@@ -18,8 +18,8 @@ export const handleApiError = (error) => {
   } else if (error.request) {
     return {
       status: 0,
-      message: 'No response from server',
-      error: 'No response from server',
+      message: 'You are currently offline. Please check your internet connection and try again.',
+      error: 'You are currently offline. Please check your internet connection and try again.',
       errors: [],
     };
   } else {

@@ -43,15 +43,17 @@ const CreateNewUserAdmin = () => {
   const [statusFlag, setStatusFlag] = useState(null);
   const [form] = Form.useForm();
 
-  const { user, token } = useSelector(state => state.auth);
+  const { user, token,role } = useSelector(state => state.auth);
   const isLoggedIn = token && user;
 
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!isLoggedIn) navigate('/');
-  }, [isLoggedIn, navigate]);
+useEffect(() => {
+  if (!isLoggedIn) {
+    navigate("/login");
+  } else if (role !== "super admin") {
+    navigate("/dashboard");
+  }
+}, [isLoggedIn, role, navigate]);
 
-  // Fetch admin details if editing
   useEffect(() => {
     if (!isEdit) return;
 
@@ -97,6 +99,8 @@ const CreateNewUserAdmin = () => {
     };
 
     const body1 = {
+      first_name: values.firstName,
+      last_name: values.lastName,
       email: values.email,
       role: values.role,
       is_locked: statusFlag,
@@ -159,40 +163,49 @@ const CreateNewUserAdmin = () => {
       >
         <Card style={{ width: "100%", maxWidth: 600, marginTop: "20px", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
           
-          {/* First & Last Name */}
           <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label={<RequiredLabel text="First Name" />}
-                name="firstName"
-                rules={[{ required: true, message: "First name is required" }]}
-              >
-                <Input
-                  placeholder="Enter first name"
-                  prefix={<UserOutlined style={{ color: "#E5E7EB" }} />}
-                  style={{ height: "38px", backgroundColor: "transparent" }}
-                  disabled={isEdit}
-                />
-              </Form.Item>
-            </Col>
+  <Col span={12}>
+    <Form.Item
+      label={<RequiredLabel text="First Name" />}
+      name="firstName"
+      rules={[
+        { required: true, message: "First name is required" },
+        {
+          pattern: /^[A-Za-z]+$/,
+          message: "First name cannot contain numbers or special characters.",
+        },
+      ]}
+    >
+      <Input
+        placeholder="Enter first name"
+        prefix={<UserOutlined style={{ color: "#E5E7EB" }} />}
+        style={{ height: "38px", backgroundColor: "transparent" }}
+      />
+    </Form.Item>
+  </Col>
 
-            <Col span={12}>
-              <Form.Item
-                label={<RequiredLabel text="Last Name" />}
-                name="lastName"
-                rules={[{ required: true, message: "Last name is required" }]}
-              >
-                <Input
-                  placeholder="Enter last name"
-                  prefix={<UserOutlined style={{ color: "#E5E7EB" }} />}
-                  style={{ height: "38px", backgroundColor: "transparent" }}
-                  disabled={isEdit}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
+  <Col span={12}>
+    <Form.Item
+      label={<RequiredLabel text="Last Name" />}
+      name="lastName"
+      rules={[
+        { required: true, message: "Last name is required" },
+        {
+          pattern: /^[A-Za-z]+$/,
+          message: "Last name cannot contain numbers or special characters.",
+        },
+      ]}
+    >
+      <Input
+        placeholder="Enter last name"
+        prefix={<UserOutlined style={{ color: "#E5E7EB" }} />}
+        style={{ height: "38px", backgroundColor: "transparent" }}
+      />
+    </Form.Item>
+  </Col>
+</Row>
 
-          {/* Email & Role */}
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item

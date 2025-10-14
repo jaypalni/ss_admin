@@ -392,26 +392,26 @@
 @media (prefers-color-scheme: dark) {
   .header {
     background: #1f1f1f !important;
-    color: white;
+    color: white !important;
   }
-  
+
   .search-input {
-    background: #2f2f2f;
-    border-color: #404040;
-    color: white;
+    background: #2f2f2f !important;
+    border-color: #404040 !important;
+    color: white !important;
   }
-  
+
   .search-input:focus {
-    background: #1f1f1f;
+    background: #1f1f1f !important;
   }
-  
+
   .page-header {
-    background: #1f1f1f;
-    color: white;
+    background: #1f1f1f !important;
+    color: white !important;
   }
-  
+
   .card {
-    background: #1f1f1f;
-    color: white;
+    background: #1f1f1f !important;
+    color: white !important;
   }
 }

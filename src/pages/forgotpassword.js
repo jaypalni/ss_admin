@@ -74,11 +74,10 @@ const ForgotPassword = () => {
 
   return (
     <div className="forgot-page-wrapper">
-      {/* render the message contextHolder so toasts work */}
       {contextHolder}
       <div className="forgot-page">
         <div className="login-form">
-          <div className="logo-wrapper">
+          <div className="logo-wrapper-forgot">
             <img src={bluelogo_icon} alt="Souq Sayarat logo" />
           </div>
           <h2 className="forgot-site-title">Souq Sayarat</h2>
@@ -121,7 +120,6 @@ const ForgotPassword = () => {
             </Button>
 
             <div style={{ textAlign: "center", fontSize: "16px", marginTop: "12px" }}>
-              {/* Important: set type="button" to avoid submitting the form */}
               <button
                 type="button"
                 onClick={handleLoginClick}

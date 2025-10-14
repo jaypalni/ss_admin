@@ -273,7 +273,7 @@ function AppLayout({ children }) {
     title: "FAQ'S",
     tagline: "",
   },
-};
+ };
 
 let currentHeader =
   headerTitles[location.pathname] ||

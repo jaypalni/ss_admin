@@ -10,24 +10,21 @@ import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
-// Helper function to validate password requirements
 const validatePasswordRequirements = (password) => {
   return {
     length: password.length >= 8,
     upper: /[A-Z]/.test(password),
     lower: /[a-z]/.test(password),
     number: /\d/.test(password),
-    special: /[!@#$%^&*()_+\-={}[\]:;"\\|,.<>/?]/.test(password),
+    special: /[@#$%&]/.test(password),
   };
 };
 
-// Helper function to check if all requirements are met
 const areAllRequirementsMet = (requirements) => {
   return requirements.length && requirements.upper && requirements.lower && 
          requirements.number && requirements.special;
 };
 
-// Helper function to validate password form
 const validatePasswordForm = (newPassword, reenterPassword, allRequirementsMet) => {
   if (!newPassword) {
     return { field: "password", message: "Please enter a new password." };
@@ -52,14 +49,14 @@ const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate
     if (userData.status_code === 200) {
       messageApi.open({ type: 'success', content: userData.message });
       setLoading(false);
-      navigate("/");
+      navigate("/dashboard");
     } else {
       messageApi.open({ type: 'error', content: userData.error });
       setLoading(false);
     }
   } catch (error) {
     console.error("Error during password update", error);
-    messageApi.open({ type: 'error', content: error.message });
+    messageApi.open({ type: "error", content: error?.message});;
     setLoading(false);
   }
 };
@@ -68,7 +65,6 @@ const isSubmitEnabled = (newPassword, reenterPassword, allRequirementsMet, passw
   return newPassword && reenterPassword && allRequirementsMet && passwordsMatch;
 };
 
-// Password Requirements Component
 const PasswordRequirements = ({ requirements }) => {
   const requirementItems = [
     { key: "length", met: requirements.length, text: "At least 8 characters long" },
@@ -110,6 +106,9 @@ const CreatePassword = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const {email,need_password} = useSelector((state) => state.auth);
 
+  const [invalidSpecialError, setInvalidSpecialError] = useState("");
+  const [invalidSpecialConfirmError, setInvalidSpecialConfirmError] = useState("");
+
   const passwordRequirements = validatePasswordRequirements(newPassword);
   const allRequirementsMet = areAllRequirementsMet(passwordRequirements);
   const passwordsMatch = newPassword !== "" && newPassword === reenterPassword;
@@ -132,7 +131,7 @@ const CreatePassword = () => {
   }, [newPassword, reenterPassword, passworderrormsg, reenterpassworderrormsg]);
 
   const handleLoginClick = () => {
-    navigate("/ForgotPassword");
+    navigate("/");
   };
 
   const handleResetPassword = (e) => {
@@ -143,7 +142,6 @@ const CreatePassword = () => {
     setPasswordErrorMsg("");
     setReenterPasswordErrorMsg("");
 
-    // Validate form using helper function
     const validationError = validatePasswordForm(newPassword, reenterPassword, allRequirementsMet);
     if (validationError) {
       if (validationError.field === "password") {
@@ -156,7 +154,6 @@ const CreatePassword = () => {
 
     setLoading(true);
     
-    // Determine which API to call and prepare body
     if (need_password === 1) {
       const body = { email: email, new_password: newPassword };
       handleApiResponse(loginApi.createnewpassword, body, messageApi, setLoading, navigate);
@@ -171,7 +168,7 @@ const CreatePassword = () => {
       {contextHolder}
       <div className="create-page">
         <div className="create-form">
-          <div className="logo-wrapper">
+          <div className="logo-wrapper-create">
   <img src={bluelogo_icon} alt="Souq Sayarat logo" />
 </div>
           <h2 className="create-site-title">Souq Sayarat</h2>
@@ -181,40 +178,78 @@ const CreatePassword = () => {
           <div className="form-group-create">
             <label htmlFor="password-input" className="create-label">New Password</label>
             <Input.Password
-              id="password-input"
-              placeholder="Enter your new password"
-              className="create-field1"
-              size="large"
-              value={newPassword}
-              aria-label="New Password"
-              aria-describedby={passworderrormsg ? "password-error" : undefined}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            {passworderrormsg && (
-              <div id="password-error" className="passworderror-msg">
-                {passworderrormsg}
-              </div>
-            )}
+             id="password-input"
+             placeholder="Enter your new password"
+             className="create-field1"
+             size="large"
+             value={newPassword}
+             aria-label="New Password"
+             aria-describedby={passworderrormsg || invalidSpecialError ? "new-password-error" : undefined}
+             onChange={(e) => {
+               const value = e.target.value;
+               const allowedSpecial = "@#$%&";
+               const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(value);
+           
+               setNewPassword(value);
+           
+               if (hasInvalidSpecial) {
+                 setInvalidSpecialError(`Only ${allowedSpecial.split("").join(", ")} are allowed as special characters.`);
+               } else {
+                 setInvalidSpecialError("");
+               }
+             }}
+           />
+           {passworderrormsg && (
+             <div id="new-password-error" className="passworderror-msg">
+               {passworderrormsg}
+             </div>
+           )}
+           {invalidSpecialError && (
+             <div id="new-password-error" className="passworderror-msg">
+               {invalidSpecialError}
+             </div>
+           )}
           </div>
 
           <div className="form-group-create">
             <label htmlFor="confirm-password-input" className="create-label">Confirm Password</label>
-            <Input.Password
+             <Input.Password
               id="confirm-password-input"
               placeholder="Confirm your new password"
               className="create-field1"
               size="large"
               value={reenterPassword}
               aria-label="Confirm Password"
-              aria-describedby={reenterpassworderrormsg ? "reenter-password-error" : undefined}
-              onChange={(e) => setReenterPassword(e.target.value)}
+              aria-describedby={
+                reenterpassworderrormsg || invalidSpecialConfirmError ? "reenter-password-error" : undefined
+              }
+              onChange={(e) => {
+                const value = e.target.value;
+                const allowedSpecial = "@#$%&";
+                const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(value);
+            
+                setReenterPassword(value);
+            
+                if (hasInvalidSpecial) {
+                  setInvalidSpecialConfirmError(
+                    `Only ${allowedSpecial.split("").join(", ")} are allowed as special characters.`
+                  );
+                } else {
+                  setInvalidSpecialConfirmError("");
+                }
+              }}
             />
             {reenterpassworderrormsg && (
               <div id="reenter-password-error" className="passworderror-msg">
                 {reenterpassworderrormsg}
               </div>
             )}
-            {reenterPassword.length > 0 && (
+            {invalidSpecialConfirmError && (
+              <div id="reenter-password-error" className="passworderror-msg">
+                {invalidSpecialConfirmError}
+              </div>
+            )}
+            {reenterPassword.length > 0 && !invalidSpecialConfirmError && (
               <div style={{ marginTop: 6, color: passwordsMatch ? "#10B981" : "#EF4444", fontSize: 13 }}>
                 {passwordsMatch ? "Passwords match" : "Passwords do not match"}
               </div>
