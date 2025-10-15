@@ -116,7 +116,6 @@ const PendingListings = () => {
 
         setTableData(formattedData);
 
-        // Update pagination using API pagination values if present
         const p = data.data.pagination ?? {};
         setPagination({
           current: p.current_page ?? p.page ?? page,
@@ -138,11 +137,9 @@ const PendingListings = () => {
     }
   };
 
-  // Call APIs on mount & when filters change
   useEffect(() => {
     fetchPendingListings(1, pagination.pageSize);
     fetchRegion();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);
 
   const columns = [
@@ -196,10 +193,8 @@ const PendingListings = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        // Normalize text safely with optional chaining
         const normalizedStatus = (status ?? "").toString().toLowerCase();
 
-        // single source of truth mapping to avoid redundant assignments
         const statusMap = {
           approved: { display: "Active", bg: "#DCFCE7", color: "#166534" },
           rejected: { display: "Rejected", bg: "#FFE4E6", color: "#B91C1C" },

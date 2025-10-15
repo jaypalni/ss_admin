@@ -115,7 +115,6 @@ const Individualdetails = () => {
         />
       </div>
 
-      {/* Cards */}
       <div className="content-body">
         <div className="row">
           {[
@@ -141,7 +140,6 @@ const Individualdetails = () => {
         </div>
       </div>
 
-      {/* Table */}
       <Table
         dataSource={dataSource}
         columns={columns}

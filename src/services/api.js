@@ -204,6 +204,25 @@ export const loginApi = {
     api.delete(API_CONFIG.ENDPOINTS.LOGIN.DELETSUBSCRIPTIONPACKAGE(id)),
     editsubscriptionpackagedata: (id) =>
     api.get(API_CONFIG.ENDPOINTS.LOGIN.EDITDATASUBSCRIPTIONPACKAGE(id)),
+
+    getallusers: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.GETALLUSERS,body),
+    getallusersid: (id,body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.GETALLUSERSID(id),body),
+    verificationstatus: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.VERFICATIONSTATUS,body),
+    reporteduser: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.REPORTEDFLAG,body),
+    banneduser: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.BANNEDUSER,body),
+    savefaq: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.SAVEFAQ,body),
+    getfaq:() =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.GETFAQ),
+    editfaq: (id,body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.EDITFAQ(id),body),
+    deletefaq: (id) =>
+    api.delete(API_CONFIG.ENDPOINTS.LOGIN.DELETEFAQ(id)),
 };
 export const bestcarAPI = {};
 

@@ -38,6 +38,8 @@ import Right from "../assets/images/Right.svg";
 import dashboard_icon from "../assets/images/dashboard_icon.svg";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { useSelector } from "react-redux";
+import individualIcon from "../assets/images/individual_icon.svg";
+import dealerIcon from "../assets/images/dealer_icon.svg";
 const { Header, Sider, Content } = Layout;
 
 function AppLayout({ children }) {
@@ -148,10 +150,12 @@ function AppLayout({ children }) {
       {
         key: "/user-management/individual", 
         label: "Individual",
+        icon: <img src={individualIcon} alt="Individual" style={{ width: 12, height: 12 }} />
       },
       {
         key: "/user-management/dealer", 
         label: "Dealer",
+        icon: <img src={dealerIcon} alt="Individual" style={{ width: 12, height: 12 }} />
       },
       ...(role === "super admin"
       ? [

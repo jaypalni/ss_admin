@@ -332,7 +332,7 @@ useEffect(() => {
       if (result?.data) {
         setCarDetails(result.data);
         console.log('Mark as bes', result?.data?.is_best_pick)
-        setIsBestCar(result?.data?.is_best_pick === "1"); // Initialize toggle state
+        setIsBestCar(result?.data?.is_best_pick === "1"); 
       }
     } catch (error) {
       const errorData = handleApiError(error);
@@ -403,8 +403,6 @@ const handleapproveapi = async () => {
   }
 };
 
-// Mark as Best API
-
 const handleMarkAsBestApi = async (isBestPickValue) => {
   try {
     setLoading(true);
@@ -444,12 +442,10 @@ const handleMarkAsBestApi = async (isBestPickValue) => {
       }}>
         { contextHolder }
       
-      {/* ===== PAGE HEADER SECTION ===== */}
       <div style={{ 
         padding: "0px 0", 
         marginBottom: 24
       }}>
-        {/* Breadcrumb Navigation */}
         <Breadcrumb
   separator=">"
   style={{ marginBottom: 16 }}

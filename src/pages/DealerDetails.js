@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Row,
@@ -6,41 +6,63 @@ import {
   Button,
   Breadcrumb,
   Tag,
-  Avatar,
-  Divider,
-  Space,
-   Empty,
+  Empty,
   message,
   Table,
-  Tooltip,
-  Switch,
-  Popconfirm,
+  Select,
 } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeftOutlined,
-  UserOutlined,
-  DownloadOutlined,
   EyeOutlined,
   CheckOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import Right from "../assets/images/Right.svg";
 import Dealer from "../assets/images/img.svg";
 import National from "../assets/images/national.svg";
 import pdf from "../assets/images/pdf.svg";
 import warning from "../assets/images/warning.svg";
-import {  useSelector } from "react-redux";
-import activeIcon from "../assets/images/star.svg";
+import activeIcon from "../assets/images/total_icon_1.svg";
 import editIcon from "../assets/images/edit.svg";
 import reject from "../assets/images/delete_icon.svg";
-import pendingIcon from "../assets/images/premium.svg";
-import soldIcon from "../assets/images/enterprice.svg";
-import modelIcon from "../assets/images/total_price.svg";
+import pendingIcon from "../assets/images/sold-icon.svg";
+import soldIcon from "../assets/images/pending_icon.svg";
+import modelIcon from "../assets/images/reject_icon_1.svg";
 import "../assets/styles/allcarsdashboard.css";
+import { loginApi } from "../services/api";
 
-const BoostStatus = ({ isFeatured }) => {
-  return isFeatured ? <Tag style={{background:"#FEF9C3",color:"#854D0E",border:"8px"}}>Pending Verification</Tag> : <Tag color="default">Not Featured</Tag>;
+const { Option } = Select;
+
+const BoostStatus = ({ status }) => {
+  let tagColor = "#FEF9C3";
+  let textColor = "#854D0E";
+  let text = "Pending Verification";
+  switch (status?.toLowerCase()) {
+    case "pending":
+      tagColor = "#FEF9C3";
+      textColor = "#854D0E";
+      text = "Pending Verification";
+      break;
+    case "verified":
+      tagColor = "#DCFCE7";
+      textColor = "#166534";
+      text = "Verified";
+      break;
+    case "rejected":
+      tagColor = "#FEEBCB";
+      textColor = "#B45309";
+      text = "Banned";
+      break;
+    default:
+      tagColor = "#F3F4F6";
+      textColor = "#374151";
+      text = "Unknown";
+  }
+
+  return <Tag style={{ background: tagColor, color: textColor, borderRadius: 8 }}>{text}</Tag>;
 };
+
 
 const DocumentCard = ({ doc, onDownload, onCancel }) => {
   const isApproved = doc.status === "Validated";
@@ -79,50 +101,52 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
               borderRadius: 8,
               padding: "2px 5px",
               fontWeight: 500,
-              fontSize:"10px"
+              fontSize: "10px",
             }}
           >
-            {isApproved ? <CheckOutlined style={{ color: "#16A34A" }} /> :  <img
-    src={warning}       
-    alt="Not Approved"
-    style={{ width: 12, height: 12 }}
-  />}
+            {isApproved ? <CheckOutlined style={{ color: "#16A34A" }} /> : <img src={warning} alt="Not Approved" style={{ width: 12, height: 12 }} />}
             {doc.status}
           </Tag>
         </div>
       </div>
 
-        <img
-          src={pdf}
-          alt={doc.title}
-          style={{
-            width: "40px",
-            height: 40,
-            objectFit: "cover",
-            borderRadius: 8,
-            marginBottom: 6,
-          }}
-        />
+      <img
+        src={pdf}
+        alt={doc.title}
+        style={{
+          width: "40px",
+          height: 40,
+          objectFit: "cover",
+          borderRadius: 8,
+          marginBottom: 6,
+        }}
+      />
 
       <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 12 }}>
-        {doc.submittedOn}
+        {doc.submittedOn ? doc.submittedOn.split("/").slice(3).join("/") : ""}
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
         <Button
           type="primary"
           icon={<EyeOutlined />}
-          onClick={() => onCancel(doc)}
-          style={{ borderRadius: 8,flex: 1,background:"#008AD5",fontWeight:400,fontSize:"12px"   }}
+          onClick={() => onCancel && onCancel(doc)}
+          style={{ borderRadius: 8, flex: 1, background: "#008AD5", fontWeight: 400, fontSize: "12px" }}
         >
           View
         </Button>
 
         <Button
           icon={<DownloadOutlined />}
-          onClick={() => onDownload(doc)}
-          style={{ borderRadius: 8,flex: 1,border: "1px solid #D1D5DB"
-,color:"#374151",fontWeight:400,fontSize:"12px"  }}
+          onClick={() => onDownload && onDownload(doc)}
+          style={{
+            borderRadius: 8,
+            flex: 1,
+            border: "1px solid #D1D5DB",
+            color: "#374151",
+            fontWeight: 400,
+            fontSize: "12px",
+          }}
         >
           Download
         </Button>
@@ -131,78 +155,29 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
   );
 };
 
-const columns_boost = [
-  {
-      title: "Listing ID",
-      dataIndex: "listingId",
-      key: "listingId",
-      width: 150,
-      render: (val) => <div style={{ fontWeight: 500,color:"#374151",fontSize:14 }}>{val}</div>
-    },
-    {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
-      width: 200,
-      render: (val) => <div style={{ fontWeight: 500,color:"#374151",fontSize:14 }}>{val}</div>
-    },
-    {
-      title: "Location",
-      dataIndex: "location",
-      key: "location",
-      width: 120,
-      render: (val) => <div style={{ fontWeight: 500,color:"#374151",fontSize:14 }}>{val}</div>,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width: 150,
-      render: (val) => <div style={{ fontWeight: 500,color:"#374151",fontSize:14 }}>{val}</div>
-    },
-    {
-      title: "Date Created",
-      dataIndex: "date",
-      key: "date",
-      width: 150,
-      render: (val) => <div style={{ fontWeight: 500,color:"#374151",fontSize:14 }}>{val}</div>
-    },
-    {
-      title: "Price (IQD)",
-      dataIndex: "price",
-      key: "price",
-      width: 150,
-      render: (val) => <div style={{ fontWeight: 500,color:"#374151",fontSize:14 }}>{val}</div>
-    },
-  ];
-
-
 const SubmittedDocumentsCard = ({ documents }) => {
-  const docs = documents ?? [
-    {
-      id: 1,
-      title: "Trade License",
-      status: "Validated",
-      submittedOn: "trade_license_2024.pdf",
-      image: pdf, // image import
-    },
-    {
-      id: 2,
-      title: "National ID",
-      status: "Missing/Unreadable",
-      submittedOn: "national_id_scan.jpg",
-      image: National, // image import
-    },
-  ];
+  if (!documents || documents.length === 0) return null;
 
   const handleDownload = (doc) => {
-    console.log("Download", doc);
-    message.info(`Download started for ${doc.title}`);
+     if (doc.submittedOn) {
+    const link = document.createElement("a");
+    link.href = doc.submittedOn;
+    link.download = doc.submittedOn.split("/").pop(); 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    message.success(`Download started for ${doc.title}`);
+  } else {
+    message.warning("No document available to download");
+  }
   };
 
-  const handleCancel = (doc) => {
-    console.log("Cancel", doc);
-    message.info(`Cancel requested for ${doc.title}`);
+  const handleView = (doc) => {
+    if (doc.submittedOn) {
+    window.open(doc.submittedOn, "_blank"); 
+  } else {
+    message.warning("No document available to view");
+  }
   };
 
   return (
@@ -211,13 +186,9 @@ const SubmittedDocumentsCard = ({ documents }) => {
       style={{ borderRadius: 12, marginTop: 16, color: "#111827", fontWeight: 600, width: "100%" }}
     >
       <Row gutter={[24, 16]}>
-        {docs.map((d) => (
+        {documents.map((d) => (
           <Col xs={24} sm={12} key={d.id}>
-            <DocumentCard
-              doc={d}
-              onDownload={handleDownload}
-              onCancel={handleCancel}
-            />
+            <DocumentCard doc={d} onDownload={handleDownload} onCancel={handleView} />
           </Col>
         ))}
       </Row>
@@ -227,7 +198,7 @@ const SubmittedDocumentsCard = ({ documents }) => {
 
 const getPackageIcon = (packageName, isSummary) => {
   if (isSummary) return modelIcon;
-  
+
   const nameLower = (packageName || "").toLowerCase();
   if (nameLower.includes("basic")) return activeIcon;
   if (nameLower.includes("premium")) return pendingIcon;
@@ -309,9 +280,7 @@ const PackageCard = ({ item }) => {
           {item.name}
         </div>
 
-        <div style={{ fontWeight: 700, fontSize: 18 }}>
-          {displayValue}
-        </div>
+        <div style={{ fontWeight: 700, fontSize: 18 }}>{displayValue}</div>
       </div>
 
       <div
@@ -332,34 +301,314 @@ const PackageCard = ({ item }) => {
   );
 };
 
+const columns_boost = [
+  {
+    title:<span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Listing ID</span>,
+    dataIndex: "listingId",
+    key: "listingId",
+    width: 150,
+    render: (val) => (
+      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+    ),
+  },
+  {
+    title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Title</span>,
+    dataIndex: "title",
+    key: "title",
+    width: 200,
+    render: (val) => (
+      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+    ),
+  },
+  {
+    title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Location</span>,
+    dataIndex: "location",
+    key: "location",
+    width: 120,
+    render: (val) => (
+      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+    ),
+  },
+  {
+    title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Status</span>,
+    dataIndex: "status",
+    key: "status",
+    width: 150,
+    render: (val) => (
+      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+    ),
+  },
+  {
+    title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Date Created</span>,
+    dataIndex: "date",
+    key: "date",
+    width: 150,
+    render: (val) => (
+      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+    ),
+  },
+  {
+    title:<span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Price (IQD)</span>,
+    dataIndex: "price",
+    key: "price",
+    width: 150,
+    render: (val) => (
+      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+    ),
+  },
+];
 
 const DealerDetails = () => {
   const navigate = useNavigate();
-   const [loading, setLoading] = useState(false);
-    const [tableData, setTableData] = useState([]);
-    const [totalActive, setTotalActive] = useState(0);
-    const [totalPercentage, setTotalPercentage] = useState(0);
+  const { dealerId } = useParams();
+  const [dealerData, setDealerData] = useState(null);
+  const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingApprove, setLoadingApprove] = useState(false);
+  const [loadingReject, setLoadingReject] = useState(false);
+  const [loadingFlagged, setLoadingFlagged] = useState(false);
+  const [loadingBanned, setLoadingBanned] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [listingFilter, setListingFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalListings, setTotalListings] = useState(0);
 
-  const carDetails = {
-    seller: {
-      first_name: "Ahmed",
-      last_name: "Al-Rashid",
-      email: "ahmed@alrashid.com",
-      phone_number: "+964-770-000-0000",
-      member_since: "Jan 2022",
-      is_dealer: "True",
-    },
-    listing_id: "DLR-2024-001",
-    is_featured: true,
-    verification_submitted_on: "Feb 5, 2024",
+  const [totalActive, setTotalActive] = useState(0);
+  const [, setTotalPercentage] = useState(0);
+  const [totalSold, setTotalSold] = useState(0);
+  const [totalRejected, setTotalRejected] = useState(0);
+  const [, setTotalPending] = useState(0);
+
+  const fetchDealerDetails = async () => {
+    try {
+      setLoading(true);
+
+      const body = {
+        filter: listingFilter.toLowerCase(),
+          sort: sortOrder,
+        page: page,
+        limit: limit,
+      };
+
+      const res = await loginApi.getallusersid(dealerId, body);
+      const payload = res?.data?.data ?? res?.data;
+
+      if (!payload) {
+        messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+        setDealerData(null);
+        setTableData([]);
+        setTotalListings(0);
+        return;
+      }
+
+      setDealerData(payload);
+
+      const listingsRaw = Array.isArray(payload.listings) ? payload.listings : [];
+      const normalized = listingsRaw.map((item, idx) => ({
+        listingId: item.car_id ?? item.id ?? `generated-${idx}`,
+        title: item.ad_title ?? item.title ?? "-",
+        location: item.location ?? "-",
+        status: item.status ?? item.approval ?? "-",
+        date: item.created_at ? item.created_at.split(" ").slice(0, 4).join(" ") : "-",
+        price: item.price ? Number(item.price).toLocaleString() : "-",
+        _raw: item,
+      }));
+      setTableData(normalized);
+
+      const pagination = payload.listings_pagination;
+      if (pagination) {
+        setTotalListings(pagination.total ?? normalized.length);
+        setPage(pagination.page ?? page);
+        setLimit(pagination.limit ?? limit);
+      } else {
+        setTotalListings(normalized.length);
+      }
+
+      setTotalActive(payload.active_cars ?? 0);
+      setTotalSold(payload.sold_cars ?? 0);
+      setTotalRejected(payload.rejected_cars ?? 0);
+      setTotalPending(payload.pending_cars ?? 0);
+      setTotalPercentage(0);
+    } catch (err) {
+      console.error("fetchDealerDetails error:", err);
+      messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const crownicon = Right;
-  const shareicon = Right;
-  const BASE_URL = ""; 
+   const approveDealer = async (status) => {
+    try {
+      if (status === "verified") setLoadingApprove(true);
+      if (status === "rejected") setLoadingReject(true);
+      const body = {
+      user_id: dealerData.user_id,       
+      verification_status: status,
+    };
+      const res = await loginApi.verificationstatus(body);
+       const data = res?.data;
+     if (data?.status_code === 200) {
+     messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+     setTimeout(() => {
+          navigate("/user-management/dealer"); 
+        }, 1000);
+      //setDealerData((prev) => ({ ...prev, is_verified: status }));
+    } else {
+      messageApi.error(data.message || data?.error || "Failed to approve dealer");
+    }
+    } catch (err) {
+      const errorMessage =
+    err?.response?.data?.message ||
+    err?.message ||                  
+    err?.response?.data?.error ||          
+    "Something went wrong while fetching dealer details";
+
+  messageApi.error(errorMessage);
+    }finally {
+    if (status === "verified") setLoadingApprove(false);
+    if (status === "rejected") setLoadingReject(false);
+  }
+  };
+
+  const reporteduser = async (status) => {
+    try {
+     setLoadingFlagged(true);
+      const body = {
+      report_id: dealerData.user_id,       
+    };
+      const res = await loginApi.reporteduser(body);
+       const data = res?.data;
+     if (data?.status_code === 200) {
+     messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+     setTimeout(() => {
+          navigate("/user-management/dealer"); 
+        }, 1000);
+      //setDealerData((prev) => ({ ...prev, is_verified: status }));
+    } else {
+      messageApi.error(data.message || data?.error || "Failed to approve dealer");
+    }
+    } catch (err) {
+      const errorMessage =
+    err?.response?.data?.message ||
+    err?.message ||                  
+    err?.response?.data?.error ||          
+    "Something went wrong while fetching dealer details";
+
+  messageApi.error(errorMessage);
+    }finally {
+     setLoadingFlagged(false);
+  }
+  };
+
+ const bannedDealer = async () => {
+  try {
+    setLoadingBanned(true);
+
+    const body = {
+      user_id: dealerData.user_id,
+    };
+
+    const res = await loginApi.banneduser(body);
+    const data = res?.data;
+
+    if (data?.status_code === 200) {
+      messageApi.success(data?.message || "Dealer banned successfully");
+      setTimeout(() => {
+        navigate("/user-management/dealer");
+      }, 1000);
+    } else {
+      messageApi.error(data?.message || data?.error || "Failed to ban dealer");
+    }
+  } catch (err) {
+    const errorMessage =
+      err?.response?.data?.message || 
+      err?.response?.data?.error ||   
+      err?.message ||                 
+      "Something went wrong while banning dealer";
+
+    messageApi.error(errorMessage);
+  } finally {
+    setLoadingBanned(false);
+  }
+};
+
+
+  useEffect(() => {
+    if (!dealerId) return;
+    fetchDealerDetails();
+  }, [dealerId, listingFilter, sortOrder, page, limit]);
+
+  if (!dealerData) return <div style={{ padding: 16 }}>Loading...</div>;
+
+  const documents = [];
+  if (dealerData.document) {
+    documents.push({
+      id: "doc-1",
+      title: "Trade License",
+      status: "Validated",
+      submittedOn: dealerData.document,
+    });
+  }
+
+  const handleFilterChange = (status) => {
+  setListingFilter(status);
+};
+
+const handleSortChange = (value) => {
+  setSortOrder(value);
+};
+
+
+const getCardColors = (title) => {
+  switch (title) {
+    case "Total Listings":
+      return { bgColor: "#EFF6FF", titleColor: "#2563EB",titleNumber:"#1E3A8A" }; 
+    case "Active Listings":
+      return { bgColor: "#F0FDF4", titleColor: "#16A34A",titleNumber:"#14532D" }; 
+    case "Sold Listings":
+      return { bgColor: "#FAF5FF", titleColor: "#581C87",titleNumber:"#581C87" }; 
+    case "Rejected Listings":
+      return { bgColor: "#FEF2F2", titleColor: "#DC2626",titleNumber:"#7F1D1D" }; 
+    default:
+      return { bgColor: "#F3F4F6", titleColor: "#111827",titleNumber:"#1E3A8A" }; 
+  }
+};
+
+
+const cards = [
+  {
+    title: "Total Listings",
+    number: dealerData.total_cars ?? totalListings ?? tableData.length,
+    icon: activeIcon,
+    ...getCardColors("Total Listings"),
+  },
+  {
+    title: "Active Listings",
+    number: dealerData.active_cars ?? totalActive ?? 0,
+    icon: pendingIcon,
+    ...getCardColors("Active Listings"),
+  },
+  {
+    title: "Sold Listings",
+    number: dealerData.sold_cars ?? totalSold ?? 0,
+    icon: soldIcon,
+    ...getCardColors("Sold Listings"),
+  },
+  {
+    title: "Rejected Listings",
+    number: dealerData.rejected_cars ?? totalRejected ?? 0,
+    icon: modelIcon,
+    ...getCardColors("Rejected Listings"),
+  },
+];
+
 
   return (
     <div style={{ padding: 16 }}>
+      {contextHolder}
+
       <Breadcrumb
         separator={<img src={Right} alt="" style={{ height: 12 }} />}
         style={{ marginBottom: 16 }}
@@ -455,7 +704,7 @@ const DealerDetails = () => {
             <Col xs={24} md={12}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                 <img
-                  src={Dealer}
+                  src={dealerData.profile_pic || Dealer}
                   alt="Dealer Logo"
                   style={{
                     width: 35,
@@ -464,6 +713,10 @@ const DealerDetails = () => {
                     objectFit: "cover",
                     flex: "0 0 35px",
                   }}
+                  onError={(e) => {
+    e.target.onerror = null; 
+    e.target.src = Dealer;  
+  }}
                 />
                 <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                   <h3
@@ -477,10 +730,10 @@ const DealerDetails = () => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    Al-Rashid Motors
+                    {dealerData.company_name || "N/A"}
                   </h3>
                   <h6 style={{ margin: 0, marginTop: 4, fontSize: "14px", fontWeight: 400, color: "#4B5563" }}>
-                    Dealer ID: #{carDetails.listing_id}
+                    Dealer ID: #{dealerData.user_id ?? "N/A"}
                   </h6>
                 </div>
               </div>
@@ -489,44 +742,42 @@ const DealerDetails = () => {
                 <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
                   Owner's Name
                 </strong>
-                <span>
-                  {carDetails?.seller?.first_name ? `${carDetails.seller.first_name} ${carDetails.seller.last_name}` : "N/A"}
-                </span>
+                <span>{dealerData.owner_name || "N/A"}</span>
               </div>
 
               <div style={{ marginBottom: 8 }}>
                 <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
                   Email Address
                 </strong>
-                <span style={{ wordBreak: "break-word" }}>{carDetails?.seller?.email || "N/A"}</span>
+                <span style={{ wordBreak: "break-word" }}>{dealerData.email || "N/A"}</span>
               </div>
 
               <div style={{ marginBottom: 8 }}>
                 <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
                   Phone Number
                 </strong>
-                <span>{carDetails?.seller?.phone_number || "N/A"}</span>
+                <span>{dealerData.phone_number || "N/A"}</span>
               </div>
 
               <div style={{ marginBottom: 8 }}>
                 <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
                   Registered Since
                 </strong>
-                <span>{carDetails?.seller?.member_since || "N/A"}</span>
+                <span>{dealerData.created_at ? dealerData.created_at.split(" ").slice(0, 4).join(" ") : "N/A"}</span>
               </div>
             </Col>
 
             <Col xs={24} md={12}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", gap: 6 }}>
                 <div style={{ display: "", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontSize: 14, color: "#6B7280", fontWeight: 500 }}>Account Status</div>
+                  <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>Account Status</div>
                   <div>
-                    <BoostStatus isFeatured={carDetails?.is_featured} />
+                    <BoostStatus status={dealerData.is_verified} />
                   </div>
                 </div>
 
                 <div style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>Verification Submitted On</div>
-                <div style={{ fontSize: 16, fontWeight: 600 }}>{carDetails?.verification_submitted_on || "N/A"}</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{dealerData.created_at ? dealerData.created_at.split(" ").slice(0, 4).join(" ") : "N/A"}</div>
               </div>
             </Col>
           </Row>
@@ -535,10 +786,10 @@ const DealerDetails = () => {
         <Col xs={24} md={8} style={{ paddingLeft: 12 }}>
           <div style={{ position: "sticky", top: 24 }}>
             <Card style={{ marginBottom: 16, backgroundColor: "#E6F4FC" }}>
-              <h3 style={{ marginBottom: 16, fontSize: "18px", fontWeight: "600" }}>Subscription Package</h3>
+              <h3 style={{ marginBottom: 16, fontSize: "16px", fontWeight: "600" }}>Subscription Package</h3>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Current Plan</span>
+                <span style={{ marginRight: 6, fontWeight: 500, color: "#4B5563" }}>Current Plan</span>
                 <Tag
                   style={{
                     backgroundColor: "#008AD5",
@@ -549,41 +800,47 @@ const DealerDetails = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Premium Plus
+                  {dealerData.subscription_details?.plan_name ?? "N/A"}
                 </Tag>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Monthly Fee</span>
                 <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
-                  50,000 IQD
+                  {dealerData.subscription_details?.price ? `${dealerData.subscription_details.price} ${dealerData.subscription_details.currency ?? ""}` : "N/A"}
                 </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Listing Limit</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>50 vehicles</span>
+                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
+                  {dealerData.subscription_details?.listing_limit ?? "N/A"}
+                </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Featured Listings</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>10 per month</span>
+                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
+                  10 per month
+                </span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Next Payment</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>Feb 15, 2024</span>
+                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
+                  {dealerData.subscription_details?.end_date ? dealerData.subscription_details.end_date.split(" ").slice(0, 4).join(" ") : "N/A"}
+                </span>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              {/* <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Payment Status</span>
                 <Tag
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
-                    backgroundColor: "#DCFCE7",
-                    color: "#166534",
+                    backgroundColor: dealerData.subscription_details?.subscription_status ? "#DCFCE7" : "#FEE2E2",
+                    color: dealerData.subscription_details?.subscription_status ? "#166534" : "#991B1B",
                     borderRadius: "22px",
                     border: "none",
                     padding: "2px 10px",
@@ -591,84 +848,63 @@ const DealerDetails = () => {
                     width: "fit-content",
                   }}
                 >
-                  <span style={{ color: "#16A34A" }}>✔</span>
-                  <span>Active</span>
+                  {dealerData.subscription_details?.subscription_status ? "Active" : "Inactive"}
                 </Tag>
-              </div>
+              </div> */}
             </Card>
           </div>
         </Col>
       </Row>
 
-      <SubmittedDocumentsCard
-            documents={[
-              {
-      id: 1,
-      title: "Trade License",
-      status: "Validated",
-      submittedOn: "trade_license_2024.pdf",
-      image: pdf, 
-    },
-    {
-      id: 2,
-      title: "National ID",
-      status: "Missing/Unreadable",
-      submittedOn: "national_id_scan.jpg",
-      image: National, 
-    },
-            ]}
-          />
+      <SubmittedDocumentsCard documents={documents} />
 
-          <div style={{ display: "flex", gap: 8,marginTop:"5px" }}>
+      <div style={{ display: "flex", gap: 8, marginTop: "5px" }}>
         <Button
           type="primary"
           icon={<CheckOutlined />}
-          style={{ borderRadius: 8,flex: 1,background:"#16A34A",fontWeight:500,fontSize:"12px"   }}
+          style={{ borderRadius: 8, flex: 1, background: "#16A34A", fontWeight: 500, fontSize: "12px" }}  onClick={() => approveDealer("verified")} loading={loadingApprove}
         >
           Approve Dealer
         </Button>
 
         <Button
           icon={<DownloadOutlined />}
-          style={{ borderRadius: 8,flex: 1,background: "#DC2626"
-,color:"#FFFFFF",fontWeight:500,fontSize:"12px"  }}
+          style={{ borderRadius: 8, flex: 1, background: "#DC2626", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => approveDealer("rejected")} loading={loadingReject}
         >
           Reject Application
         </Button>
 
-         <Button
+        <Button
           type="primary"
           icon={<EyeOutlined />}
-          style={{ borderRadius: 8,flex: 1,background:"#EA580C",color:"white",fontWeight:500,fontSize:"12px"   }}
+          style={{ borderRadius: 8, flex: 1, background: "#EA580C", color: "white", fontWeight: 500, fontSize: "12px" }}
         >
           Info Requested
         </Button>
 
         <Button
           icon={<DownloadOutlined />}
-          style={{ borderRadius: 8,flex: 1,background: "#CA8A04"
-,color:"white",fontWeight:500,fontSize:"12px"  }}
+          style={{ borderRadius: 8, flex: 1, background: "#CA8A04", color: "white", fontWeight: 500, fontSize: "12px" }} onClick={() => reporteduser("")} loading={loadingFlagged}
         >
           Flag Account
         </Button>
 
         <Button
           icon={<DownloadOutlined />}
-          style={{ borderRadius: 8,flex: 1,background: "#1F2937"
-,color:"#FFFFFF",fontWeight:500,fontSize:"12px"  }}
+          style={{ borderRadius: 8, flex: 1, background: "#1F2937", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => bannedDealer("")} loading={loadingBanned}
         >
           Ban Dealer
         </Button>
       </div>
 
-       <div
+      <div
         className="tile-card"
         style={{
           background: "#fff",
           borderRadius: 12,
           padding: 20,
           boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
-          marginTop:"20px"
+          marginTop: "20px",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -677,29 +913,110 @@ const DealerDetails = () => {
           </div>
         </div>
 
-        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16 }}>
+        <div style={{ overflowX: "auto",scrollbarWidth: "none", paddingBottom: 8, marginBottom: 2 }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
-            {tableData.length === 0 ? (
+            {cards.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
             ) : (
-              [...tableData, {
-                key: "__total_summary__",
-                id: "__total_summary__",
-                name: "Total",
-                total: totalActive,
-                percentage: totalPercentage,
-                isSummary: true,
-              }].map((item) => <PackageCard key={item.key || item.id} item={item} />)
+              cards.map((card, idx) => (
+                <div key={idx} className="col-md-6 col-lg-3 mb-4" style={{ flex: "0 0 auto" }}>
+                 <div>
+  <div
+    className="card-body dashboard-card-body"
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 12,
+      background: card.bgColor, 
+      borderRadius: 8,
+    }}
+  >
+    <div className="card-text-container">
+      <h5
+        className="card-individual-title"
+        style={{ margin: 0, color: card.titleColor, fontWeight: 500 }}
+      >
+        {card.title}
+      </h5>
+      <p className="card-individual-number" style={{ color: card.titleNumber, fontWeight: 700, margin: 0 }}>
+        {card.number}
+      </p>
+    </div>
+    <div
+      className="card-icon-individual-wrapper"
+      style={{ backgroundColor: card.bgColor, borderRadius: 8, padding: 8 }}
+    >
+      <img src={card.icon} alt={card.title} style={{ width: 20, height: 20 }} />
+    </div>
+  </div>
+              </div>
+
+                </div>
+              ))
             )}
           </div>
         </div>
 
         <div>
           <Table
-            columns={columns_boost}
+            columns={[
+              ...columns_boost,
+            ]}
             dataSource={tableData}
             loading={loading}
+            rowKey="listingId"
             locale={{ emptyText: <Empty description="No packages found" /> }}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total: totalListings,
+              //showSizeChanger: true,
+              //pageSizeOptions: ["10", "20", "50", "100", "200"],
+              onChange: (p, pSize) => {
+                setPage(p);
+                if (pSize && pSize !== limit) setLimit(pSize);
+              },
+            }}
+            title={() => (
+              <Row justify="space-between" align="middle" style={{ background: "#fff" }}>
+                <Col style={{ display: "flex", alignItems: "center", gap: 12 }}>
+  {["All", "Active", "Pending", "Sold","Rejected"].map((status) => (
+    <Button
+      key={status}
+      size="small"
+      style={{
+        minWidth: 50,
+        fontSize: 10,
+        fontWeight: 500,
+        borderRadius: 6,
+        border: "none",
+        backgroundColor: listingFilter === status ? "#008AD5" : "#E5E7EB",
+        color: listingFilter === status ? "#FFFFFF" : "#374151",
+      }}
+      onClick={() => handleFilterChange(status)}
+    >
+      {status}
+    </Button>
+  ))}
+</Col>
+
+<Col style={{ display: "flex", alignItems: "center", gap: 12 }}>
+  <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Sort by:</span>
+  <Select
+    value={sortOrder}
+    onChange={handleSortChange}
+    style={{ width: 180, borderRadius: 6, backgroundColor: "#D1D5DB", fontWeight:400,fontSize:"12px",color: "#fff" }}
+  >
+    <Option value="newest">Date Created(Newest)</Option>
+    <Option value="oldest">Oldest</Option>
+    {/* <Option value="PriceHigh">Price: High → Low</Option>
+    <Option value="PriceLow">Price: Low → High</Option> */}
+  </Select>
+</Col>
+
+              </Row>
+            )}
           />
         </div>
       </div>

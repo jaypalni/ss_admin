@@ -17,16 +17,12 @@ function AllCarsDashboard() {
   
   dashboardcounts();
 
-  // Set interval to call every 15 minutes (15 * 60 * 1000 ms)
   const interval = setInterval(() => {
     dashboardcounts();
   }, 15 * 60 * 1000);
 
-  // Cleanup interval on unmount
   return () => clearInterval(interval);
 }, []);
-
-  // Dashboard Counts API
 
   const dashboardcounts = async () => {
     try {
@@ -46,7 +42,6 @@ function AllCarsDashboard() {
     }
   };
 
-  // Show loader while fetching data
   if (loading || !dashboardData) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>

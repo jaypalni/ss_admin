@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { Input, Select, Table, Card, Row, Col, Button } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { Input, Select, Table, Card, Row, Col, Button, message } from "antd";
 import { EyeOutlined, DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -9,6 +9,8 @@ import National from "../assets/images/warning.svg";
 import Info from "../assets/images/info_1.svg";
 import Clock from "../assets/images/clock_1.svg";
 import "../assets/styles/dealer.css";
+import { loginApi } from "../services/api";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 
 const { Option } = Select;
 
@@ -23,39 +25,133 @@ const Dealer = () => {
 
   const [searchValue, setSearchValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
-  const dataSource = [
-    { id: "#USR001", company: "Baghad Motors", owner: "Ahmed Al-Rashid", email: "ahmed@baghdadmotors.com", phone: "+964-770-000-0000", registered: "Jan 15, 2024", listings: 12, status: "Verified" },
-    { id: "#USR002", company: "Basra Auto Center", owner: "Omar Hassan", email: "omar@basraauto.com", phone: "+964-770-111-1111", registered: "Feb 03, 2024", listings: 5, status: "Pending" },
-    { id: "#USR003", company: "Erbil Car Gallery", owner: "Karwan Ahmed", email: "info@erbilcars.com", phone: "+964-770-222-2222", registered: "Mar 12, 2024", listings: 18, status: "Rejected" },
-    { id: "#USR004", company: "Najaf Motors", owner: "Ali Al-Najafi", email: "ali@najafmotors.com", phone: "+964-770-333-3333", registered: "Apr 08, 2024", listings: 2, status: "Info Requested" },
-  ];
+  const [dealers, setDealers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
 
-  const filteredData = useMemo(() => {
-    const q = searchValue.trim().toLowerCase();
-    return dataSource.filter((item) => {
-      const searchMatch =
-        !q ||
-        (item.id && item.id.toLowerCase().includes(q)) ||
-        (item.company && item.company.toLowerCase().includes(q)) ||
-        (item.owner && item.owner.toLowerCase().includes(q)) ||
-        (item.email && item.email.toLowerCase().includes(q)) ||
-        (item.phone && item.phone.toLowerCase().includes(q));
+  const debounceRef = useRef(null);
+  const DEBOUNCE_MS = 500;
 
-      const statusMatch = statusFilter === "All Status" || item.status === statusFilter;
-      return searchMatch && statusMatch;
-    });
-  }, [searchValue, statusFilter, dataSource]);
+  const statusToApiFilter = (status) => {
+    if (!status || status === "All Status") return undefined;
+    return status.toLowerCase();
+  };
+
+  const fetchDealers = async ({ page = 1, limit = 10, filter, search = "" } = {}) => {
+    setLoading(true);
+    try {
+      const body = {
+        user_type: "dealer",
+        ...(filter ? { filter } : {}),
+        search: search || "",
+        page,
+        limit,
+      };
+
+      const response = await loginApi.getallusers(body);
+      const result = handleApiResponse(response);
+
+      if (result?.data) {
+        setDealers(
+          result.data.map((d) => ({
+            id: String(d.id),
+            company: d.company_name || "-",
+            owner: d.owner_name || "-",
+            email: d.email || "-",
+            phone: d.phone_number || "-",
+            registered: d.registered_since ? d.registered_since.split(" ").slice(0, 4).join(" ") : "-",
+            listings: d.no_of_listings || 0,
+            status: d.status || "-",
+          }))
+        );
+        setTotal(result.pagination?.total || result.data.length || 0);
+      } else {
+        setDealers([]);
+        setTotal(0);
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({
+        type: "error",
+        content: errorData?.error || "Error fetching dealers",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reporteduser = async (id) => {
+      try {
+       setLoading(true);
+        const body = {
+        report_id: id,       
+      };
+        const res = await loginApi.reporteduser(body);
+         const data = res?.data;
+       if (data?.status_code === 200) {
+       messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+        //setDealerData((prev) => ({ ...prev, is_verified: status }));
+      } else {
+        message.error(data.message || "Failed to approve dealer");
+      }
+      } catch (err) {
+         console.error("fetchDealerDetails error:", err);
+        messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+      }finally {
+       setLoading(false);
+    }
+    };
+  
+    const bannedDealer = async (id) => {
+      try {
+       setLoading(true);
+        const body = {
+        user_id: id,       
+      };
+        const res = await loginApi.banneduser(body);
+         const data = res?.data;
+       if (data?.status_code === 200) {
+       messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+      } else {
+        message.error(data.message || "Failed to banned dealer");
+      }
+      } catch (err) {
+         console.error("fetchDealerDetails error:", err);
+        messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+      }finally {
+       setLoading(false);
+    }
+    };
+  
+
+  useEffect(() => {
+    const apiFilter = statusToApiFilter(statusFilter);
+    fetchDealers({ page, limit, filter: apiFilter, search: searchValue });
+  }, [statusFilter, page, limit]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const apiFilter = statusToApiFilter(statusFilter);
+      setPage(1);
+      fetchDealers({ page: 1, limit, filter: apiFilter, search: searchValue });
+    }, DEBOUNCE_MS);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [searchValue]);
 
   const handleExport = () => {
-    if (!filteredData || filteredData.length === 0) return;
-    const headers = ["User ID", "Company", "Owner", "Email", "Phone", "Registered", "Listings", "Status"];
-    const rows = filteredData.map((r) => [r.id, r.company, r.owner, r.email, r.phone, r.registered, r.listings, r.status]);
+    if (!dealers || dealers.length === 0) return;
+    const headers = ["ID", "Company", "Owner", "Email", "Phone", "Registered", "Listings", "Status"];
+    const rows = dealers.map((d) => [d.id, d.company, d.owner, d.email, d.phone, d.registered, d.listings, d.status]);
     const csvContent = [headers, ...rows]
       .map((e) => e.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
+
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -69,52 +165,60 @@ const Dealer = () => {
 
   const columns = [
     {
-      title: "ID",
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>ID</span>,
       dataIndex: "id",
       key: "id",
-      render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
-      width: 120,
+      render: (text) => <span style={{ color: "black", cursor: "pointer" }}>{text}</span>,
+      width: 80,
     },
-   {
-  title: "Company",
-  dataIndex: "company",
-  key: "company",
-  width: 220,
-  render: (text) => <span className="dealer-company">{text}</span>,
-},
-{
-  title: "Owner",
-  dataIndex: "owner",
-  key: "owner",
-  width: 180,
-  render: (text) => <span className="dealer-owner">{text}</span>,
-},
-
     {
-      title: "Contact",
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Company</span>,
+      dataIndex: "company",
+      key: "company",
+      width: 180,
+    },
+    {
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Owner</span>,
+      dataIndex: "owner",
+      key: "owner",
+      width: 180,
+    },
+    {
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Contact</span>,
       dataIndex: "contact",
       key: "contact",
-      width: 220,
+      width: 300,
       render: (_, record) => (
-        <div className="contact-cell">
-          <div className="contact-email">{record.email}</div>
-          <div className="contact-phone">{record.phone}</div>
+        <div>
+          <div>{record.email}</div>
+          <div>{record.phone}</div>
         </div>
       ),
     },
-    { title: "Registered", dataIndex: "registered", key: "registered", width: 140, render: (text) => <span className="dealer-registered">{text}</span>,},
-    { title: "Listings", dataIndex: "listings", key: "listings", align: "center", width: 120 },
     {
-      title: "Status",
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Registered</span>,
+      dataIndex: "registered",
+      key: "registered",
+      width: 140,
+    },
+    {
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Listings</span>,
+      dataIndex: "listings",
+      key: "listings",
+      align: "center",
+      width: 120,
+    },
+    {
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Status</span>,
       dataIndex: "status",
       key: "status",
       width: 160,
       render: (status) => {
         let bgColor = "#DBEAFE";
         let textColor = "#1E40AF";
-        if (status === "Verified") { bgColor = "#DCFCE7"; textColor = "#166534"; }
-        else if (status === "Pending") { bgColor = "#FEF9C3"; textColor = "#854D0E"; }
-        else if (status === "Rejected") { bgColor = "#FEE2E2"; textColor = "#991B1B"; }
+        if (status === "verified") { bgColor = "#DCFCE7"; textColor = "#166534"; }
+        else if (status === "pending") { bgColor = "#FEF9C3"; textColor = "#854D0E"; }
+        else if (status === "rejected") { bgColor = "#FEE2E2"; textColor = "#991B1B"; }
         else if (status === "Info Requested") { bgColor = "#DBEAFE"; textColor = "#1E40AF"; }
 
         return (
@@ -123,10 +227,9 @@ const Dealer = () => {
               display: "inline-block",
               backgroundColor: bgColor,
               color: textColor,
-              padding: "6px 10px",
-              borderRadius: 8,
-              fontSize: 10,
-              whiteSpace: "normal", 
+              padding: "4px 10px",
+              borderRadius: 24,
+              fontSize: 12,
               maxWidth: 140,
               textAlign: "center",
               wordBreak: "break-word",
@@ -138,165 +241,26 @@ const Dealer = () => {
       },
     },
     {
-      title: "Actions",
+      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Actions</span>,
       key: "actions",
       align: "center",
       width: 140,
       render: (_, record) => (
         <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-          <EyeOutlined style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }} onClick={() => navigate(`/user-management/dealer/:dealerId`)} />
-          <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => console.log(`Edit ${record.id}`)} />
-          <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => console.log(`Delete ${record.id}`)} />
+          <EyeOutlined
+            style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+            onClick={() => navigate(`/user-management/dealer/${record.id}`)}
+          />
+          <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => reporteduser(record.id)} />
+          <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => bannedDealer(record.id)} />
         </div>
       ),
     },
   ];
 
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredData.slice(start, end);
-  }, [filteredData, currentPage]);
-
   return (
     <div style={{ padding: 20, background: "#f0f2f5" }}>
-
-       <Card style={{ marginBottom: 16, backgroundColor: "#FFF7ED", borderRadius: 6, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-        <Row justify="space-between" align="middle">
-          <Col
-  style={{
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  }}
->
-  <img
-    src={National} 
-    alt="Pending icon"
-    style={{ width: 16, height: 16 }}
-  />
-  <h1
-    style={{
-      fontSize: "16px",
-      fontWeight: 600,
-      color: "#9A3412",
-      marginBottom: 0,
-    }}
-  >
-    Pending Actions Required
-  </h1>
-</Col>
-
-          <Col>
-  <div
-    style={{
-      backgroundColor: "#F97316", 
-      color: "white", 
-      width: 20,
-      height: 20,
-      borderRadius: "50%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: 12,
-      fontWeight: 500,
-    }}
-  >
-    3
-  </div>
-</Col>
-
-        </Row>
-
-        <Card
-  style={{
-    marginTop: 10,
-    backgroundColor: "white",
-    borderColor: "#FED7AA",
-    borderRadius: 6,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  }}
-   bodyStyle={{ padding: 12 }}  
->
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <img
-        src={Clock} 
-        alt="alert"
-        style={{ width: 14, height: 14 }}
-      />
-      <div>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>
-          Basra Auto Center - Verification Review
-        </div>
-        <div style={{ fontSize: 13, color: "#4B5563",fontWeight: 400, }}>
-          Submitted additional documents 2 days ago
-        </div>
-      </div>
-    </div>
-
-    <Button
-      type="primary"
-      style={{
-        backgroundColor: "#008AD5",
-        borderColor: "#008AD5",
-        borderRadius: 8,
-        color: "#FFFFFF",
-        fontWeight: 400,
-      }}
-      onClick={() => console.log("Review clicked")}
-    >
-      Review
-    </Button>
-  </div>
-        </Card>
-
-
-        <Card
-  style={{
-    marginTop: 10,
-    backgroundColor: "white",
-    borderColor: "#FED7AA",
-    borderRadius: 6,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  }}
-   bodyStyle={{ padding: 12 }}  
->
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <img
-        src={Info} 
-        alt="alert"
-        style={{ width: 14, height: 14 }}
-      />
-      <div>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "#111827" }}>
-         Najaf Motors - Information Request Response
-        </div>
-        <div style={{ fontSize: 13, color: "#4B5563",fontWeight: 400, }}>
-          Responded to info request 1 day ago
-        </div>
-      </div>
-    </div>
-
-    <Button
-      type="primary"
-      style={{
-        backgroundColor: "#008AD5",
-        borderColor: "#008AD5",
-        borderRadius: 8,
-        color: "#FFFFFF",
-        fontWeight: 400,
-      }}
-      onClick={() => console.log("Review clicked")}
-    >
-      Review
-    </Button>
-  </div>
-        </Card>
-
-      </Card>
-
+      {contextHolder}
       <Card style={{ marginBottom: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
         <Row justify="space-between" align="middle">
           <Col style={{ display: "flex", gap: 12 }}>
@@ -312,38 +276,34 @@ const Dealer = () => {
           <Col>
             <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 200, marginRight: 8 }}>
               <Option value="All Status">All Status</Option>
-              <Option value="Verified">Verified</Option>
-              <Option value="Pending">Pending</Option>
-              <Option value="Rejected">Rejected</Option>
-              <Option value="Info Requested">Info Requested</Option>
+              <Option value="active">Active</Option>
+              <Option value="pending">Pending</Option>
+              <Option value="banned">Banned</Option>
+              <Option value="flagged">Flagged</Option>
+              {/* <Option value="Info Requested">Info Requested</Option> */}
             </Select>
-            <Button type="primary" onClick={handleExport} icon={<DownloadOutlined />} style={{ backgroundColor: "#16A34A", margin: "8px" }}>
+            <Button type="primary" onClick={handleExport} icon={<DownloadOutlined />} style={{ backgroundColor: "#16A34A" }}>
               Export
             </Button>
           </Col>
         </Row>
-
-        <div style={{ marginTop: 0 }}>
-          <span style={{ color: "#4B5563", fontSize: 14, fontWeight: 400 }}>
-            Showing {filteredData.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} dealers
-          </span>
-        </div>
       </Card>
 
       <Card style={{ margin: "0 auto", maxWidth: 1200, backgroundColor: "#fff" }}>
         <Table
           className="dealer-table"
-          dataSource={paginatedData}
+          dataSource={dealers}
           columns={columns}
           rowKey="id"
           bordered={false}
+          loading={loading}
           pagination={{
-            current: currentPage,
-            pageSize: pageSize,
+            current: page,
+            pageSize: limit,
+            total: total,
             showSizeChanger: false,
-            total: filteredData.length,
-            onChange: (page) => setCurrentPage(page),
-            showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} results`,
+            onChange: (p) => setPage(p),
+            showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} dealers`,
           }}
         />
       </Card>

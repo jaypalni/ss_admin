@@ -1,99 +1,146 @@
 import React, { useState, useEffect } from "react";
 import { PlusOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Row, Col, Input, Modal,Popconfirm, } from "antd";
+import { Button, Row, Col, Input, Modal, Popconfirm, message } from "antd";
 import editIcon from "../assets/images/edit.svg";
 import { FaTrash } from "react-icons/fa";
+import { loginApi } from "../services/api";
 
-export default function FQA() {
-  const [items, setItems] = useState(() => {
-    try {
-      const raw = localStorage.getItem("fqa_items");
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  });
-
+export default function FQA({ dealerData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [expandedId, setExpandedId] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    try {
-      localStorage.setItem("fqa_items", JSON.stringify(items));
-    } catch (e) {
-    }
-  }, [items]);
+    fetchFAQ();
+  }, []);
 
-  function openNew() {
+  const fetchFAQ = async () => {
+    try {
+      setLoading(true);
+      const res = await loginApi.getfaq();
+      const data = res?.data;
+      if (data?.status_code === 200) {
+        setItems(data.data.faqs || []);
+      } else {
+        messageApi.error(data?.message || "Failed to fetch Q&A");
+      }
+    } catch (err) {
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong while fetching Q&A";
+      messageApi.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    const trimmedQ = question.trim();
+    const trimmedA = answer.trim();
+    if (!trimmedQ || !trimmedA) {
+      Modal.warning({
+        title: "Missing fields",
+        content: "Please enter both question and answer.",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const body = {
+        question: trimmedQ,
+        answer: trimmedA,
+        ...(editingId && { id: editingId }),
+      };
+
+    let res;
+    if (editingId) {
+      res = await loginApi.editfaq(editingId, body); 
+    } else {
+      res = await loginApi.savefaq(body);
+    }
+
+      const data = res?.data;
+      if (data?.status_code === 200 || data?.status_code === 201) {
+        messageApi.success(data?.message || "Q&A saved successfully");
+        fetchFAQ();
+        setIsOpen(false);
+        setQuestion("");
+        setAnswer("");
+        setEditingId(null);
+      } else {
+        messageApi.error(data?.message || "Failed to save Q&A");
+      }
+    } catch (err) {
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong while saving Q&A";
+      messageApi.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openNew = () => {
     setQuestion("");
     setAnswer("");
     setEditingId(null);
     setIsOpen(true);
-  }
+  };
 
-  function openEdit(item) {
+  const openEdit = (item) => {
     setQuestion(item.question);
     setAnswer(item.answer);
     setEditingId(item.id);
     setIsOpen(true);
-  }
+  };
 
-  function handleSave() {
-    const trimmedQ = question.trim();
-    const trimmedA = answer.trim();
-    if (!trimmedQ || !trimmedA) {
-      Modal.warning({ title: "Missing fields", content: "Please enter both question and answer." });
-      return;
-    }
+  const handleDelete = async (id) => {
+  try {
+    setLoading(true);
+    const res = await loginApi.deletefaq(id); 
+    const data = res?.data;
 
-    if (editingId) {
-      setItems((prev) => prev.map((it) => (it.id === editingId ? { ...it, question: trimmedQ, answer: trimmedA } : it)));
+    if (data?.status_code === 200) {
+      messageApi.success(data?.message || "Deleted successfully");
+      fetchFAQ();
     } else {
-      const newItem = {
-        id: Date.now().toString(),
-        question: trimmedQ,
-        answer: trimmedA,
-      };
-      setItems((prev) => [newItem, ...prev]);
+      messageApi.error(data?.message || "Failed to delete");
     }
-
-    setIsOpen(false);
-    setQuestion("");
-    setAnswer("");
-    setEditingId(null);
+  } catch (err) {
+    const errorMessage =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Something went wrong while deleting";
+    messageApi.error(errorMessage);
+  } finally {
+    setLoading(false);
   }
-
-  function handleDelete(id) {
-    Modal.confirm({
-      title: "Delete Q&A",
-      content: "Are you sure you want to delete this item?",
-      onOk() {
-        setItems((prev) => prev.filter((it) => it.id !== id));
-        if (expandedId === id) setExpandedId(null);
-      },
-    });
-  }
-
-  function toggleExpand(id) {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }
+};
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <div style={{
-         marginBottom: "16px",
-    backgroundColor: "#ffffff",
-    border: "1px solid #e5e7eb", 
-    borderRadius: "8px", 
-    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)", 
-    padding: "12px"
-      }}>
+      {contextHolder}
+
+      <div
+        style={{
+          marginBottom: "16px",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+          padding: "12px",
+        }}
+      >
         <Row align="middle" justify="space-between">
           <Col>
-            <h2 className="text-lg font-semibold">FQA (Questions & Answers)</h2>
+            <h2 className="text-lg font-semibold">FAQ (Questions & Answers)</h2>
           </Col>
           <Col>
             <Button
@@ -115,65 +162,89 @@ export default function FQA() {
 
         <div className="mt-5 space-y-4">
           {items.length === 0 && (
-            <div className="p-6 text-center text-gray-500">No Q&A yet — click Add to create one.</div>
+            <div className="p-6 text-center text-gray-500">
+              No Q&A yet — click Add to create one.
+            </div>
           )}
 
-        {items.map((it) => (
-  <div key={it.id} style={{ marginBottom: "16px",
-    backgroundColor: "#ffffff",
-    border: "1px solid #e5e7eb", 
-    borderRadius: "8px", 
-    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)", 
-    padding: "12px"}}>    
-       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div>
-            <h1 style={{ fontSize: "20px", fontWeight: "600", color: "#1F2937", marginBottom: 2 }}>Question: {it.question}</h1>
-            <p style={{ fontSize: "13px", color: "#4B5563", margin: 0, fontWeight: "400" }}>Answer: {it.answer}</p>
-          </div>
+          {items.map((it) => (
+            <div
+              key={it.id}
+              style={{
+                marginBottom: "16px",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+                padding: "12px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <div>
+                  <h1
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "600",
+                      color: "#1F2937",
+                      marginBottom: 2,
+                    }}
+                  >
+                    Question: {it.question}
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#4B5563",
+                      margin: 0,
+                      fontWeight: "400",
+                    }}
+                  >
+                    Answer: {it.answer}
+                  </p>
+                </div>
 
-           <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-    <button
-      style={{
-        backgroundColor: "#E5E7EB",
-        color: "#374151",
-        border: "none",
-        padding: "6px 10px",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontSize: "12px",
-        fontWeight: "400",
-        display: "flex",
-        alignItems: "center",
-        gap: 3,
-      }}
-      onClick={() => openEdit(it)}
-    >
-      <img src={editIcon} alt="edit" style={{ width: "12px", height: "12px" }} />
-      <span>Edit</span>
-    </button>
+                <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+                  <button
+                    style={{
+                      backgroundColor: "#E5E7EB",
+                      color: "#374151",
+                      border: "none",
+                      padding: "6px 10px",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontWeight: "400",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 3,
+                    }}
+                    onClick={() => openEdit(it)}
+                  >
+                    <img src={editIcon} alt="edit" style={{ width: "12px", height: "12px" }} />
+                    <span>Edit</span>
+                  </button>
 
-    <Popconfirm
-      title="Delete User"
-      description="Are you sure you want to delete this user?"
-      onConfirm={() => handleDelete(it.id)}
-      okText="Yes"
-      cancelText="No"
-      okType="danger"
-    >
-      <Button
-        type="text"
-        icon={<FaTrash />}
-        size="small"
-        danger
-        title="Delete User"
-      />
-    </Popconfirm>
-  </div>
-
-          </div>
-  </div>
-        ))}
-
+                  <Popconfirm
+                    title="Delete Q&A"
+                    description="Are you sure you want to delete this item?"
+                    onConfirm={() => handleDelete(it.id)}
+                    okText="Yes"
+                    cancelText="No"
+                    okType="danger"
+                  >
+                    <Button type="text" icon={<FaTrash />} size="small" danger title="Delete Q&A" />
+                  </Popconfirm>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -187,13 +258,12 @@ export default function FQA() {
           <Button key="cancel" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>,
-          <Button key="submit" type="primary" icon={<SaveOutlined />} onClick={handleSave}>
+          <Button key="submit" type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={loading}>
             {editingId ? "Save" : "Add"}
           </Button>,
         ]}
       >
         <div style={{ marginBottom: 12 }}>
-          <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 600 }}></label>
           <Input.TextArea
             placeholder="Add Question"
             rows={1}
@@ -204,7 +274,6 @@ export default function FQA() {
         </div>
 
         <div>
-          <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 600 }}></label>
           <Input.TextArea
             placeholder="Add Answer..."
             rows={3}
