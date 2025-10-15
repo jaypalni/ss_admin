@@ -341,7 +341,7 @@ const CreateNewSubscription = () => {
   <Col xs={24} sm={12}>
     <Form.Item shouldUpdate={(prev, cur) => prev.planType !== cur.planType}>
       {() => {
-        const isListings = form.getFieldValue("planType") === "listings";
+        const isListings = form.getFieldValue("planType") === "listing";
         return (
           <Form.Item
             label={isListings ? <RequiredLabel text="User Type" /> : <span>User Type</span>}
