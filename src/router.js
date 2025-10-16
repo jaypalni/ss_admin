@@ -42,6 +42,7 @@ import TranscationsFin from "./pages/TranscationsFin";
 import DealerDetails from "./pages/DealerDetails";
 import FQA from "./pages/FQA";
 
+
 const AppRouter = () => {
   return (
     <Router>

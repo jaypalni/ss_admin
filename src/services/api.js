@@ -1,6 +1,7 @@
 import axios from "axios";
 import API_CONFIG from "../config/api.config";
 import store from '../redux/store';
+import { Navigate } from "react-router-dom";
 
 //Validate base URL
 if (!API_CONFIG.BASE_URL) {
@@ -72,6 +73,7 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
+          Navigate("/")
           break;
         case 403:
           console.error("Access forbidden");

@@ -94,9 +94,8 @@ const Dealer = () => {
          const data = res?.data;
        if (data?.status_code === 200) {
        messageApi.error(res?.data?.message || "Failed to fetch dealer details");
-        //setDealerData((prev) => ({ ...prev, is_verified: status }));
       } else {
-        message.error(data.message || "Failed to approve dealer");
+        messageApi.error(data.message || "Failed to approve dealer");
       }
       } catch (err) {
          console.error("fetchDealerDetails error:", err);
@@ -117,7 +116,7 @@ const Dealer = () => {
        if (data?.status_code === 200) {
        messageApi.error(res?.data?.message || "Failed to fetch dealer details");
       } else {
-        message.error(data.message || "Failed to banned dealer");
+        messageApi.error(data.message || "Failed to banned dealer");
       }
       } catch (err) {
          console.error("fetchDealerDetails error:", err);

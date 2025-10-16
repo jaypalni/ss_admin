@@ -106,6 +106,48 @@ const Individual = () => {
     return () => clearTimeout(debounceRef.current);
   }, [searchValue]);
 
+    const reporteduser = async (id) => {
+        try {
+         setLoading(true);
+          const body = {
+          report_id: id,       
+        };
+          const res = await loginApi.reporteduser(body);
+           const data = res?.data;
+         if (data?.status_code === 200) {
+         messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+        } else {
+          messageApi.error(data.message || "Failed to approve dealer");
+        }
+        } catch (err) {
+           console.error("fetchDealerDetails error:", err);
+          messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+        }finally {
+         setLoading(false);
+      }
+      };
+    
+      const bannedDealer = async (id) => {
+        try {
+         setLoading(true);
+          const body = {
+          user_id: id,       
+        };
+          const res = await loginApi.banneduser(body);
+           const data = res?.data;
+         if (data?.status_code === 200) {
+         messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+        } else {
+          messageApi.error(data.message || "Failed to banned dealer");
+        }
+        } catch (err) {
+           console.error("fetchDealerDetails error:", err);
+          messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+        }finally {
+         setLoading(false);
+      }
+      };
+
   const handleExport = () => {
     if (!users || users.length === 0) {
       messageApi.open({ type: "info", content: "No data to export" });
@@ -233,13 +275,13 @@ const Individual = () => {
           />
           <img
             src={EditOutlined}
-            onClick={() => console.log(`Edit ${record.id}`)}
+            onClick={() =>  reporteduser(record.id)}
             alt="edit"
             style={{ width: 18, height: 18, cursor: "pointer" }}
           />
           <img
             src={DeleteOutlined}
-            onClick={() => console.log(`Delete ${record.id}`)}
+            onClick={() =>  bannedDealer(record.id)}
             alt="delete"
             style={{ width: 18, height: 18, cursor: "pointer" }}
           />
