@@ -130,6 +130,7 @@ const Individualdetails = () => {
       const data = res?.data;
       if (data?.status_code === 200) {
         messageApi.success(data?.message || "User reported successfully");
+        navigate("/user-management/individual")
       } else {
         messageApi.error(data?.message || data?.error || "Failed to report user");
       }
@@ -154,6 +155,7 @@ const Individualdetails = () => {
       const data = res?.data;
       if (data?.status_code === 200) {
         messageApi.success(data?.message || "User banned successfully");
+        navigate("/user-management/individual")
       } else {
         messageApi.error(data?.message || data?.error || "Failed to ban user");
       }

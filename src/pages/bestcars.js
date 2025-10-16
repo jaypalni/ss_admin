@@ -162,31 +162,40 @@ function BestCars() {
     return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
   };
 
-  const handleHeaderCheckboxChange = (e) => {
-  const checked = e.target.checked;
+const handleHeaderCheckboxChange = (e) => {
+    const checked = e.target.checked;
 
-  console.log("123456",setSelectedIds(cars.map((c) => c.id)))
+    if (cars.length === 0) return;
 
-  Modal.confirm({
-    title: "Confirm",
-    content: checked
-      ? "Do you want to select all cars?"
-      : "Do you want to deselect all cars?",
-    okText: "Yes",
-    cancelText: "No",
-    onOk() {
-      if (checked) {
-        setSelectedIds(cars.map((c) => c.id));
-        setHeaderChecked(true);
-      } else {
-        setSelectedIds([]);
-        setHeaderChecked(false);
-      }
-    },
-    onCancel() {
-    },
-  });
-};
+    Modal.confirm({
+      title: "Confirm",
+      content: checked
+        ? "Do you want to select all cars?"
+        : "Do you want to deselect all cars?",
+      okText: "Yes",
+      cancelText: "No",
+      onOk() {
+        if (checked) {
+          setSelectedIds(cars.map((c) => c.id));
+        } else {
+          setSelectedIds([]);
+        }
+        setHeaderChecked(checked);
+      },
+      onCancel() {
+        setHeaderChecked((prev) => !prev);
+      },
+    });
+  };
+
+useEffect(() => {
+  if (selectedIds.length === cars.length && cars.length > 0) {
+    setHeaderChecked(true);
+  } else {
+    setHeaderChecked(false);
+  }
+}, [selectedIds, cars]);
+
 
   const mapApiItemToCar = (item) => {
     const { sellerName, sellerCity } = formatSellerInfo(item.user_details);
@@ -339,13 +348,11 @@ function BestCars() {
           messageApi.open({ type: "success", content: data.message });
         }
       } else {
-        // Rollback on failure
         setCars((prev) => updateCarBestPick(prev, id, !newValue));
         setBestPicksTotal((prev) => rollbackBestPicksCount(prev, newValue, bestPicksIsGlobal));
         messageApi.open({ type: "error", content: data?.message || "Failed to update Best Pick" });
       }
     } catch (err) {
-      // Rollback on error
       setCars((prev) => updateCarBestPick(prev, id, !newValue));
       setBestPicksTotal((prev) => rollbackBestPicksCount(prev, newValue, bestPicksIsGlobal));
       const errorData = handleApiError(err);
@@ -355,15 +362,23 @@ function BestCars() {
     }
   };
 
- const handleCardCheckboxChange = (carId, checked) => {
-  setSelectedIds((prev) => {
-    if (checked) {
-      return Array.from(new Set([...prev, carId]));
+  const handleCardCheckboxChange = (carId, checked) => {
+    setSelectedIds((prev) => {
+      if (checked) {
+        return Array.from(new Set([...prev, carId]));
+      } else {
+        return prev.filter((id) => id !== carId);
+      }
+    });
+  };
+
+   useEffect(() => {
+    if (selectedIds.length === cars.length && cars.length > 0) {
+      setHeaderChecked(true);
     } else {
-      return prev.filter((id) => id !== carId);
+      setHeaderChecked(false);
     }
-  });
-};
+  }, [selectedIds, cars]);
 
   const displayedCars = cars;
 
