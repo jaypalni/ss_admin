@@ -46,7 +46,7 @@ const Dealer = () => {
     try {
       const body = {
         user_type: "dealer",
-        ...(filter ? { filter } : {}),
+        filter: filter || "",
         search: search || "",
         page,
         limit,

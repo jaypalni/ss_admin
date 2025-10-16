@@ -45,7 +45,7 @@ const Individual = () => {
     try {
       const body = {
         user_type: "individual",
-        ...(filter ? { filter } : {}),
+        filter: filter || "",
         search: search || "",
         page,
         limit,
