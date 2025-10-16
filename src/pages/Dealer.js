@@ -24,7 +24,7 @@ const Dealer = () => {
   }, [isLoggedIn, navigate]);
 
   const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -276,7 +276,7 @@ const Dealer = () => {
           </Col>
           <Col>
             <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 200, marginRight: 8 }}>
-              <Option value="All Status">All Status</Option>
+              <Option value="all">All</Option>
               <Option value="active">Active</Option>
               <Option value="pending">Pending</Option>
               <Option value="banned">Banned</Option>

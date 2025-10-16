@@ -23,7 +23,7 @@ const Individual = () => {
   }, [isLoggedIn, navigate]);
 
   const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -316,7 +316,7 @@ const Individual = () => {
               onChange={setStatusFilter}
               style={{ width: 160 }}
             >
-              <Option value="All Status">All Status</Option>
+              <Option value="all">All</Option>
               <Option value="Active">Active</Option>
               <Option value="Flagged">Flagged</Option>
               <Option value="Banned">Banned</Option>
