@@ -196,7 +196,7 @@ export default function FQA({ dealerData }) {
                       marginBottom: 2,
                     }}
                   >
-                    Question: {it.question}
+                    {it.question}
                   </h1>
                   <p
                     style={{
@@ -206,7 +206,7 @@ export default function FQA({ dealerData }) {
                       fontWeight: "400",
                     }}
                   >
-                    Answer: {it.answer}
+                    {it.answer}
                   </p>
                 </div>
 
