@@ -3,7 +3,22 @@ export const handleApiResponse = (response) => {
   return response?.data ?? null;
 };
 
+export const formatDateTime = (dateStr) => {
+  if (!dateStr) return "-";
 
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "-";
+
+  const pad = (n) => (n < 10 ? `0${n}` : n);
+
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1); 
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+};
 // API Error Handler
 export const handleApiError = (error) => {
   if (error.response) {

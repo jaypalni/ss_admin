@@ -5,6 +5,7 @@ import {
   MenuUnfoldOutlined,
   UserOutlined,
   LockOutlined,
+  QuestionCircleOutlined
 } from "@ant-design/icons";
 import {
   FaHome,
@@ -40,6 +41,8 @@ import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { useSelector } from "react-redux";
 import individualIcon from "../assets/images/individual_icon.svg";
 import dealerIcon from "../assets/images/dealer_icon.svg";
+import pricing from "../assets/images/pricing.svg";
+import transcation_icon from "../assets/images/transcation.svg";
 const { Header, Sider, Content } = Layout;
 
 function AppLayout({ children }) {
@@ -134,10 +137,12 @@ function AppLayout({ children }) {
       {
         key: "/financials/pricing", 
         label: "Pricing",
+         icon: <img src={pricing} alt="Individual" style={{ width: 12, height: 12 }} />
       },
       {
         key: "/financials/transactions", 
         label: "Transactions",
+         icon: <img src={transcation_icon} alt="Individual" style={{ width: 12, height: 12 }} />
       },
     ],
   },
@@ -162,6 +167,7 @@ function AppLayout({ children }) {
           {
         key: "/Admins", 
         label: "Admin",
+         icon: <FaUser/>
       },
         ]
       : []),
@@ -182,10 +188,12 @@ function AppLayout({ children }) {
       {
         key: "/accountsettings/changepassword", 
         label: "Change Password",
+         icon: <LockOutlined/>
       },
       {
         key: "/FAQ'S", 
         label: "FAQ'S",
+         icon: <QuestionCircleOutlined  />
       },
     ],
     },

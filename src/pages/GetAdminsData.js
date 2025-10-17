@@ -6,7 +6,7 @@ import { loginApi } from "../services/api";
 import { Table, message, Button, Popconfirm } from "antd";
 import editIcon from "../assets/images/edit.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
-import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import { handleApiError, handleApiResponse,formatDateTime } from "../utils/apiUtils";
 import { FaTrash } from "react-icons/fa";
 import { useSelector } from 'react-redux';
 
@@ -96,7 +96,7 @@ const GetAdminsData = () => {
           firstname: item.first_name,
           lastname: item.last_name,
           emailaddress: item.email,
-          lastlogin: item.last_login,
+          lastlogin: formatDateTime(item.last_login),
         }))
       : [];
 

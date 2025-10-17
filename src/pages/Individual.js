@@ -140,7 +140,7 @@ const Individual = () => {
          messageApi.error(res?.data?.message || "Failed to fetch dealer details");
          fetchUsers()
         } else {
-          messageApi.error(data.message || "Failed to banned dealer");
+          messageApi.error(data.error || "Failed to banned dealer");
         }
         } catch (err) {
            console.error("fetchDealerDetails error:", err);
@@ -150,30 +150,83 @@ const Individual = () => {
       }
       };
 
-  const handleExport = () => {
-    if (!users || users.length === 0) {
+const handleExport = async () => {
+  try {
+    setLoading(true);
+    const apiFilter = statusToApiFilter(statusFilter);
+    const allRows = [];
+    let currentPage = "";
+    const pageSize = ""; 
+    let totalFromApi = null;
+    let keepFetching = true;
+
+    while (keepFetching) {
+      const body = {
+        user_type: "individual",
+        filter: apiFilter ?? "",
+        search: searchValue ?? "",
+        page: currentPage,
+        limit: pageSize,
+      };
+
+      const response = await loginApi.getallusers(body);
+      const result = handleApiResponse(response);
+
+      if (!result || !Array.isArray(result.data) || result.data.length === 0) {
+        if (currentPage === 1) {
+          messageApi.open({ type: "info", content: "No data to export" });
+          setLoading(false);
+          return;
+        }
+        break;
+      }
+
+      allRows.push(...result.data);
+
+      if (result.pagination && typeof result.pagination.total === "number") {
+        totalFromApi = result.pagination.total;
+        const pages = Math.ceil(totalFromApi / (result.pagination.limit || pageSize));
+        if (currentPage >= pages) keepFetching = false;
+        else currentPage += 1;
+      } else {
+        if (result.data.length < pageSize) keepFetching = false;
+        else currentPage += 1;
+      }
+    }
+
+    if (allRows.length === 0) {
       messageApi.open({ type: "info", content: "No data to export" });
       return;
     }
 
+    // Normalize rows into CSV-friendly array
+    const normalized = allRows.map((u) => ({
+      id: String(u.id),
+      fullname: (u.full_name || "").trim() || "-",
+      emailaddress: u.email || "-",
+      phone: u.phone_number || "-",
+      registered: u.registered_since ? u.registered_since.split(" ").slice(1, 4).join(" ") : "-",
+      listings: typeof u.no_of_listings !== "undefined" ? u.no_of_listings : "-",
+      status: u.status ? String(u.status).toLowerCase() : "-",
+    }));
+
     const headers = ["User ID", "Full Name", "Email Address", "Phone Number", "Registered", "Listings", "Status"];
-    const rows = users.map((r) => [
+    const rows = normalized.map((r) => [
       r.id,
       r.fullname,
       r.emailaddress,
       r.phone,
-      r.registered.split(" ").slice(0, 4).join(" "), 
+      r.registered,
       r.listings,
       r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "-",
     ]);
 
     const csvContent = [headers, ...rows]
-      .map((e) => e.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .map((e) => e.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = `users_export_${new Date().toISOString().slice(0, 10)}.csv`;
@@ -181,7 +234,16 @@ const Individual = () => {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  };
+
+    messageApi.open({ type: "success", content: `Export started for ${normalized.length} users` });
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({ type: "error", content: errorData?.error || "Error exporting users" });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const columns = [
     {

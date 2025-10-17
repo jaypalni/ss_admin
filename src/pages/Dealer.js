@@ -145,10 +145,49 @@ const Dealer = () => {
     return () => clearTimeout(debounceRef.current);
   }, [searchValue]);
 
-  const handleExport = () => {
-    if (!dealers || dealers.length === 0) return;
+const handleExport = async () => {
+  try {
+    setLoading(true);
+
+    const body = {
+      user_type: "dealer",
+      filter: "",   
+      search: "", 
+      page: "",
+      limit: "",
+    };
+
+    const response = await loginApi.getallusers(body);
+    const result = handleApiResponse(response);
+
+    if (!result?.data || result.data.length === 0) {
+      message.warning("No dealer data available to export");
+      return;
+    }
+
+    const allDealers = result.data.map((d) => ({
+      id: String(d.id),
+      company: d.company_name || "-",
+      owner: d.owner_name || "-",
+      email: d.email || "-",
+      phone: d.phone_number || "-",
+      registered: d.registered_since ? d.registered_since.split(" ").slice(1, 4).join(" ") : "-",
+      listings: d.no_of_listings || 0,
+      status: d.status || "-",
+    }));
+
     const headers = ["ID", "Company", "Owner", "Email", "Phone", "Registered", "Listings", "Status"];
-    const rows = dealers.map((d) => [d.id, d.company, d.owner, d.email, d.phone, d.registered, d.listings, d.status]);
+    const rows = allDealers.map((d) => [
+      d.id,
+      d.company,
+      d.owner,
+      d.email,
+      d.phone,
+      d.registered,
+      d.listings,
+      d.status,
+    ]);
+
     const csvContent = [headers, ...rows]
       .map((e) => e.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
@@ -162,7 +201,19 @@ const Dealer = () => {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  };
+
+    message.success(`Export started for ${allDealers.length} dealers`);
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({
+      type: "error",
+      content: errorData?.error || "Error exporting dealers",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const columns = [
     {
