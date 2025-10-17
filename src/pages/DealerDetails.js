@@ -24,13 +24,17 @@ import National from "../assets/images/national.svg";
 import pdf from "../assets/images/pdf.svg";
 import warning from "../assets/images/warning.svg";
 import activeIcon from "../assets/images/total_icon_1.svg";
-import editIcon from "../assets/images/edit.svg";
-import reject from "../assets/images/delete_icon.svg";
 import pendingIcon from "../assets/images/sold-icon.svg";
 import soldIcon from "../assets/images/pending_icon.svg";
 import modelIcon from "../assets/images/reject_icon_1.svg";
 import "../assets/styles/allcarsdashboard.css";
 import { loginApi } from "../services/api";
+import editIcon from "../assets/images/edit.svg";
+import reject from "../assets/images/delete_icon.svg";
+import info_d from "../assets/images/info_d.svg";
+import ban_d from "../assets/images/ban_d.svg";
+import reject_d from "../assets/images/reject_d.svg";
+import flag_d from "../assets/images/flag_d.svg";
 
 const { Option } = Select;
 
@@ -157,28 +161,42 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
 
 const SubmittedDocumentsCard = ({ documents }) => {
   if (!documents || documents.length === 0) return null;
+  const BASE_URL = process.env.REACT_APP_API_URL
 
-  const handleDownload = (doc) => {
-     if (doc.submittedOn) {
+
+const handleDownload = (doc) => {
+  if (doc.submittedOn) {
+    let url = doc.submittedOn;
+
+    if (!/^https?:\/\//i.test(url)) {
+      url = `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+    }
+
     const link = document.createElement("a");
-    link.href = doc.submittedOn;
-    link.download = doc.submittedOn.split("/").pop(); 
+    link.href = url;
+    link.download = url.split("/").pop();
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    message.success(`Download started for ${doc.title}`);
+
+    message.success(`Download started for ${doc.title ?? "document"}`);
   } else {
     message.warning("No document available to download");
   }
-  };
+};
 
-  const handleView = (doc) => {
-    if (doc.submittedOn) {
-    window.open(doc.submittedOn, "_blank"); 
+ const handleView = (doc) => {
+  if (doc.submittedOn) {
+    let url = doc.submittedOn;
+    if (!/^https?:\/\//i.test(url)) {
+      url = `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+    }
+
+    window.open(url, "_blank");
   } else {
     message.warning("No document available to view");
   }
-  };
+};
 
   return (
     <Card
@@ -868,7 +886,7 @@ const cards = [
         </Button>
 
         <Button
-          icon={<DownloadOutlined />}
+           icon={<img src={reject_d} alt="download" style={{ width: 10, height: 10 }} />}
           style={{ borderRadius: 8, flex: 1, background: "#DC2626", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => approveDealer("rejected")} loading={loadingReject}
         >
           Reject Application
@@ -876,21 +894,21 @@ const cards = [
 
         <Button
           type="primary"
-          icon={<EyeOutlined />}
+          icon={<img src={info_d} alt="download" style={{ width: 12, height: 12 }} />}
           style={{ borderRadius: 8, flex: 1, background: "#EA580C", color: "white", fontWeight: 500, fontSize: "12px" }}
         >
           Info Requested
         </Button>
 
         <Button
-          icon={<DownloadOutlined />}
+          icon={<img src={flag_d} alt="download" style={{ width: 12, height: 12 }} />}
           style={{ borderRadius: 8, flex: 1, background: "#CA8A04", color: "white", fontWeight: 500, fontSize: "12px" }} onClick={() => reporteduser("")} loading={loadingFlagged}
         >
           Flag Account
         </Button>
 
         <Button
-          icon={<DownloadOutlined />}
+          icon={<img src={ban_d} alt="download" style={{ width: 12, height: 12 }} />}
           style={{ borderRadius: 8, flex: 1, background: "#1F2937", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => bannedDealer("")} loading={loadingBanned}
         >
           Ban Dealer

@@ -14,6 +14,7 @@ import "../assets/styles/allcarsdashboard.css";
 import "../assets/styles/individualdetails.css";
 import avatarFallback from "../assets/images/icon_img.svg";
 import { loginApi } from "../services/api";
+import premimum_d from "../assets/images/premimum_d.svg";
 
 const { Option } = Select;
 
@@ -332,7 +333,7 @@ const Individualdetails = () => {
               <h2 style={nameStyle}>{dealerData.full_name || "N/A"}</h2>
 
               <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginTop: 8 }}>
-                <div>
+                <div style={{width:140}}>
                   <div style={metaKeyStyle}>Email:</div>
                   <div style={metaValueStyle}>{dealerData.email || "-"}</div>
                 </div>
@@ -344,7 +345,7 @@ const Individualdetails = () => {
                   </div>
                 </div>
 
-                <div>
+                <div style={{marginLeft:18}}>
                   <div style={metaKeyStyle}>
                     <span style={{ color: "#64748B" }}>User ID:</span>{" "}
                     <span style={{ color: "#0F172A", fontWeight: 600 }}>#{dealerData.user_id ?? "-"}</span>
@@ -356,7 +357,7 @@ const Individualdetails = () => {
                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                   <div style={{ color: "#6B7280", fontSize: 13 }}>Registered:</div>
                   <div style={{ ...metaValueStyle, fontWeight: 600 }}>
-                    {dealerData.registered_at ? dealerData.registered_at.split(" ").slice(0, 4).join(" ") : (dealerData.created_at ? dealerData.created_at.split(" ").slice(0,4).join(" ") : "-")}
+                    {dealerData.registered_at ? dealerData.registered_at.split(" ").slice(1, 4).join(" ") : (dealerData.created_at ? dealerData.created_at.split(" ").slice(1,4).join(" ") : "-")}
                   </div>
                 </div>
 
@@ -368,7 +369,7 @@ const Individualdetails = () => {
                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                   <div style={{ color: "#6B7280", fontSize: 13 }}>Expires:</div>
                   <div style={{ ...metaValueStyle, fontWeight: 600 }}>
-                    {dealerData.subscription_details?.end_date ? dealerData.subscription_details.end_date.split(" ").slice(0, 4).join(" ") : (dealerData.subscription_expires_at ? dealerData.subscription_expires_at.split(" ").slice(0,4).join(" ") : "-")}
+                    {dealerData.subscription_details?.end_date ? dealerData.subscription_details.end_date.split(" ").slice(1, 4).join(" ") : (dealerData.subscription_expires_at ? dealerData.subscription_expires_at.split(" ").slice(1,4).join(" ") : "-")}
                   </div>
                 </div>
               </div>
@@ -400,18 +401,19 @@ const Individualdetails = () => {
 
                
                  {dealerData.subscription_details?.plan_name && (
-  <Tag style={{ ...pillStyle, background: "#DBEAFE", color: "#1E40AF" }}>
-    <span
-      style={{
-        width: 10,
-        height: 10,
-        borderRadius: 999,
-        background: "#6366F1",
-        display: "inline-block",
-      }}
-    />
-    {dealerData.subscription_details.plan_name}
-  </Tag>
+ <Tag style={{ ...pillStyle, background: "#DBEAFE", color: "#1E40AF" }}>
+  <img
+    src={premimum_d}
+    alt="plan icon"
+    style={{
+      width: 14,
+      height: 14,
+      display: "inline-block",
+      objectFit: "contain",
+    }}
+  />
+  {dealerData.subscription_details?.plan_name ?? ""}
+</Tag>
 )}
 
               
@@ -419,7 +421,7 @@ const Individualdetails = () => {
             </div>
           </div>
         </div>
-
+{dealerData.status !== "banned" && (
         <div style={rightActionsStyle}>
           <Button
             onClick={reportedUser}
@@ -471,8 +473,9 @@ const Individualdetails = () => {
             </div>
           </Button>
         </div>
+               )}
       </div>
-
+   
       <div className="content-body">
         <div className="row">
           {cards.map((card, idx) => (
