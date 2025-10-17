@@ -63,7 +63,7 @@ const Dealer = () => {
             owner: d.owner_name || "-",
             email: d.email || "-",
             phone: d.phone_number || "-",
-            registered: d.registered_since ? d.registered_since.split(" ").slice(0, 4).join(" ") : "-",
+            registered: d.registered_since ? d.registered_since.split(" ").slice(1, 4).join(" ") : "-",
             listings: d.no_of_listings || 0,
             status: d.status || "-",
           }))

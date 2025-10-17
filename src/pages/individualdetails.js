@@ -88,7 +88,7 @@ const Individualdetails = () => {
         status:
           (item.approval && String(item.approval).charAt(0).toUpperCase() + String(item.approval).slice(1)) ||
           "-",
-        date: item.created_at ? item.created_at.split(" ").slice(0, 4).join(" ") : "-",
+        date: item.created_at ? item.created_at.split(" ").slice(1, 4).join(" ") : "-",
         price: item.price ? Number(item.price).toLocaleString() : "-",
         _raw: item,
       }));
@@ -297,7 +297,7 @@ const Individualdetails = () => {
     <div className="content-wrapper-allcardashboard">
       {contextHolder}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 8,marginTop:10 }}>
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={() => navigate("/user-management/individual")}

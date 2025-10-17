@@ -429,7 +429,7 @@ const DealerDetails = () => {
         title: item.ad_title ?? item.title ?? "-",
         location: item.location ?? "-",
         status: item.status ?? item.approval ?? "-",
-        date: item.created_at ? item.created_at.split(" ").slice(0, 4).join(" ") : "-",
+        date: item.created_at ? item.created_at.split(" ").slice(1, 4).join(" ") : "-",
         price: item.price ? Number(item.price).toLocaleString() : "-",
         _raw: item,
       }));
@@ -781,7 +781,7 @@ const cards = [
                 <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
                   Registered Since
                 </strong>
-                <span>{dealerData.created_at ? dealerData.created_at.split(" ").slice(0, 4).join(" ") : "N/A"}</span>
+                <span>{dealerData.created_at ? dealerData.created_at.split(" ").slice(1, 4).join(" ") : "N/A"}</span>
               </div>
             </Col>
 
@@ -795,7 +795,7 @@ const cards = [
                 </div>
 
                 <div style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>Verification Submitted On</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{dealerData.created_at ? dealerData.created_at.split(" ").slice(0, 4).join(" ") : "N/A"}</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{dealerData.created_at ? dealerData.created_at.split(" ").slice(1, 4).join(" ") : "N/A"}</div>
               </div>
             </Col>
           </Row>

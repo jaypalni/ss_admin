@@ -61,7 +61,7 @@ const Individual = () => {
             fullname: (u.full_name || "").trim() || "-",
             emailaddress: u.email || "-",
             phone: u.phone_number || "-",
-            registered: u.registered_since || "-",
+            registered:  u.registered_since ? u.registered_since.split(" ").slice(1, 4).join(" ") : "-",
             listings: typeof u.no_of_listings !== "undefined" ? u.no_of_listings : "-",
             status: u.status ? String(u.status).toLowerCase() : "-",
             raw: u,
