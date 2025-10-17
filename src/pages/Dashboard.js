@@ -10,6 +10,7 @@ import openIcon from "../assets/images/support_dash.svg";
 import soldIcon from "../assets/images/sold_dash.svg";
 import "../assets/styles/dashboard.css";
 import { userAPI } from "../services/api"; 
+import { handleApiError } from "../utils/apiUtils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -32,27 +33,16 @@ const Dashboard = () => {
     return res?.data ? res : null;
   };
 
-  const handleApiError = (err) => {
-    return (
-      err?.response?.data?.message ||
-      err?.message ||
-      "Something went wrong while fetching dashboard"
-    );
-  };
-
   const dashboardcounts = async () => {
     try {
       setLoading(true);
       const response = await userAPI.dashboardstats(); 
       const resData = response?.data ?? response; 
-      if (!resData || resData.status_code !== 200) {
-        const msg = resData?.message || "Failed to fetch dashboard stats";
-        messageApi.open({ type: "error", content: msg });
-        setDashboardData(null);
-        return;
-      }
 
-      const d = resData.data || {};
+      if (resData.status_code === 200) {
+        const msg = resData?.message || "Failed to fetch dashboard stats";
+        //messageApi.open({ type: "error", content: msg });
+       const d = resData.data || {};
 
       const mapped = [
         {
@@ -142,10 +132,27 @@ const Dashboard = () => {
       ];
 
       setDashboardData(mapped);
+      }else if (resData.status_code === 401){
+        const msg = resData?.message || "Invalid or expired session";
+        messageApi.open({ type: "error", content: msg });
+        navigate("/");
+        setDashboardData(null);
+        return;
+      }
     } catch (error) {
-      const errorData = handleApiError(error);
-      messageApi.open({ type: "error", content: errorData });
+     const status = error?.response?.status;
+    const serverMessage = error?.response?.data?.message;
+
+    if (status === 401 || serverMessage === "Invalid or expired session") {
+      const toast = serverMessage || "Session expired. Please login again.";
+      messageApi.open({ type: "error", content: toast });
+      navigate("/");
       setDashboardData(null);
+    } else {
+      const errorMessage = handleApiError(error);
+      messageApi.open({ type: "error", content: errorMessage });
+      setDashboardData(null);
+    }
     } finally {
       setLoading(false);
     }
