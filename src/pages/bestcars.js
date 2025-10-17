@@ -14,6 +14,7 @@ import {
   Tooltip,
   Checkbox,
   Modal,
+  Spin
 } from "antd";
 import "../assets/styles/bestcars.css";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -478,9 +479,10 @@ useEffect(() => {
         }}
       >
         <div style={{ width: "90%", margin: "0 auto", padding: 0 }}>
-          <div style={{ marginTop: 8 }}>
+          <Spin spinning={loading} tip="">
+            <div style={{ marginTop: 8 }}>
             {displayedCars.length === 0 ? (
-              <div style={{ padding: 24, textAlign: "center", color: "#6B7280" }}>No data found</div>
+              <div style={{ padding: 24, textAlign: "center", color: "#6B7280" }}>{loading ? "Loading vehicles..." : "No data found"}</div>
             ) : (
               displayedCars.map((car) => (
                 <Card
@@ -565,6 +567,7 @@ useEffect(() => {
               </>
             )}
           </div>
+          </Spin>
         </div>
       </div>
     </div>
