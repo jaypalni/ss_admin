@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import activeIcon from "../assets/images/active-icon.png"; 
 import pendingIcon from "../assets/images/pending-icon.png";
 import soldIcon from "../assets/images/sold-icon.png";
@@ -9,20 +9,11 @@ import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 import { message, Spin, Tooltip } from "antd";
 
 function AllCarsDashboard() {
+  const didMountRef = useRef(false);
   const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
 
-  useEffect(() => {
-  
-  dashboardcounts();
-
-  const interval = setInterval(() => {
-    dashboardcounts();
-  }, 15 * 60 * 1000);
-
-  return () => clearInterval(interval);
-}, []);
 
   const dashboardcounts = async () => {
     try {
@@ -36,17 +27,33 @@ function AllCarsDashboard() {
 
     } catch (error) {
       const errorData = handleApiError(error);
-      messageApi.open({ type: "error", content: errorData });
+                 messageApi.open({
+                 type: "error",
+                 content: errorData?.message || errorData?.message || "Error exporting dealers",
+               });
+               setLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+  if (didMountRef.current) return;
+  didMountRef.current = true;
+  dashboardcounts();
+
+  const interval = setInterval(() => {
+    dashboardcounts();
+  }, 15 * 60 * 1000);
+
+  return () => clearInterval(interval);
+}, []);
+
   if (loading || !dashboardData) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>
         {contextHolder}
-        <Spin size="large" />
+        {/* <Spin size="large" /> */}
       </div>
     );
   }
@@ -124,10 +131,9 @@ function AllCarsDashboard() {
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              maxWidth: '150px', // adjust width based on your card
+              maxWidth: '150px',
               cursor: 'pointer',
               margin: 0,
-            //   marginTop: "-12px",
             }}
           >
             {dashboardData.model_name}

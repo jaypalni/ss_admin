@@ -26,6 +26,7 @@ const Individual = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [debouncedSearch, setDebouncedSearch] = useState(searchValue);
 
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -34,6 +35,7 @@ const Individual = () => {
 
   const debounceRef = useRef(null);
   const DEBOUNCE_MS = 500;
+  
 
   const statusToApiFilter = (status) => {
     if (!status || status === "All Status") return undefined;
@@ -92,8 +94,8 @@ const Individual = () => {
 
   useEffect(() => {
     const apiFilter = statusToApiFilter(statusFilter);
-    fetchUsers({ page, limit, filter: apiFilter, search: searchValue });
-  }, [statusFilter, page, limit]);
+    fetchUsers({ page, limit, filter: apiFilter, search: debouncedSearch  });
+  }, [statusFilter, page, limit,debouncedSearch ]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

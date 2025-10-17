@@ -12,7 +12,7 @@ export const formatDateTime = (dateStr) => {
   const pad = (n) => (n < 10 ? `0${n}` : n);
 
   const year = d.getFullYear();
-  const month = pad(d.getMonth() + 1); 
+  const month = pad(d.getMonth() + 1); // months are 0-indexed
   const day = pad(d.getDate());
   const hours = pad(d.getHours());
   const minutes = pad(d.getMinutes());

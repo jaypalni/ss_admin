@@ -17,6 +17,7 @@ import lock from "../assets/images/Lock.svg";
 import bluelogo_icon2 from "../assets/images/Frame.svg";
 import { loginApi } from "../services/api";
 import PropTypes from "prop-types";
+import { handleApiError } from "../utils/apiUtils";
 
 
 const validatePasswordRequirements = (password) => {
@@ -160,8 +161,11 @@ const ChangePassword = () => {
         });
       }
     } catch (err) {
-      console.error("updatePassword error", err);
-      messageApi.open({ type: "error", content: err?.message || "Network error" });
+      const errorMessage = handleApiError(err);
+            messageApi.open({
+            type: "error",
+            content: errorMessage?.message || "Error exporting dealers",
+          });
     } finally {
       setLoading(false);
     }

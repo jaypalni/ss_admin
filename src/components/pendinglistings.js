@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { Input, Select, DatePicker, Table, Card, Row, Col, message } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 const { Option } = Select;
 
 const PendingListings = () => {
+  const didMountRef = useRef(false);
   const [searchValue, setSearchValue] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [sellerType, setSellerType] = useState("");
@@ -31,7 +32,6 @@ const PendingListings = () => {
     fetchPendingListings(paginationInfo.current, paginationInfo.pageSize);
   };
 
-  // Fetch locations dynamically
   const fetchRegion = async () => {
     try {
       setLoading(true);
@@ -47,19 +47,20 @@ const PendingListings = () => {
       setCarLocation(data1.data);
     } catch (error) {
       const errorData = handleApiError(error);
-      message.error(errorData.message || "Failed to fetch location data");
+            messageApi.open({
+            type: "error",
+            content: errorData?.message || errorData?.message || "Error exporting dealers",
+          });
       setCarLocation([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch pending listings
   const fetchPendingListings = async (page = 1, limit = 10) => {
     try {
       setLoading(true);
 
-      // prefer optional chaining + nullish coalescing
       const normalizedFilter = statusFilter?.toString().toLowerCase() ?? "";
 
       const body = {
@@ -138,6 +139,8 @@ const PendingListings = () => {
   };
 
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
     fetchPendingListings(1, pagination.pageSize);
     fetchRegion();
   }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);

@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { PlusOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Row, Col, Input, Modal, Popconfirm, message } from "antd";
 import editIcon from "../assets/images/edit.svg";
 import { FaTrash } from "react-icons/fa";
 import { loginApi } from "../services/api";
+import { handleApiError } from "../utils/apiUtils";
+
 
 export default function FQA({ dealerData }) {
+  const didMountRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -15,7 +18,9 @@ export default function FQA({ dealerData }) {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    fetchFAQ();
+  if (didMountRef.current) return;
+  didMountRef.current = true;
+  fetchFAQ();
   }, []);
 
   const fetchFAQ = async () => {
@@ -29,11 +34,11 @@ export default function FQA({ dealerData }) {
         messageApi.error(data?.message || "Failed to fetch Q&A");
       }
     } catch (err) {
-      const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Something went wrong while fetching Q&A";
-      messageApi.error(errorMessage);
+      const errorMessage = handleApiError(err);
+      messageApi.open({
+      type: "error",
+      content: errorMessage?.error || "Error exporting dealers",
+    });
     } finally {
       setLoading(false);
     }

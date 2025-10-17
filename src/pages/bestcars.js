@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginApi, userAPI } from "../services/api";
 import { Row, Col } from "react-bootstrap";
@@ -128,6 +128,7 @@ const isApiResponseSuccessful = (data) => {
 };
 
 function BestCars() {
+  const didMountRef = useRef(false);
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   const [makeFilter, setMakeFilter] = useState("");
@@ -304,11 +305,15 @@ useEffect(() => {
   };
 
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
     fetchMakeData();
     fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
   }, []);
 
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
     setPagination((p) => ({ ...p, current: 1 }));
     fetchBestCarsData(1, pagination.pageSize, { make: makeFilter, search: searchValue });
   }, [makeFilter, searchValue]);

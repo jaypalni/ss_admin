@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import {
   Empty,
   message,
@@ -196,6 +196,7 @@ const PackageCard = ({ item, isBoost = false }) => {
 };
 
 const Pricing = () => {
+  const didMountRef = useRef(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -218,6 +219,8 @@ const Pricing = () => {
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
     fetchAdminData();
   }, []);
 

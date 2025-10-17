@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import PropTypes from "prop-types";
 import "../assets/styles/otp.css";
 import { useNavigate } from "react-router-dom";
@@ -60,6 +60,7 @@ ActionButtons.propTypes = {
 };
 
 const GetAdminsData = () => {
+   const didMountRef = useRef(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -81,6 +82,8 @@ const GetAdminsData = () => {
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
    fetchAdminData(pagination.current, pagination.pageSize);
   }, []);
 
@@ -122,7 +125,6 @@ const GetAdminsData = () => {
     setLoading(false);
   }
 };
-
 
   const handleDelete = async (id) => {
     try {

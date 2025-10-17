@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Spin, Empty, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -10,9 +10,10 @@ import openIcon from "../assets/images/support_dash.svg";
 import soldIcon from "../assets/images/sold_dash.svg";
 import "../assets/styles/dashboard.css";
 import { userAPI } from "../services/api"; 
-import { handleApiError } from "../utils/apiUtils";
+import { handleApiError,handleApiResponse } from "../utils/apiUtils";
 
 const Dashboard = () => {
+  const didMountRef = useRef(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
@@ -26,23 +27,19 @@ const Dashboard = () => {
   }, [isLoggedIn]);
 
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
     dashboardcounts();
   }, []);
 
-  const handleApiResponse = (res) => {
-    return res?.data ? res : null;
-  };
-
   const dashboardcounts = async () => {
-    try {
-      setLoading(true);
-      const response = await userAPI.dashboardstats(); 
-      const resData = response?.data ?? response; 
+  try {
+    setLoading(true);
+    const response = await userAPI.dashboardstats(); 
+    const data = handleApiResponse(response);
 
-      if (resData.status_code === 200) {
-        const msg = resData?.message || "Failed to fetch dashboard stats";
-        //messageApi.open({ type: "error", content: msg });
-       const d = resData.data || {};
+    if (data?.data) {
+      const d = data.data;
 
       const mapped = [
         {
@@ -61,8 +58,7 @@ const Dashboard = () => {
         {
           id: "cars_sold",
           subtitle: "Cars Sold",
-          priceLabel:
-            d.car_sold_this_week?.total,
+          priceLabel: d.car_sold_this_week?.total,
           priceValue: d.car_sold_this_week?.percentage_change ?? "+0%",
           detail: "Manual Updates",
           midRight: d.car_sold_this_week?.system_updates ?? 0,
@@ -76,16 +72,11 @@ const Dashboard = () => {
           id: "pending_approval",
           subtitle: "Pending Approval",
           priceLabel: d.listings_pending_approval ?? 0,
-          priceValue:
-            d.listings_pending_approval_breakdown?.percentage_change ??
-            d.listings_pending_approval_breakdown?.percentage_change ??
-            "+0%",
+          priceValue: d.listings_pending_approval_breakdown?.percentage_change ?? "+0%",
           detail: "New Listings",
-          midRight:
-            d.listings_pending_approval_breakdown?.new_listings ?? 0,
+          midRight: d.listings_pending_approval_breakdown?.new_listings ?? 0,
           footerLeft: "Modified Listings",
-          footerRight:
-            d.listings_pending_approval_breakdown?.modified_listings ?? 0,
+          footerRight: d.listings_pending_approval_breakdown?.modified_listings ?? 0,
           statusText: "Pending",
           statusBg: "#FEF9C3",
           statusColor: "#CA8A04",
@@ -132,30 +123,18 @@ const Dashboard = () => {
       ];
 
       setDashboardData(mapped);
-      }else if (resData.status_code === 401){
-        const msg = resData?.message || "Invalid or expired session";
-        messageApi.open({ type: "error", content: msg });
-        navigate("/");
-        setDashboardData(null);
-        return;
-      }
-    } catch (error) {
-     const status = error?.response?.status;
-    const serverMessage = error?.response?.data?.message;
+    }
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.open({
+      type: "error",
+      content: errorData.message || "Something went wrong",
+    });
 
-    if (status === 401 || serverMessage === "Invalid or expired session") {
-      const toast = serverMessage || "Session expired. Please login again.";
-      messageApi.open({ type: "error", content: toast });
-      navigate("/");
-      setDashboardData(null);
-    } else {
-      const errorMessage = handleApiError(error);
-      messageApi.open({ type: "error", content: errorMessage });
-      setDashboardData(null);
-    }
-    } finally {
-      setLoading(false);
-    }
+    setDashboardData(null);
+  } finally {
+    setLoading(false);
+  }
   };
 
   const getCardIcon = (subtitle) => {
