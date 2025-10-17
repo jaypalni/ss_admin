@@ -278,7 +278,7 @@ const Dealer = () => {
             <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 200, marginRight: 8 }}>
               <Option value="all">All</Option>
               <Option value="active">Active</Option>
-              <Option value="pending">Pending</Option>
+              <Option value="pending verification">Pending</Option>
               <Option value="banned">Banned</Option>
               <Option value="flagged">Flagged</Option>
               {/* <Option value="Info Requested">Info Requested</Option> */}
