@@ -24,6 +24,7 @@ import {
   FaDollarSign,
   FaStar,
   FaCarAlt,
+  FaFileContract, FaUserShield
 } from "react-icons/fa";
 import { Breadcrumb} from "antd";
 import { BiSupport } from "react-icons/bi";
@@ -174,6 +175,29 @@ function AppLayout({ children }) {
       
     ],
   },
+   {
+      key: "/content",
+      icon: <FaFileContract />,
+      label: "Content",
+      hasDropdown: true,
+      children: [
+      {
+        key: "/FAQ'S", 
+        label: "FAQ Management",
+         icon: <QuestionCircleOutlined  />
+      },
+      {
+        key: "/terms&conditions", 
+        label: "Terms & Conditions",
+         icon: <FaFileContract   />
+      },
+      {
+        key: "/privacyPolicy", 
+        label: "Privacy Policy",
+         icon: <FaUserShield  />
+      },
+    ],
+    },
     {
       key: "/support",
       icon: <BiSupport />,
@@ -189,11 +213,6 @@ function AppLayout({ children }) {
         key: "/accountsettings/changepassword", 
         label: "Change Password",
          icon: <LockOutlined/>
-      },
-      {
-        key: "/FAQ'S", 
-        label: "FAQ'S",
-         icon: <QuestionCircleOutlined  />
       },
     ],
     },
@@ -282,8 +301,16 @@ function AppLayout({ children }) {
     tagline: "Manage your password and security settings",
   },
    "/FAQ'S": {
-    title: "FAQ'S",
-    tagline: "",
+    title: "FAQ Management",
+    tagline: "Content / FAQ Management",
+  },
+   "/terms&conditions": {
+    title: "Terms & Conditions Management",
+    tagline: "Manage and update your Terms & Conditions content",
+  },
+   "/privacyPolicy": {
+    title: "Privacy Policy Management",
+    tagline: "Manage and update your privacy policy content",
   },
  };
 

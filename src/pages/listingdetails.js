@@ -317,8 +317,6 @@ const getReasonRejection = async () => {
   }
 };
 
-// Car Details Api
-
 useEffect(() => {
   if (!listingId || fetchCalled.current) return;
 

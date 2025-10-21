@@ -19,27 +19,14 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-useEffect(() => {
-  // Disable browser back button
-  const handlePopState = () => {
-    window.history.pushState(null, "", window.location.href);
-  };
-
-  // Push a new state so back button won’t go back
-  window.history.pushState(null, "", window.location.href);
-  window.addEventListener("popstate", handlePopState);
-
-  return () => {
-    window.removeEventListener("popstate", handlePopState);
-  };
-}, []);
-
 
   const handleLogin = (e) => {
+    // Prevent default form submission behavior
     if (e) {
       e.preventDefault();
     }
-
+    
+    console.log("handleLogin called");
     let hasError = false;
     setEmailErrorMsg("");
     setPasswordErrorMsg("");
@@ -61,52 +48,41 @@ useEffect(() => {
      userloginAPI(body); 
   };
 
-const userloginAPI = async (body) => {
-  try {
-    setLoading(true);
-    const response = await loginApi.login(body);
-    const userData = response?.data;
-
-    if (userData?.status_code === 200) {
-      messageApi.open({ 
-        type: 'success', 
-        content: userData.message || 'Login successful!' 
-      });
-
-      dispatch(loginSuccess(
-        userData?.data?.firstname,
-        userData?.data?.access_token,
-        userData?.data?.email,
-        userData?.data?.role,
-        userData?.data?.needs_password_update
-      ));
-
-      if (userData?.data?.needs_password_update === 1) {
-        navigate("/CreatePassword");
+  const userloginAPI = async (body) => {
+    try {
+      const response = await loginApi.login(body);
+      const userData = response.data;
+      console.log('userdata',userData)
+      if (userData.status_code === 200) {
+        messageApi.open({ 
+          type: 'success', 
+          content: userData.message || 'Login successful!' 
+        });
+        dispatch(loginSuccess(userData?.data?.firstname, userData?.data?.access_token,
+           userData?.data?.email,userData?.data?.role,userData?.data?.needs_password_update));
+        setLoading(false);
+        
+        if (userData?.data?.needs_password_update === 1) {
+          navigate("/CreatePassword");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
-        navigate("/dashboard");
+        messageApi.open({ 
+          type: 'error', 
+          content: userData.error || userData.message || 'Login failed. Please try again.' 
+        });
+        setLoading(false);
       }
-    } else {
-      // Handles 401 or other non-200 responses
-      const errorMsg = userData?.message || 'Email or password is incorrect';
-      messageApi.open({
-        type: 'error',
-        content: errorMsg,
+    } catch (error) {
+      console.error("Error during login", error);
+      messageApi.open({ 
+        type: 'error', 
+       content: (error?.response?.data?.message) || error.message || "Network error",
       });
+      setLoading(false);
     }
-  } catch (error) {
-    const errorMsg = error?.response?.data?.message 
-                     || error?.message 
-                     || 'Network error. Please check your connection.';
-    messageApi.open({
-      type: 'error',
-      content: errorMsg,
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="login-page-wrapper1">

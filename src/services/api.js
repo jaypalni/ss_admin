@@ -73,7 +73,7 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          Navigate("/")
+          //Navigate("/")
           break;
         case 403:
           console.error("Access forbidden");
@@ -138,8 +138,6 @@ export const userAPI = {
     carBestPick: (id,pick) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_BEST_PICK(id,pick)),
     carApprove: (id) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_APPROVE(id)),
     carRejected: (id,body) => api.put(API_CONFIG.ENDPOINTS.USER.CAR_REJECTED(id),body),
-    getCarByIdDetails: (id) =>
-    api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)),
 
     // New API's
     regionslist: () =>

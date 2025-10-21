@@ -139,8 +139,6 @@ const PendingListings = () => {
   };
 
   useEffect(() => {
-    if (didMountRef.current) return;
-    didMountRef.current = true;
     fetchPendingListings(1, pagination.pageSize);
     fetchRegion();
   }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);

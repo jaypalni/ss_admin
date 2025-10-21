@@ -56,7 +56,10 @@ const ForgotPassword = () => {
         dispatch(setEmailLogin(email));
         messageApi.open({ type: "success", content: userData.message });
         setIsOtpSent(true);
-        navigate("/OtpScreen");
+        setTimeout(() => {
+           navigate("/OtpScreen");
+        }, 1000);
+       
       } else {
         messageApi.open({
           type: "error",

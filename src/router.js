@@ -41,6 +41,8 @@ import CreateNewSubscription from "./pages/CreateNewSubscription";
 import TranscationsFin from "./pages/TranscationsFin";
 import DealerDetails from "./pages/DealerDetails";
 import FQA from "./pages/FQA";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 
 const AppRouter = () => {
@@ -294,6 +296,30 @@ const AppRouter = () => {
           element={
             <AppLayout>
               <FQA />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/FAQ'S"
+          element={
+            <AppLayout>
+              <FQA />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/terms&conditions"
+          element={
+            <AppLayout>
+              <TermsAndConditions />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/privacyPolicy"
+          element={
+            <AppLayout>
+              <PrivacyPolicy />
             </AppLayout>
           }
         />
