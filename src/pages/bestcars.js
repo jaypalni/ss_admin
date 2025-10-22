@@ -164,19 +164,32 @@ function BestCars() {
     return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
   };
 
+const isMountedRef = useRef(true);
+useEffect(() => {
+  return () => { isMountedRef.current = false; };
+}, []);
+
 const handleHeaderCheckboxChange = (e) => {
-    const checked = e.target.checked;
+  e.stopPropagation?.();
+  const checked = !!e.target.checked;
+  console.log("header checkbox clicked, checked:", checked, "cars.length:", cars.length);
+  console.log("Modal.confirm exists?:", !!Modal?.confirm);
 
-    if (cars.length === 0) return;
+  if (!cars || cars.length === 0) {
+    console.warn("No cars available — skipping confirm");
+    return;
+  }
 
+  const prevChecked = headerChecked;
+
+  try {
     Modal.confirm({
       title: "Confirm",
-      content: checked
-        ? "Do you want to select all cars?"
-        : "Do you want to deselect all cars?",
+      content: checked ? "Do you want to select all cars?" : "Do you want to deselect all cars?",
       okText: "Yes",
       cancelText: "No",
       onOk() {
+        if (!isMountedRef.current) return;
         if (checked) {
           setSelectedIds(cars.map((c) => c.id));
         } else {
@@ -185,10 +198,27 @@ const handleHeaderCheckboxChange = (e) => {
         setHeaderChecked(checked);
       },
       onCancel() {
-        setHeaderChecked((prev) => !prev);
+        Promise.resolve().then(() => {
+          if (!isMountedRef.current) return;
+          setHeaderChecked(prevChecked);
+        });
       },
     });
-  };
+  } catch (err) {
+    console.error("Modal.confirm threw:", err);
+    // fallback confirm
+    const ok = window.confirm(checked ? "Select all cars?" : "Deselect all cars?");
+    if (!isMountedRef.current) return;
+    if (ok) {
+      if (checked) setSelectedIds(cars.map((c) => c.id));
+      else setSelectedIds([]);
+      setHeaderChecked(checked);
+    } else {
+      setHeaderChecked(prevChecked);
+    }
+  }
+};
+
 
 useEffect(() => {
   if (selectedIds.length === cars.length && cars.length > 0) {
@@ -305,15 +335,11 @@ useEffect(() => {
   };
 
   useEffect(() => {
-    if (didMountRef.current) return;
-    didMountRef.current = true;
     fetchMakeData();
     fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
   }, []);
 
   useEffect(() => {
-    if (didMountRef.current) return;
-    didMountRef.current = true;
     setPagination((p) => ({ ...p, current: 1 }));
     fetchBestCarsData(1, pagination.pageSize, { make: makeFilter, search: searchValue });
   }, [makeFilter, searchValue]);
@@ -377,14 +403,6 @@ useEffect(() => {
       }
     });
   };
-
-   useEffect(() => {
-    if (selectedIds.length === cars.length && cars.length > 0) {
-      setHeaderChecked(true);
-    } else {
-      setHeaderChecked(false);
-    }
-  }, [selectedIds, cars]);
 
   const displayedCars = cars;
 
