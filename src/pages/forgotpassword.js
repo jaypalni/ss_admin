@@ -10,6 +10,8 @@ import arrow_icon1 from "../assets/images/arrow.svg";
 import bluelogo_icon1 from "../assets/images/message.svg";
 import { useDispatch } from "react-redux";
 import { setEmailLogin } from "../redux/actions/authActions";
+import {handleApiResponse,handleApiError} from "../utils/apiUtils"
+
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -47,8 +49,7 @@ const ForgotPassword = () => {
     try {
       console.log("Calling forgotpassword API with", body);
       const response = await loginApi.forgotpassword(body);
-      console.log("forgotpassword response", response);
-      const userData = response.data;
+      const userData = handleApiResponse(response);
 
       if (userData.status_code === 200) {
         localStorage.setItem("fromLogin", "true");
@@ -67,11 +68,11 @@ const ForgotPassword = () => {
         });
       }
     } catch (error) {
-      console.error("Error during forgot API call:", error);
-      messageApi.open({
-        type: "error",
-        content: (error?.response?.data?.message) || error.message || "Network error",
-      });
+     const errorData = handleApiError(error);
+                 messageApi.open({
+                   type: "error",
+                   content: errorData?.error || "Error fetching users",
+                 });
     }
   };
 

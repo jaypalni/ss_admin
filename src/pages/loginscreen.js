@@ -9,6 +9,8 @@ import { useDispatch } from "react-redux";
 import { loginApi } from "../services/api";
 import { loginSuccess } from "../redux/actions/authActions";
 import { encryptData, decryptData } from "../utils/CryptoJS";
+import {handleApiResponse,handleApiError} from "../utils/apiUtils"
+
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -51,7 +53,7 @@ const LoginScreen = () => {
   const userloginAPI = async (body) => {
     try {
       const response = await loginApi.login(body);
-      const userData = response.data;
+      const userData = handleApiResponse(response);
       console.log('userdata',userData)
       if (userData.status_code === 200) {
         messageApi.open({ 
@@ -75,11 +77,11 @@ const LoginScreen = () => {
         setLoading(false);
       }
     } catch (error) {
-      console.error("Error during login", error);
-      messageApi.open({ 
-        type: 'error', 
-       content: (error?.response?.data?.message) || error.message || "Network error",
-      });
+      const errorData = handleApiError(error);
+            messageApi.open({
+              type: "error",
+              content: errorData?.error || "Error fetching users",
+            });
       setLoading(false);
     }
   };

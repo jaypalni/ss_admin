@@ -10,6 +10,8 @@ import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { encryptData, decryptData } from "../utils/CryptoJS";
+import {handleApiError} from "../utils/apiUtils"
+
 
 const validatePasswordRequirements = (password) => {
   return {
@@ -56,8 +58,11 @@ const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate
       setLoading(false);
     }
   } catch (error) {
-    console.error("Error during password update", error);
-    messageApi.open({ type: "error", content: error?.message});;
+   const errorData = handleApiError(error);
+                 messageApi.open({
+                   type: "error",
+                   content: errorData?.error || "Error fetching users",
+                 });
     setLoading(false);
   }
 };

@@ -20,7 +20,6 @@ import PropTypes from "prop-types";
 import { handleApiError } from "../utils/apiUtils";
 import { encryptData, decryptData } from "../utils/CryptoJS";
 
-
 const validatePasswordRequirements = (password) => {
   const allowedSpecial = "@#$%&";
   const hasAllowedSpecial = new RegExp(`[${allowedSpecial}]`).test(password);

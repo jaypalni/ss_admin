@@ -18,6 +18,7 @@ import "../assets/styles/otp.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { loginApi } from "../services/api";
 import { useSelector } from 'react-redux';
+import {handleApiResponse,handleApiError} from "../utils/apiUtils"
 
 const { Option } = Select;
 
@@ -111,7 +112,7 @@ useEffect(() => {
 
       if (isEdit) {
         const res = await loginApi.admindata(id, body1);
-        const resData = res?.data;
+        const resData =  handleApiResponse(res?.data);;
         if (resData?.status_code === 200) {
           messageApi.success(resData.message || "Admin updated successfully");
           navigate("/Admins");
@@ -131,13 +132,11 @@ useEffect(() => {
         }
       }
     } catch (err) {
-      console.error("Submit error:", err);
-      messageApi.error(
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Something went wrong"
-      );
+     const errorData = handleApiError(err);
+                 messageApi.open({
+                   type: "error",
+                   content: errorData?.error || "Error fetching users",
+                 });
     } finally {
       setLoading(false);
     }
@@ -171,7 +170,7 @@ useEffect(() => {
       rules={[
         { required: true, message: "First name is required" },
         {
-          pattern: /^[A-Za-z]+$/,
+          pattern: /^[A-Za-z\s]+$/,
           message: "First name cannot contain numbers or special characters.",
         },
       ]}
@@ -191,7 +190,7 @@ useEffect(() => {
       rules={[
         { required: true, message: "Last name is required" },
         {
-          pattern: /^[A-Za-z]+$/,
+          pattern: /^[A-Za-z\s]+$/,
           message: "Last name cannot contain numbers or special characters.",
         },
       ]}
@@ -203,7 +202,7 @@ useEffect(() => {
       />
     </Form.Item>
   </Col>
-</Row>
+          </Row>
 
 
           <Row gutter={16}>

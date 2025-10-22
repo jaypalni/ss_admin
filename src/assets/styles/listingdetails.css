@@ -12,6 +12,16 @@
 }
 
 
+.ant-modal {
+  z-index: 12000 !important;
+}
+.ant-modal-root {
+  z-index: 12000 !important;
+}
+.ant-modal-mask {
+  z-index: 11999 !important;
+}
+
 .top-bar {
   display: flex;
   justify-content: space-between;

@@ -9,6 +9,8 @@ import bluelogo_icon1 from "../assets/images/black_arrow.svg";
 import bluelogo_icon2 from "../assets/images/Frame.svg";
 import { loginApi } from "../services/api";
 import { setResetLogin } from "../redux/actions/authActions";
+import {handleApiResponse,handleApiError} from "../utils/apiUtils"
+
 
 const OtpScreen = () => {
   const dispatch = useDispatch();
@@ -93,7 +95,7 @@ const OtpScreen = () => {
     setLoading(true);
     try {
       const response = await loginApi.verifyotp(body);
-      const userData = response.data;
+      const userData = handleApiResponse(response);
 
       if (userData.status_code === 200) {
         dispatch(setResetLogin(userData.reset_token));
@@ -108,11 +110,11 @@ const OtpScreen = () => {
       }
     } catch (error) {
       setLoading(false);
-      console.error("Error during OTP verification:", error);
-      messageApi.open({
-        type: "error",
-        content: (error?.response?.data?.message) || error.message || "Network error",
-      });
+      const errorData = handleApiError(error);
+                 messageApi.open({
+                   type: "error",
+                   content: errorData?.error || "Error fetching users",
+                 });
     }
   };
 

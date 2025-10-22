@@ -42,6 +42,7 @@ export const attachStore = (store) => {
 // Add request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
+     if (config?.skipAuth) return config;
     const token = reduxStore?.getState?.().auth?.token ?? null;
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -152,7 +153,7 @@ export const userAPI = {
       api.get(API_CONFIG.ENDPOINTS.USER.DASHBOARD_STATS),
     pendingcars: (body, page = 1, limit = 10) => 
   api.post(API_CONFIG.ENDPOINTS.USER.PENDING_CARS(page, limit), body),
-    getCarById: (id) => api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id)),
+    getCarById: (id) => api.get(API_CONFIG.ENDPOINTS.USER.GET_BY_ID(id),{ skipAuth: true }),
     approvecar: (body) => 
   api.post(API_CONFIG.ENDPOINTS.USER.APPORVE_CAR, body),
     rejectcar: (body) => 
