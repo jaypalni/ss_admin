@@ -52,7 +52,7 @@ const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate
     if (userData.status_code === 200) {
       messageApi.open({ type: 'success', content: userData.message });
       setLoading(false);
-      navigate("/dashboard");
+      navigate("/");
     } else {
       messageApi.open({ type: 'error', content: userData.error });
       setLoading(false);
