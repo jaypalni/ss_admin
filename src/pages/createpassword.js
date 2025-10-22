@@ -9,6 +9,7 @@ import bluelogo_icon from "../assets/images/car.svg";
 import { loginApi } from "../services/api";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
+import { encryptData, decryptData } from "../utils/CryptoJS";
 
 const validatePasswordRequirements = (password) => {
   return {
@@ -153,12 +154,14 @@ const CreatePassword = () => {
     }
 
     setLoading(true);
+
+    const encryptedPassword = encryptData(newPassword);
     
     if (need_password === 1) {
-      const body = { email: email, new_password: newPassword };
+      const body = { email: email, new_password: encryptedPassword };
       handleApiResponse(loginApi.createnewpassword, body, messageApi, setLoading, navigate);
     } else {
-      const body = { new_password: newPassword };
+      const body = { new_password: encryptedPassword };
       handleApiResponse(loginApi.resetpassword, body, messageApi, setLoading, navigate);
     }
   };

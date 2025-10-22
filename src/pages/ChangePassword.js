@@ -18,6 +18,7 @@ import bluelogo_icon2 from "../assets/images/Frame.svg";
 import { loginApi } from "../services/api";
 import PropTypes from "prop-types";
 import { handleApiError } from "../utils/apiUtils";
+import { encryptData, decryptData } from "../utils/CryptoJS";
 
 
 const validatePasswordRequirements = (password) => {
@@ -137,9 +138,11 @@ const ChangePassword = () => {
       return;
     }
 
+    const encryptedPassword = encryptData(currentPassword);
+    const encryptedPassword1 = encryptData(newPassword);
     const body = {
-      current_password: currentPassword,
-      new_password: newPassword,
+      current_password: encryptedPassword,
+      new_password: encryptedPassword1,
     };
 
     setLoading(true);

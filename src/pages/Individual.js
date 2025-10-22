@@ -93,20 +93,25 @@ const Individual = () => {
   };
 
   useEffect(() => {
+  if (debounceRef.current) clearTimeout(debounceRef.current);
+  debounceRef.current = setTimeout(() => {
     const apiFilter = statusToApiFilter(statusFilter);
-    fetchUsers({ page, limit, filter: apiFilter, search: debouncedSearch  });
-  }, [statusFilter, page, limit,debouncedSearch ]);
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      const apiFilter = statusToApiFilter(statusFilter);
-      setPage(1); 
-      fetchUsers({ page: 1, limit, filter: apiFilter, search: searchValue });
-    }, DEBOUNCE_MS);
+    const fetchPage = page;
+    const resetPage = searchValue !== debouncedSearch ? 1 : fetchPage;
 
-    return () => clearTimeout(debounceRef.current);
-  }, [searchValue]);
+    setPage(resetPage);
+
+    fetchUsers({
+      page: resetPage,
+      limit,
+      filter: apiFilter,
+      search: searchValue,
+    });
+  }, DEBOUNCE_MS);
+  return () => clearTimeout(debounceRef.current);
+}, [statusFilter, page, limit, searchValue]);
+
 
     const reporteduser = async (id) => {
         try {

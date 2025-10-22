@@ -15,6 +15,7 @@ import "../assets/styles/individualdetails.css";
 import avatarFallback from "../assets/images/icon_img.svg";
 import { loginApi } from "../services/api";
 import premimum_d from "../assets/images/premimum_d.svg";
+import {handleApiResponse,handleApiError} from "../utils/apiUtils"
 
 const { Option } = Select;
 
@@ -68,7 +69,7 @@ const Individualdetails = () => {
       };
 
       const res = await loginApi.getallusersid(individualId, body);
-      const payload = res?.data?.data ?? res?.data;
+      const payload = handleApiResponse(res.data);
 
       if (!payload) {
         messageApi.error(res?.data?.message || "Failed to fetch user details");

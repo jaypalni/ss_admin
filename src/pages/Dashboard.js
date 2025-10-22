@@ -32,13 +32,18 @@ const Dashboard = () => {
     dashboardcounts();
   }, []);
 
-  const dashboardcounts = async () => {
+ const dashboardcounts = async () => {
   try {
     setLoading(true);
     const response = await userAPI.dashboardstats(); 
     const data = handleApiResponse(response);
 
-    if (data?.data) {
+    if (data?.status_code === 401) {
+      navigate("/");
+      return;
+    }
+
+    if (data?.status_code === 200 && data?.data) {
       const d = data.data;
 
       const mapped = [
@@ -123,9 +128,18 @@ const Dashboard = () => {
       ];
 
       setDashboardData(mapped);
+    } else {
+      setDashboardData(null);
     }
+
   } catch (error) {
     const errorData = handleApiError(error);
+
+    if (errorData?.status_code === 401) {
+      navigate("/");
+      return;
+    }
+
     messageApi.open({
       type: "error",
       content: errorData.message || "Something went wrong",
@@ -135,7 +149,7 @@ const Dashboard = () => {
   } finally {
     setLoading(false);
   }
-  };
+};
 
   const getCardIcon = (subtitle) => {
     switch (subtitle) {

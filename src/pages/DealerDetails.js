@@ -35,6 +35,7 @@ import info_d from "../assets/images/info_d.svg";
 import ban_d from "../assets/images/ban_d.svg";
 import reject_d from "../assets/images/reject_d.svg";
 import flag_d from "../assets/images/flag_d.svg";
+import {handleApiResponse,handleApiError} from "../utils/apiUtils"
 
 const { Option } = Select;
 
@@ -411,7 +412,8 @@ const DealerDetails = () => {
       };
 
       const res = await loginApi.getallusersid(dealerId, body);
-      const payload = res?.data?.data ?? res?.data;
+      console.log("12345",res)
+      const payload = handleApiResponse(res.data);
 
       if (!payload) {
         messageApi.error(res?.data?.message || "Failed to fetch dealer details");

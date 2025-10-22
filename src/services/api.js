@@ -2,6 +2,7 @@ import axios from "axios";
 import API_CONFIG from "../config/api.config";
 import store from '../redux/store';
 import { Navigate } from "react-router-dom";
+import { message } from "antd";
 
 //Validate base URL
 if (!API_CONFIG.BASE_URL) {
@@ -73,7 +74,10 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          //Navigate("/")
+          message.warning("Session expired. Redirecting to login...");
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1000);
           break;
         case 403:
           console.error("Access forbidden");

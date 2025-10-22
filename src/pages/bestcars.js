@@ -153,6 +153,7 @@ function BestCars() {
 
   const { user, token } = useSelector((state) => state.auth);
   const isLoggedIn = token && user;
+
   useEffect(() => {
     if (!isLoggedIn) navigate("/");
   }, [isLoggedIn, navigate]);
@@ -334,15 +335,17 @@ useEffect(() => {
     }
   };
 
-  useEffect(() => {
+ useEffect(() => {
+  if (!didMountRef.current) {
     fetchMakeData();
-    fetchBestCarsData(pagination.current, pagination.pageSize, { make: makeFilter, search: searchValue });
-  }, []);
+    didMountRef.current = true;
+  }
 
-  useEffect(() => {
-    setPagination((p) => ({ ...p, current: 1 }));
-    fetchBestCarsData(1, pagination.pageSize, { make: makeFilter, search: searchValue });
-  }, [makeFilter, searchValue]);
+  const currentPage = 1;
+  setPagination((p) => ({ ...p, current: currentPage }));
+  fetchBestCarsData(currentPage, pagination.pageSize, { make: makeFilter, search: searchValue });
+}, [makeFilter, searchValue]);
+
 
   const onChangePage = (page, newPageSize) => {
     const effectivePageSize = newPageSize || pagination.pageSize;
@@ -481,11 +484,11 @@ useEffect(() => {
                 </div>
               </div>
              
-                  <Checkbox
+                  {/* <Checkbox
   style={{ marginTop: "10px" }}
   checked={headerChecked} 
   onChange={handleHeaderCheckboxChange}
-/>
+/> */}
 
             </Col>
           </Row>

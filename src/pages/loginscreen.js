@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginApi } from "../services/api";
 import { loginSuccess } from "../redux/actions/authActions";
+import { encryptData, decryptData } from "../utils/CryptoJS";
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -19,9 +20,7 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-
   const handleLogin = (e) => {
-    // Prevent default form submission behavior
     if (e) {
       e.preventDefault();
     }
@@ -39,10 +38,11 @@ const LoginScreen = () => {
       hasError = true;
     }
     if (hasError) return;
+   const encryptedPassword = encryptData(password);
 
     const body = {
       email: email,
-      password: password,
+      password: encryptedPassword,
     };
     setLoading(true);
      userloginAPI(body); 
@@ -104,7 +104,6 @@ const LoginScreen = () => {
       className="login-button2"
       size="large"
       block
-      onClick={""}
     >
        <img 
       src={frame_icon} 

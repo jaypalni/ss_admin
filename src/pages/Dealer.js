@@ -130,20 +130,26 @@ const Dealer = () => {
   
 
   useEffect(() => {
+  if (debounceRef.current) clearTimeout(debounceRef.current);
+
+  debounceRef.current = setTimeout(() => {
     const apiFilter = statusToApiFilter(statusFilter);
-    fetchDealers({ page, limit, filter: apiFilter, search: searchValue });
-  }, [statusFilter, page, limit]);
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      const apiFilter = statusToApiFilter(statusFilter);
-      setPage(1);
-      fetchDealers({ page: 1, limit, filter: apiFilter, search: searchValue });
-    }, DEBOUNCE_MS);
+    const fetchPage = searchValue ? 1 : page;
 
-    return () => clearTimeout(debounceRef.current);
-  }, [searchValue]);
+    setPage(fetchPage);
+
+    fetchDealers({
+      page: fetchPage,
+      limit,
+      filter: apiFilter,
+      search: searchValue,
+    });
+  }, DEBOUNCE_MS);
+
+  return () => clearTimeout(debounceRef.current);
+}, [statusFilter, searchValue, page, limit]);
+
 
 const handleExport = async () => {
   try {
@@ -260,38 +266,59 @@ const handleExport = async () => {
       align: "center",
       width: 120,
     },
-    {
-      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Status</span>,
-      dataIndex: "status",
-      key: "status",
-      width: 160,
-      render: (status) => {
-        let bgColor = "#DBEAFE";
-        let textColor = "#1E40AF";
-        if (status === "verified") { bgColor = "#DCFCE7"; textColor = "#166534"; }
-        else if (status === "pending") { bgColor = "#FEF9C3"; textColor = "#854D0E"; }
-        else if (status === "rejected") { bgColor = "#FEE2E2"; textColor = "#991B1B"; }
-        else if (status === "Info Requested") { bgColor = "#DBEAFE"; textColor = "#1E40AF"; }
+{
+  title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Status</span>,
+  dataIndex: "status",
+  key: "status",
+  width: 160,
+  render: (status) => {
+    if (!status) return null;
 
-        return (
-          <div
-            style={{
-              display: "inline-block",
-              backgroundColor: bgColor,
-              color: textColor,
-              padding: "4px 10px",
-              borderRadius: 24,
-              fontSize: 12,
-              maxWidth: 140,
-              textAlign: "center",
-              wordBreak: "break-word",
-            }}
-          >
-            {status}
-          </div>
-        );
-      },
-    },
+    const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
+
+    let bgColor = "#DBEAFE";
+    let textColor = "#1E40AF";
+
+    switch (status.toLowerCase()) {
+      case "verified":
+        bgColor = "#DCFCE7";
+        textColor = "#166534";
+        break;
+      case "pending":
+        bgColor = "#FEF9C3";
+        textColor = "#854D0E";
+        break;
+      case "rejected":
+        bgColor = "#FEE2E2";
+        textColor = "#991B1B";
+        break;
+      case "info requested":
+        bgColor = "#DBEAFE";
+        textColor = "#1E40AF";
+        break;
+      default:
+        break;
+    }
+
+    return (
+      <div
+        style={{
+          display: "inline-block",
+          backgroundColor: bgColor,
+          color: textColor,
+          padding: "4px 10px",
+          borderRadius: 24,
+          fontSize: 12,
+          maxWidth: 140,
+          textAlign: "center",
+          wordBreak: "break-word",
+        }}
+      >
+        {displayStatus}
+      </div>
+    );
+  },
+},
     {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Actions</span>,
       key: "actions",
