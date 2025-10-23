@@ -441,7 +441,6 @@ const handleRejectSubmit = async () => {
 
       <Row gutter={24}>
         <Col xs={24} md={18}>
-          {/* Listing Reference & Subscription */}
           <Card style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16, fontSize: "18px", fontWeight: "600" }}>Listing Reference & Subscription</h3>
             <Row gutter={16}>
@@ -472,7 +471,6 @@ const handleRejectSubmit = async () => {
             </Row>
           </Card>
 
-          {/* Vehicle Images */}
           <Card style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16 }}>Vehicle Images</h3>
             <Row gutter={[16, 16]}>
@@ -490,7 +488,6 @@ const handleRejectSubmit = async () => {
             </Row>
           </Card>
 
-          {/* Basic Information */}
           <Card style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16, fontSize: "18px", fontWeight: "600" }}>Basic Information</h3>
             <h2 style={{ marginBottom: 12, fontSize: "20px", fontWeight: "700" }}>{carDetails?.ad_title}</h2>
@@ -508,7 +505,6 @@ const handleRejectSubmit = async () => {
             </Row>
           </Card>
 
-          {/* Listing Timeline */}
           <Card style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16, fontSize: "18px", fontWeight: "600" }}>Listing Timeline</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -518,7 +514,6 @@ const handleRejectSubmit = async () => {
             </div>
           </Card>
 
-          {/* Technical Specifications */}
           <Card style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16, fontSize: "18px", fontWeight: "600" }}>Technical Specifications</h3>
             <Row gutter={16}>

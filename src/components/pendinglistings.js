@@ -78,52 +78,62 @@ const PendingListings = () => {
       const data = handleApiResponse(response);
 
       if (data?.data?.cars) {
-        const formattedData = data.data.cars
-          .filter((item) => {
-            if (!normalizedFilter) return true;
+  const formattedData = data.data.cars
+    .filter((item) => {
+      if (!normalizedFilter) return true;
 
-            const approval = item.approval?.toString().toLowerCase() ?? "";
-            const status = item.status?.toString().toLowerCase() ?? "";
+      const approval = item.approval?.toString().toLowerCase() ?? "";
+      const status = item.status?.toString().toLowerCase() ?? "";
 
-            if (normalizedFilter === "sold") {
-              return status === "sold";
-            }
+      if (normalizedFilter === "sold") {
+        return status === "sold";
+      }
 
-            if (["pending", "approved", "rejected"].includes(normalizedFilter)) {
-              return approval === normalizedFilter || (!approval && status === normalizedFilter);
-            }
+      if (["pending", "approved", "rejected"].includes(normalizedFilter)) {
+        return (
+          approval === normalizedFilter ||
+          (!approval && status === normalizedFilter)
+        );
+      }
 
-            return status === normalizedFilter || approval === normalizedFilter;
-          })
-          .map((item) => {
-            const approval = item.approval?.toString().toLowerCase() ?? "";
-            const status = item.status?.toString().toLowerCase() ?? "";
+      return status === normalizedFilter || approval === normalizedFilter;
+    })
+    .map((item) => {
+      const approval = item.approval?.toString().toLowerCase() ?? "";
+      const status = item.status?.toString().toLowerCase() ?? "";
 
-            const displayedStatus =
-              normalizedFilter === "sold" ? status || approval : approval || status;
+      let displayedStatus =
+        normalizedFilter === "sold" ? status || approval : approval || status;
 
-            return {
-              key: item.car_id,
-              car_id: item.car_id,
-              referenceId: item.car_id,
-              dateSubmitted: item.date_submitted ? dayjs(item.date_submitted).format("MMM DD, YYYY") : "",
-              listingTitle: item.ad_title ?? "",
-              sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
-              location: item.location ?? "",
-              type: item.user_type === "dealer" ? "Dealer" : "Individual",
-              status: displayedStatus,
-            };
-          });
+      if (approval === "approved" && status === "sold") {
+        displayedStatus = "sold";
+      }
 
-        setTableData(formattedData);
+      return {
+        key: item.car_id,
+        car_id: item.car_id,
+        referenceId: item.car_id,
+        dateSubmitted: item.date_submitted
+          ? dayjs(item.date_submitted).format("MMM DD, YYYY")
+          : "",
+        listingTitle: item.ad_title ?? "",
+        sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
+        location: item.location ?? "",
+        type: item.user_type === "dealer" ? "Dealer" : "Individual",
+        status: displayedStatus,
+      };
+    });
 
-        const p = data.data.pagination ?? {};
-        setPagination({
-          current: p.current_page ?? p.page ?? page,
-          pageSize: p.limit ?? limit,
-          total: p.total_cars ?? p.total ?? 0,
-        });
-      } else {
+  setTableData(formattedData);
+
+  const p = data.data.pagination ?? {};
+  setPagination({
+    current: p.current_page ?? p.page ?? page,
+    pageSize: p.limit ?? limit,
+    total: p.total_cars ?? p.total ?? 0,
+  });
+}
+ else {
         setTableData([]);
         setPagination((prev) => ({ ...prev, total: 0 }));
       }
