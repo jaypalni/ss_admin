@@ -420,3 +420,18 @@
 :where(.css-16dneet).ant-menu-light .ant-menu-item-selected, :where(.css-16dneet).ant-menu-light>.ant-menu .ant-menu-item-selected {
     color: #f8f8f8 !important;
 }
+
+.logo-wrapper-1 {
+  width: 40px;
+  height: 40px;
+  background-color: #008AD5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.logo-wrapper-1 img {
+  width: 20px;
+  height: 20px;
+}

@@ -33,7 +33,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { RiAdminFill } from "react-icons/ri";
 import "../assets/styles/layout.css";
 import {  MdLogout } from "react-icons/md";
-import menucar_icon from "../assets/images/menucariocn.png";
+import menucar_icon from "../assets/images/car.svg"
 import { loginApi } from "../services/api";
 import PropTypes from 'prop-types';
 import Right from "../assets/images/Right.svg";
@@ -459,14 +459,9 @@ if (isCreateNewAdmin) {
     flexDirection: 'row',
   }}
 >
-  <img
-    src={menucar_icon}
-    alt="Car"
-    style={{
-      width: '40px',
-      height: '40px',
-    }}
-  />
+  <div className="logo-wrapper-1 ">
+  <img src={menucar_icon} alt="Souq Sayarat logo" />
+</div>
 
   {!collapsed && (
     <div
