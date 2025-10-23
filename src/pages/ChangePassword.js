@@ -155,7 +155,10 @@ const ChangePassword = () => {
         setCurrentPassword("");
         setNewPassword("");
         setReenterPassword("");
-        navigate("/");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+        
       } else {
         messageApi.open({
           type: "error",

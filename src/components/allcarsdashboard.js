@@ -29,7 +29,7 @@ function AllCarsDashboard() {
       const errorData = handleApiError(error);
                  messageApi.open({
                  type: "error",
-                 content: errorData?.message || errorData?.message || "Error exporting dealers",
+                 content: errorData?.message || "Error exporting dealers",
                });
                setLoading(false);
     } finally {

@@ -225,7 +225,6 @@ const CreateNewSubscription = () => {
                 marginBottom: "10px",
               }}
             >
-              {/* {isEdit ? "Edit Subscription Plan" : "Create New Subscription Plan"} */}
             </h2>
 
             <Row gutter={16}>

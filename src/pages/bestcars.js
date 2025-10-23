@@ -170,57 +170,6 @@ useEffect(() => {
   return () => { isMountedRef.current = false; };
 }, []);
 
-const handleHeaderCheckboxChange = (e) => {
-  e.stopPropagation?.();
-  const checked = !!e.target.checked;
-  console.log("header checkbox clicked, checked:", checked, "cars.length:", cars.length);
-  console.log("Modal.confirm exists?:", !!Modal?.confirm);
-
-  if (!cars || cars.length === 0) {
-    console.warn("No cars available — skipping confirm");
-    return;
-  }
-
-  const prevChecked = headerChecked;
-
-  try {
-    Modal.confirm({
-      title: "Confirm",
-      content: checked ? "Do you want to select all cars?" : "Do you want to deselect all cars?",
-      okText: "Yes",
-      cancelText: "No",
-      onOk() {
-        if (!isMountedRef.current) return;
-        if (checked) {
-          setSelectedIds(cars.map((c) => c.id));
-        } else {
-          setSelectedIds([]);
-        }
-        setHeaderChecked(checked);
-      },
-      onCancel() {
-        Promise.resolve().then(() => {
-          if (!isMountedRef.current) return;
-          setHeaderChecked(prevChecked);
-        });
-      },
-    });
-  } catch (err) {
-    console.error("Modal.confirm threw:", err);
-    // fallback confirm
-    const ok = window.confirm(checked ? "Select all cars?" : "Deselect all cars?");
-    if (!isMountedRef.current) return;
-    if (ok) {
-      if (checked) setSelectedIds(cars.map((c) => c.id));
-      else setSelectedIds([]);
-      setHeaderChecked(checked);
-    } else {
-      setHeaderChecked(prevChecked);
-    }
-  }
-};
-
-
 useEffect(() => {
   if (selectedIds.length === cars.length && cars.length > 0) {
     setHeaderChecked(true);

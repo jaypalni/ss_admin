@@ -36,36 +36,63 @@ import ban_d from "../assets/images/ban_d.svg";
 import reject_d from "../assets/images/reject_d.svg";
 import flag_d from "../assets/images/flag_d.svg";
 import {handleApiResponse,handleApiError} from "../utils/apiUtils"
-
+import PropTypes from "prop-types";
 const { Option } = Select;
 
 const BoostStatus = ({ status }) => {
-  let tagColor = "#FEF9C3";
-  let textColor = "#854D0E";
+  let tagColor = "#F3F4F6";
+  let textColor = "#374151";
   let text = "Pending Verification";
-  switch (status?.toLowerCase()) {
+
+  switch ((status || "").toLowerCase()) {
     case "pending":
       tagColor = "#FEF9C3";
       textColor = "#854D0E";
       text = "Pending Verification";
       break;
+
     case "verified":
       tagColor = "#DCFCE7";
       textColor = "#166534";
       text = "Verified";
       break;
+
     case "rejected":
+      tagColor = "#FEE2E2";
+      textColor = "#991B1B";
+      text = "Rejected";
+      break;
+
+    case "banned":
       tagColor = "#FEEBCB";
       textColor = "#B45309";
       text = "Banned";
       break;
+
+    case "flagged":
+      tagColor = "#FEF9C3";
+      textColor = "#854D0E";
+      text = "Flagged";
+      break;
+
     default:
-      tagColor = "#F3F4F6";
-      textColor = "#374151";
-      text = "Unknown";
+      text = "Pending Verification";
+      break;
   }
 
-  return <Tag style={{ background: tagColor, color: textColor, borderRadius: 8 }}>{text}</Tag>;
+  return (
+    <Tag
+      style={{
+        background: tagColor,
+        color: textColor,
+        borderRadius: 8,
+        padding: "4px 12px",
+        fontWeight: 500,
+      }}
+    >
+      {text}
+    </Tag>
+  );
 };
 
 
@@ -377,6 +404,44 @@ const columns_boost = [
   },
 ];
 
+BoostStatus.propTypes = {
+  status: PropTypes.string,
+};
+
+DocumentCard.propTypes = {
+  doc: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    title: PropTypes.string,
+    status: PropTypes.string,
+    submittedOn: PropTypes.string,
+  }).isRequired,
+  onDownload: PropTypes.func,
+  onCancel: PropTypes.func,
+};
+
+SubmittedDocumentsCard.propTypes = {
+  documents: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      title: PropTypes.string,
+      status: PropTypes.string,
+      submittedOn: PropTypes.string,
+    })
+  ),
+};
+
+PackageCard.propTypes = {
+  item: PropTypes.shape({
+    key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    isSummary: PropTypes.bool,
+    total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    listings: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }).isRequired,
+};
+
 const DealerDetails = () => {
   const navigate = useNavigate();
   const { dealerId } = useParams();
@@ -474,7 +539,6 @@ const DealerDetails = () => {
      setTimeout(() => {
           navigate("/user-management/dealer"); 
         }, 1000);
-      //setDealerData((prev) => ({ ...prev, is_verified: status }));
     } else {
       messageApi.error(data.message || data?.error || "Failed to approve dealer");
     }
@@ -505,7 +569,6 @@ const DealerDetails = () => {
      setTimeout(() => {
           navigate("/user-management/dealer"); 
         }, 1000);
-      //setDealerData((prev) => ({ ...prev, is_verified: status }));
     } else {
       messageApi.error(data.message || data?.error || "Failed to approve dealer");
     }
@@ -911,7 +974,7 @@ const cards = [
 
         <Button
           icon={<img src={ban_d} alt="download" style={{ width: 12, height: 12 }} />}
-          style={{ borderRadius: 8, flex: 1, background: "#1F2937", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => bannedDealer("")} loading={loadingBanned}
+          style={{ borderRadius: 8, flex: 1, background: "#1F2937", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => bannedDealer} loading={loadingBanned}
         >
           Ban Dealer
         </Button>
@@ -1043,5 +1106,8 @@ const cards = [
     </div>
   );
 };
+
+DealerDetails.propTypes = {};
+
 
 export default DealerDetails;

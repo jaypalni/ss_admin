@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Input, Select, DatePicker, Table, Card, Row, Col, message } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,6 @@ import { handleApiError, handleApiResponse } from "../utils/apiUtils";
 const { Option } = Select;
 
 const PendingListings = () => {
-  const didMountRef = useRef(false);
   const [searchValue, setSearchValue] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [sellerType, setSellerType] = useState("");
@@ -49,7 +48,7 @@ const PendingListings = () => {
       const errorData = handleApiError(error);
             messageApi.open({
             type: "error",
-            content: errorData?.message || errorData?.message || "Error exporting dealers",
+            content: errorData?.message || "Error exporting dealers",
           });
       setCarLocation([]);
     } finally {

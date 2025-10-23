@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Empty,
   message,
@@ -10,23 +10,26 @@ import {
   Space,
 } from "antd";
 import { useNavigate } from "react-router-dom";
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
+
 import activeIcon from "../assets/images/star.svg";
 import pendingIcon from "../assets/images/premium.svg";
 import soldIcon from "../assets/images/enterprice.svg";
 import modelIcon from "../assets/images/total_price.svg";
-import "../assets/styles/allcarsdashboard.css";
-import { handleApiError, handleApiResponse } from "../utils/apiUtils";
-import "../assets/styles/pricing.css";
-import { loginApi } from "../services/api";
 import editIcon from "../assets/images/edit.svg";
 import reject from "../assets/images/delete_icon.svg";
 import plusIcon from "../assets/images/plus_icon.svg";
 import boostIcon3 from "../assets/images/3_boost.svg";
 import boostIcon7 from "../assets/images/7_boost.svg";
 import boostIcon14 from "../assets/images/14_boost.svg";
-import PropTypes from "prop-types";
 
+import { loginApi } from "../services/api";
+import { handleApiError, handleApiResponse } from "../utils/apiUtils";
+import "../assets/styles/allcarsdashboard.css";
+import "../assets/styles/pricing.css";
+
+// Helper functions
 const getBoostIconByDuration = (duration) => {
   if (duration <= 5) return boostIcon3;
   if (duration >= 6 && duration <= 10) return boostIcon7;
@@ -35,7 +38,6 @@ const getBoostIconByDuration = (duration) => {
 
 const getPackageIcon = (packageName, isSummary, isBoost = false, duration = 0) => {
   if (isSummary) return modelIcon;
-
   if (isBoost) return getBoostIconByDuration(duration);
 
   const nameLower = (packageName || "").toLowerCase();
@@ -46,11 +48,9 @@ const getPackageIcon = (packageName, isSummary, isBoost = false, duration = 0) =
 };
 
 const getIconBackgroundColor = (icon, duration = null, isBoost = false, isSummary = false) => {
- if (isBoost && !isSummary) {
+  if (isBoost && !isSummary) {
     const d = Number(duration);
-    if (!Number.isFinite(d)) {
-      return "#FFEDD5";
-    }
+    if (!Number.isFinite(d)) return "#FFEDD5";
     if (d <= 5) return "#DBEAFE";
     if (d >= 6 && d <= 10) return "#DCFCE7";
     if (d > 10) return "#F3E8FF";
@@ -62,7 +62,6 @@ const getIconBackgroundColor = (icon, duration = null, isBoost = false, isSummar
   if (icon === soldIcon) return "#F3E8FF";
   return "#FFEDD5";
 };
-
 
 const formatPercentage = (percentage) => {
   const pct = Number(percentage) || 0;
@@ -81,42 +80,40 @@ const getCardDisplayValue = (item) => {
   return item.listings;
 };
 
-const formatSubscriptionData = (item) => {
-  return {
-    key: item.id,
-    id: item.id,
-    name: item.name,
-    price: item.price,
-    listings: item.listing_limit,
-    duration: item.duration_days,
-    autoRenew: Number(item.Auto_renewed) === 1,
-    active: Number(item.is_active) === 1,
-    description: item.description,
-    raw: item,
-    total: item.active,
-    percentage: Number(item.percentage) || 0,
-    currency: item.currency || "IQD",
-    target_user_type: item.target_user_type || "",
-  };
-};
+const formatSubscriptionData = (item) => ({
+  key: item.id,
+  id: item.id,
+  name: item.name,
+  price: item.price,
+  listings: item.listing_limit,
+  duration: item.duration_days,
+  autoRenew: Number(item.Auto_renewed) === 1,
+  active: Number(item.is_active) === 1,
+  description: item.description,
+  raw: item,
+  total: item.active,
+  percentage: Number(item.percentage) || 0,
+  currency: item.currency || "IQD",
+  target_user_type: item.target_user_type || "",
+});
 
-const parseNumericValue = (value) => {
-  return value !== undefined && value !== null ? Number(value) : 0;
-};
+const parseNumericValue = (value) => (value !== undefined && value !== null ? Number(value) : 0);
 
-const getErrorMessage = (err) => {
-  return err?.response?.data?.message || 
-         err?.response?.data?.error || 
-         err?.message || 
-         "Something went wrong";
-};
+const getErrorMessage = (err) =>
+  err?.response?.data?.message ||
+  err?.response?.data?.error ||
+  err?.message ||
+  "Something went wrong";
 
+// PackageCard component
 const PackageCard = ({ item, isBoost = false }) => {
   const icon = getPackageIcon(item.name, item.isSummary, isBoost, item.duration);
-  const iconBgColor = getIconBackgroundColor(icon, item.duration, isBoost,item.isSummary);
+  const iconBgColor = getIconBackgroundColor(icon, item.duration, isBoost, item.isSummary);
   const percentageData = formatPercentage(item.percentage);
-
   const displayValue = getCardDisplayValue(item);
+
+  // Extract display title
+  const displayTitle = isBoost ? (item.isSummary ? "Total" : `${item.duration}-Day Boost`) : item.name;
 
   return (
     <div
@@ -149,32 +146,20 @@ const PackageCard = ({ item, isBoost = false }) => {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-       <div
-  style={{
-    fontSize: 12,
-    color: "#6B7280",
-    marginBottom: 4,
-    whiteSpace: "normal",
-    wordBreak: "break-word",
-  }}
-  title={
-    isBoost
-      ? item.isSummary
-        ? "Total"
-        : `${item.duration}-Day Boost`
-      : item.name
-  }
->
-  {isBoost
-    ? item.isSummary
-      ? "Total"
-      : `${item.duration}-Day Boost`
-    : item.name}
-       </div>
-
-        <div style={{ fontWeight: 700, fontSize: 18 }}>
-          {displayValue}
+        <div
+          style={{
+            fontSize: 12,
+            color: "#6B7280",
+            marginBottom: 4,
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+          }}
+          title={displayTitle}
+        >
+          {displayTitle}
         </div>
+
+        <div style={{ fontWeight: 700, fontSize: 18 }}>{displayValue}</div>
       </div>
 
       <div
@@ -195,12 +180,28 @@ const PackageCard = ({ item, isBoost = false }) => {
   );
 };
 
+PackageCard.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    name: PropTypes.string.isRequired,
+    isSummary: PropTypes.bool,
+    percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    listing_limit: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    all_time_total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    target_user_type: PropTypes.string,
+    raw: PropTypes.object,
+  }).isRequired,
+  isBoost: PropTypes.bool,
+};
+
+// Main Pricing component
 const Pricing = () => {
   const didMountRef = useRef(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [tableData, setTableData] = useState([]);
   const [listingData, setListingData] = useState([]);
   const [boostingData, setBoostingData] = useState([]);
   const [totalListingActive, setTotalListingActive] = useState(0);
@@ -208,14 +209,11 @@ const Pricing = () => {
   const [totalBoostingActive, setTotalBoostingActive] = useState(0);
   const [totalBoostingPercentage, setTotalBoostingPercentage] = useState(0);
 
-
   const { user, token } = useSelector((state) => state.auth);
   const isLoggedIn = token && user;
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/");
-    }
+    if (!isLoggedIn) navigate("/");
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
@@ -225,92 +223,88 @@ const Pricing = () => {
   }, []);
 
   const fetchAdminData = async () => {
-  try {
-    setLoading(true);
-    const response = await loginApi.getsubscriptionpackage();
-    const data = handleApiResponse(response);
+    try {
+      setLoading(true);
+      const response = await loginApi.getsubscriptionpackage();
+      const data = handleApiResponse(response);
 
-    if (data?.data) {
-      const listings = (data.data.listings || []).map(formatSubscriptionData);
-      const boostings = (data.data.boostings || []).map(formatSubscriptionData);
+      if (data?.data) {
+        const listings = (data.data.listings || []).map(formatSubscriptionData);
+        const boostings = (data.data.boostings || []).map(formatSubscriptionData);
 
-      setListingData(listings);
-      setBoostingData(boostings);
+        setListingData(listings);
+        setBoostingData(boostings);
 
-      setTotalListingActive(parseNumericValue(data.total_listing_active));
-      setTotalListingPercentage(parseNumericValue(data.total_listing_percentage));
+        setTotalListingActive(parseNumericValue(data.total_listing_active));
+        setTotalListingPercentage(parseNumericValue(data.total_listing_percentage));
 
-      setTotalBoostingActive(parseNumericValue(data.total_boosting_active));
-      setTotalBoostingPercentage(parseNumericValue(data.total_boosting_percentage));
-    } else {
-      setListingData([]);
-      setBoostingData([]);
-      setTotalListingActive(0);
-      setTotalListingPercentage(0);
-      setTotalBoostingActive(0);
-      setTotalBoostingPercentage(0);
+        setTotalBoostingActive(parseNumericValue(data.total_boosting_active));
+        setTotalBoostingPercentage(parseNumericValue(data.total_boosting_percentage));
+      } else {
+        setListingData([]);
+        setBoostingData([]);
+        setTotalListingActive(0);
+        setTotalListingPercentage(0);
+        setTotalBoostingActive(0);
+        setTotalBoostingPercentage(0);
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({
+        type: "error",
+        content: errorData?.message || "Failed to fetch subscription packages",
+      });
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    const errorData = handleApiError(error);
-    messageApi.open({
-      type: "error",
-      content: errorData?.message || "Failed to fetch subscription packages",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
- const handleToggleActive = async (id, checked) => {
-  const isInListing = listingData.some((p) => p.id === id);
-  const isInBoosting = boostingData.some((p) => p.id === id);
+  const handleToggleActive = async (id, checked) => {
+    const isInListing = listingData.some((p) => p.id === id);
+    const isInBoosting = boostingData.some((p) => p.id === id);
 
-  const prevListingData = listingData;
-  const prevBoostingData = boostingData;
-  const prevTotalListing = totalListingActive;
-  const prevTotalBoosting = totalBoostingActive;
+    const prevListingData = listingData;
+    const prevBoostingData = boostingData;
+    const prevTotalListing = totalListingActive;
+    const prevTotalBoosting = totalBoostingActive;
 
-  if (isInListing) {
-    setListingData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
-    setTotalListingActive((prev) => Math.max(0, prev + (checked ? 1 : -1)));
-  }
+    if (isInListing) {
+      setListingData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
+      setTotalListingActive((prev) => Math.max(0, prev + (checked ? 1 : -1)));
+    }
 
-  if (isInBoosting) {
-    setBoostingData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
-    setTotalBoostingActive((prev) => Math.max(0, prev + (checked ? 1 : -1)));
-  }
+    if (isInBoosting) {
+      setBoostingData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
+      setTotalBoostingActive((prev) => Math.max(0, prev + (checked ? 1 : -1)));
+    }
 
-  if (!isInListing && !isInBoosting && typeof setTableData === "function") {
-    setTableData((prev) => prev.map((p) => (p.id === id ? { ...p, active: checked } : p)));
-  }
+    const body = { id, is_active: checked ? 1 : 0 };
+    try {
+      setLoading(true);
+      const res = await loginApi.editsubscriptionpackage(body);
+      const resData = res?.data;
 
-  const body = { id, is_active: checked ? 1 : 0 };
-  try {
-    setLoading(true);
-    const res = await loginApi.editsubscriptionpackage(body);
-    const resData = res?.data;
-
-    if (resData?.status_code === 200) {
-      messageApi.success(resData.message || "Subscription updated successfully");
-    } else {
+      if (resData?.status_code === 200) {
+        messageApi.success(resData.message || "Subscription updated successfully");
+      } else {
+        setListingData(prevListingData);
+        setBoostingData(prevBoostingData);
+        setTotalListingActive(prevTotalListing);
+        setTotalBoostingActive(prevTotalBoosting);
+        messageApi.error(resData?.message || "Failed to update subscription");
+      }
+    } catch (err) {
       setListingData(prevListingData);
       setBoostingData(prevBoostingData);
       setTotalListingActive(prevTotalListing);
       setTotalBoostingActive(prevTotalBoosting);
-      messageApi.error(resData?.message || "Failed to update subscription");
-    }
-  } catch (err) {
-    setListingData(prevListingData);
-    setBoostingData(prevBoostingData);
-    setTotalListingActive(prevTotalListing);
-    setTotalBoostingActive(prevTotalBoosting);
 
-    console.error("Submit error:", err);
-    messageApi.error(getErrorMessage(err));
-  } finally {
-    setLoading(false);
-  }
-};
+      console.error("Submit error:", err);
+      messageApi.error(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEdit = (record) => {
     if (String(record.id) === "__total_summary__") return;
@@ -319,10 +313,9 @@ const Pricing = () => {
 
   const handleDelete = async (record) => {
     if (String(record.id) === "__total_summary__") return;
-    const id = record.id;
     try {
       setLoading(true);
-      const response = await loginApi.deletesubscriptionpackage(id);
+      const response = await loginApi.deletesubscriptionpackage(record.id);
       const data = handleApiResponse(response);
       if (data?.status_code === 200) {
         messageApi.success(data?.message || "Package deleted successfully");
@@ -341,6 +334,7 @@ const Pricing = () => {
     }
   };
 
+  // Table columns
   const columns = [
     {
       title: "Package Name",
@@ -360,7 +354,6 @@ const Pricing = () => {
       dataIndex: "listings",
       key: "listings",
       width: 120,
-      render: (val) => <div>{val}</div>,
     },
     {
       title: "Duration (days)",
@@ -373,46 +366,52 @@ const Pricing = () => {
       dataIndex: "autoRenew",
       key: "autoRenew",
       width: 140,
-      render: (val, record) => {
-        if (String(record.id) === "__total_summary__") {
-          return <span style={{ fontWeight: 500, color: val ? "#16A34A" : "#DC2626" }}>{val ? "Yes" : "No"}</span>;
-        }
-        const isYes = !!val;
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontWeight: 500, color: isYes ? "#16A34A" : "#DC2626" }}>{isYes ? "Yes" : "No"}</span>
-          </div>
-        );
-      },
+      render: (val) => (
+        <span style={{ fontWeight: 500, color: val ? "#16A34A" : "#DC2626" }}>{val ? "Yes" : "No"}</span>
+      ),
     },
     {
       title: "Active",
       dataIndex: "active",
       key: "active",
       width: 100,
-      render: (val, record) => {
-        return (
-          <Switch
-            checked={!!val}
-            onChange={(checked) => handleToggleActive(record.id, checked)}
-            style={{ backgroundColor: !!val ? "#008AD5" : "#d9d9d9", borderColor: !!val ? "#008AD5" : "#d9d9d9" }}
-          />
-        );
-      },
+      render: (val, record) => (
+        <Switch
+          checked={!!val}
+          onChange={(checked) => handleToggleActive(record.id, checked)}
+          style={{ backgroundColor: !!val ? "#008AD5" : "#d9d9d9", borderColor: !!val ? "#008AD5" : "#d9d9d9" }}
+        />
+      ),
     },
     {
       title: "Actions",
       key: "actions",
       width: 140,
-      render: (text, record) => {
+      render: (_, record) => {
         if (String(record.id) === "__total_summary__") return <span style={{ color: "#6B7280" }}>—</span>;
         return (
           <Space>
             <Tooltip title="Edit">
-              <img src={editIcon} alt="edit" onClick={() => handleEdit(record)} style={{ width: 14, cursor: "pointer" }} />
+              <button
+                onClick={() => handleEdit(record)}
+                style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+                aria-label="Edit"
+              >
+                <img src={editIcon} alt="edit" style={{ width: 14 }} />
+              </button>
             </Tooltip>
-            <Popconfirm title={`Delete "${record.name}"?`} onConfirm={() => handleDelete(record)} okText="Yes" cancelText="No">
-              <img src={reject} alt="delete" style={{ width: 14, cursor: "pointer" }} />
+            <Popconfirm
+              title={`Delete "${record.name}"?`}
+              onConfirm={() => handleDelete(record)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <button
+                style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+                aria-label="Delete"
+              >
+                <img src={reject} alt="delete" style={{ width: 14 }} />
+              </button>
             </Popconfirm>
           </Space>
         );
@@ -421,7 +420,7 @@ const Pricing = () => {
   ];
 
   const columns_boost = [
-     {
+    {
       title: "Duration (days)",
       dataIndex: "duration",
       key: "duration",
@@ -439,52 +438,60 @@ const Pricing = () => {
       dataIndex: "active",
       key: "active",
       width: 100,
-      render: (val, record) => {
-        return (
-          <Switch
-            checked={!!val}
-            onChange={(checked) => handleToggleActive(record.id, checked)}
-            style={{ backgroundColor: !!val ? "#008AD5" : "#d9d9d9", borderColor: !!val ? "#008AD5" : "#d9d9d9" }}
-          />
-        );
-      },
+      render: (val, record) => (
+        <Switch
+          checked={!!val}
+          onChange={(checked) => handleToggleActive(record.id, checked)}
+          style={{ backgroundColor: !!val ? "#008AD5" : "#d9d9d9", borderColor: !!val ? "#008AD5" : "#d9d9d9" }}
+        />
+      ),
     },
     {
       title: "Actions",
       key: "actions",
       width: 140,
-      render: (text, record) => {
+      render: (_, record) => {
         if (String(record.id) === "__total_summary__") return <span style={{ color: "#6B7280" }}>—</span>;
         return (
           <Space>
             <Tooltip title="Edit">
-              <img src={editIcon} alt="edit" onClick={() => handleEdit(record)} style={{ width: 14, cursor: "pointer" }} />
+              <button
+                onClick={() => handleEdit(record)}
+                style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+                aria-label="Edit"
+              >
+                <img src={editIcon} alt="edit" style={{ width: 14 }} />
+              </button>
             </Tooltip>
-            <Popconfirm title={`Delete "${record.name}"?`} onConfirm={() => handleDelete(record)} okText="Yes" cancelText="No">
-              <img src={reject} alt="delete" style={{ width: 14, cursor: "pointer" }} />
+            <Popconfirm
+              title={`Delete "${record.name}"?`}
+              onConfirm={() => handleDelete(record)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <button
+                style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+                aria-label="Delete"
+              >
+                <img src={reject} alt="delete" style={{ width: 14 }} />
+              </button>
             </Popconfirm>
           </Space>
         );
       },
     },
   ];
+
   return (
     <div style={{ padding: "20px" }}>
       {contextHolder}
 
-      <div
-        className="tile-card"
-        style={{
-          background: "#fff",
-          borderRadius: 12,
-          padding: 20,
-          boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
-        }}
-      >
+      {/* Subscription Packages */}
+      <div className="tile-card" style={{ background: "#fff", borderRadius: 12, padding: 20, boxShadow: "0 6px 18px rgba(15,23,42,0.06)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div>
-            <h1 style={{ fontSize: "20px", fontWeight: "600", color: "#1F2937", marginBottom: 2 }}>Subscription Packages</h1>
-            <p style={{ fontSize: "13px", color: "#4B5563", margin: 0, fontWeight: "400" }}>Manage all subscription-based plans</p>
+            <h1 style={{ fontSize: 20, fontWeight: 600, color: "#1F2937", marginBottom: 2 }}>Subscription Packages</h1>
+            <p style={{ fontSize: 13, color: "#4B5563", margin: 0, fontWeight: 400 }}>Manage all subscription-based plans</p>
           </div>
 
           <button
@@ -494,25 +501,25 @@ const Pricing = () => {
               border: "none",
               gap: 8,
               padding: "8px 18px",
-              borderRadius: "6px",
+              borderRadius: 6,
               cursor: "pointer",
-              fontSize: "12px",
-              fontWeight: "500",
+              fontSize: 12,
+              fontWeight: 500,
               display: "flex",
               alignItems: "center",
             }}
             onClick={() => navigate("/financials/pricing/createNewPackage")}
           >
-            <img src={plusIcon} alt="add" style={{ width: "12px", height: "12px", marginRight: "8px", fontWeight: 400 }} />
+            <img src={plusIcon} alt="add" style={{ width: 12, height: 12, marginRight: 8 }} />
             Create New Package
           </button>
         </div>
 
         <Divider style={{ margin: "0px 0 16px 0" }} />
 
-        <h6 style={{ fontSize: "12px", fontWeight: "500", color: "#374151", marginBottom: 10 }}>Monthly Analytics</h6>
+        <h6 style={{ fontSize: 12, fontWeight: 500, color: "#374151", marginBottom: 10 }}>Monthly Analytics</h6>
 
-        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16, scrollbarWidth: "none",msOverflowStyle: "none", }}>
+        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16, scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
             {listingData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
@@ -529,30 +536,20 @@ const Pricing = () => {
           </div>
         </div>
 
-        <div>
-          <Table
-            columns={columns}
-            dataSource={listingData}
-            loading={loading}
-            locale={{ emptyText: <Empty description="No packages found" /> }}
-          />
-        </div>
+        <Table
+          columns={columns}
+          dataSource={listingData}
+          loading={loading}
+          locale={{ emptyText: <Empty description="No packages found" /> }}
+        />
       </div>
 
-      <div
-        className="tile-card"
-        style={{
-          background: "#fff",
-          borderRadius: 12,
-          padding: 20,
-          boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
-          marginTop:"20px"
-        }}
-      >
+      {/* Boosting Packages */}
+      <div className="tile-card" style={{ background: "#fff", borderRadius: 12, padding: 20, boxShadow: "0 6px 18px rgba(15,23,42,0.06)", marginTop: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div>
-            <h1 style={{ fontSize: "20px", fontWeight: "600", color: "#1F2937", marginBottom: 2 }}>Featured Listing Pricing Rules</h1>
-            <p style={{ fontSize: "13px", color: "#4B5563", margin: 0, fontWeight: "400" }}>Define pricing logic for boosted listings</p>
+            <h1 style={{ fontSize: 20, fontWeight: 600, color: "#1F2937", marginBottom: 2 }}>Featured Listing Pricing Rules</h1>
+            <p style={{ fontSize: 13, color: "#4B5563", margin: 0, fontWeight: 400 }}>Define pricing logic for boosted listings</p>
           </div>
 
           <button
@@ -562,25 +559,25 @@ const Pricing = () => {
               border: "none",
               gap: 8,
               padding: "8px 18px",
-              borderRadius: "6px",
+              borderRadius: 6,
               cursor: "pointer",
-              fontSize: "12px",
-              fontWeight: "500",
+              fontSize: 12,
+              fontWeight: 500,
               display: "flex",
               alignItems: "center",
             }}
             onClick={() => navigate("/financials/pricing/createNewPackage")}
           >
-            <img src={plusIcon} alt="add" style={{ width: "12px", height: "12px", marginRight: "8px", fontWeight: 400 }} />
+            <img src={plusIcon} alt="add" style={{ width: 12, height: 12, marginRight: 8 }} />
             Add New Boost Rule
           </button>
         </div>
 
         <Divider style={{ margin: "0px 0 16px 0" }} />
 
-        <h6 style={{ fontSize: "12px", fontWeight: "500", color: "#374151", marginBottom: 10 }}>Monthly Featured Purchases</h6>
+        <h6 style={{ fontSize: 12, fontWeight: 500, color: "#374151", marginBottom: 10 }}>Monthly Featured Purchases</h6>
 
-        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16,scrollbarWidth: "none",msOverflowStyle: "none", }}>
+        <div style={{ overflowX: "auto", paddingBottom: 8, marginBottom: 16, scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
             {boostingData.length === 0 ? (
               <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
@@ -592,38 +589,20 @@ const Pricing = () => {
                 total: totalBoostingActive,
                 percentage: totalBoostingPercentage,
                 isSummary: true,
-                
-              }].map((item) => <PackageCard key={item.key || item.id} item={item} isBoost={true} />)
+              }].map((item) => <PackageCard key={item.key || item.id} item={item} isBoost />)
             )}
           </div>
         </div>
 
-        <div>
-          <Table
-            columns={columns_boost}
-            dataSource={boostingData}
-            loading={loading}
-            locale={{ emptyText: <Empty description="No packages found" /> }}
-          />
-        </div>
+        <Table
+          columns={columns_boost}
+          dataSource={boostingData}
+          loading={loading}
+          locale={{ emptyText: <Empty description="No packages found" /> }}
+        />
       </div>
     </div>
   );
-};
-
-PackageCard.propTypes = {
-  item: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    name: PropTypes.string.isRequired,
-    isSummary: PropTypes.bool,
-    percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    listing_limit: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    all_time_total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    target_user_type: PropTypes.string,
-    raw: PropTypes.object,
-  }).isRequired,
 };
 
 export default Pricing;

@@ -19,7 +19,7 @@
   z-index: 12000 !important;
 }
 .ant-modal-mask {
-  z-index: 11999 !important;
+  z-index: 1 !important;
 }
 
 .top-bar {

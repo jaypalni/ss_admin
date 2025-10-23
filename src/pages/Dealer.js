@@ -30,7 +30,7 @@ const Dealer = () => {
 
   const [dealers, setDealers] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, ] = useState(10);
   const [total, setTotal] = useState(0);
 
   const debounceRef = useRef(null);
@@ -293,8 +293,8 @@ const handleExport = async () => {
         textColor = "#991B1B";
         break;
       case "info requested":
-        bgColor = "#DBEAFE";
-        textColor = "#1E40AF";
+        bgColor = bgColor;
+        textColor = textColor;
         break;
       default:
         break;
@@ -330,8 +330,30 @@ const handleExport = async () => {
             style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
             onClick={() => navigate(`/user-management/dealer/${record.id}`)}
           />
-          <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => reporteduser(record.id)} />
-          <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18, cursor: "pointer" }} onClick={() => bannedDealer(record.id)} />
+          <button
+  onClick={() => reporteduser(record.id)}
+  style={{
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+  }}
+  aria-label="Edit"
+>
+  <img src={EditOutlined} alt="Edit" style={{ width: 18, height: 18 }} />
+</button>
+<button
+  onClick={() => bannedDealer(record.id)}
+  style={{
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+  }}
+  aria-label="Edit"
+>
+  <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18 }} />
+</button>
         </div>
       ),
     },

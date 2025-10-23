@@ -44,6 +44,13 @@ const getApprovalStatusStyle = (approval) => {
       border: "1px solid #f5c6cb",
     };
   }
+  if (approval === "sold") {
+    return {
+      backgroundColor: "#DBEAFE",
+      color: "#1E40AF",
+      border: "1px solid #DBEAFE",
+    };
+  }
   return {
     backgroundColor: "#fff3cd",
     color: "#856404",
@@ -189,15 +196,53 @@ const ActionButtons = ({ approval, isBestCar, setIsBestCar, handleApprove, handl
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <Button type="primary" block onClick={handleApprove} loading={loading} style={{ backgroundColor: "#28a745", borderColor: "#28a745", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", fontWeight: 500 }}>
-        <img src={approveIcon} alt="approve" style={{ width: 16, height: 16, display: "inline-block" }} />
-        Approve Listing
-      </Button>
+     <Button
+  type="primary"
+  block
+  onClick={handleApprove}
+  loading={loading}
+  style={{
+    backgroundColor: "#28a745",
+    borderColor: "#28a745",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8, 
+    fontWeight: 500,
+  }}
+>
+  <img
+    src={approveIcon}
+    alt="approve"
+    style={{ width: 16, height: 16, display: "inline-block", marginRight: 4 }}
+  />
+  <span>Approve Listing</span>
+</Button>
 
-      <Button danger block onClick={handleReject} loading={rejectLoading}style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", backgroundColor: "#DC2626", borderColor: "#DC2626", color: "#fff", fontWeight: 500 }}>
-        <img src={rejectIcon} alt="reject" style={{ width: 16, height: 16, display: "inline-block" }} />
-        Reject Listing
-      </Button>
+<Button
+  danger
+  block
+  onClick={handleReject}
+  loading={rejectLoading}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#DC2626",
+    borderColor: "#DC2626",
+    color: "#fff",
+    fontWeight: 500,
+  }}
+>
+  <img
+    src={rejectIcon}
+    alt="reject"
+    style={{ width: 16, height: 16, display: "inline-block", marginRight: 4 }}
+  />
+  <span>Reject Listing</span>
+</Button>
+
     </div>
   );
 };
@@ -212,6 +257,7 @@ ActionButtons.propTypes = {
   loading: PropTypes.bool,
   rejectionReason: PropTypes.string,
   comment: PropTypes.string,
+  rejectLoading: PropTypes.string,
 };
 
 ActionButtons.defaultProps = { approval: "pending", loading: false, rejectionReason: "", comment: "" };
@@ -223,7 +269,6 @@ const ListingDetails = () => {
   const [rejectionReason, setRejectionReason] = useState(null);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
-  const [approveLoading, setApproveLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [rejectReasonData, setRejectReasonData] = useState([]);
@@ -401,7 +446,6 @@ const handleRejectSubmit = async () => {
     <div
       style={{
         background: "#f7f7f7",
-        padding: 14,
         height: "calc(100vh - 0px)",
         overflowY: "auto",
         padding: "20px",

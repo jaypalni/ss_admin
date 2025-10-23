@@ -143,7 +143,12 @@ const ForgotPassword = () => {
                 <img
                   src={arrow_icon}
                   alt="arrow"
-                  style={{ width: "12px", height: "12px", verticalAlign: "middle" }}
+                  style={{
+    width: "12px",
+    height: "12px",
+    verticalAlign: "middle",
+    marginRight: 4,
+  }}
                 />
                 Back to Login
               </button>

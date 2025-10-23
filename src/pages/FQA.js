@@ -1,13 +1,13 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { PlusOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Row, Col, Input, Modal, Popconfirm, message } from "antd";
 import editIcon from "../assets/images/edit.svg";
 import { FaTrash } from "react-icons/fa";
 import { loginApi } from "../services/api";
 import { handleApiError } from "../utils/apiUtils";
+import PropTypes from "prop-types";
 
-
-export default function FQA({ dealerData }) {
+const FQA = ({ dealerData }) => {
   const didMountRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState("");
@@ -18,9 +18,9 @@ export default function FQA({ dealerData }) {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-  if (didMountRef.current) return;
-  didMountRef.current = true;
-  fetchFAQ();
+    if (didMountRef.current) return;
+    didMountRef.current = true;
+    fetchFAQ();
   }, []);
 
   const fetchFAQ = async () => {
@@ -36,9 +36,9 @@ export default function FQA({ dealerData }) {
     } catch (err) {
       const errorMessage = handleApiError(err);
       messageApi.open({
-      type: "error",
-      content: errorMessage?.error || "Error exporting dealers",
-    });
+        type: "error",
+        content: errorMessage?.error || "Error fetching FAQs",
+      });
     } finally {
       setLoading(false);
     }
@@ -47,6 +47,7 @@ export default function FQA({ dealerData }) {
   const handleSave = async () => {
     const trimmedQ = question.trim();
     const trimmedA = answer.trim();
+
     if (!trimmedQ || !trimmedA) {
       Modal.warning({
         title: "Missing fields",
@@ -63,12 +64,12 @@ export default function FQA({ dealerData }) {
         ...(editingId && { id: editingId }),
       };
 
-    let res;
-    if (editingId) {
-      res = await loginApi.editfaq(editingId, body); 
-    } else {
-      res = await loginApi.savefaq(body);
-    }
+      let res;
+      if (editingId) {
+        res = await loginApi.editfaq(editingId, body);
+      } else {
+        res = await loginApi.savefaq(body);
+      }
 
       const data = res?.data;
       if (data?.status_code === 200 || data?.status_code === 201) {
@@ -107,27 +108,27 @@ export default function FQA({ dealerData }) {
   };
 
   const handleDelete = async (id) => {
-  try {
-    setLoading(true);
-    const res = await loginApi.deletefaq(id); 
-    const data = res?.data;
+    try {
+      setLoading(true);
+      const res = await loginApi.deletefaq(id);
+      const data = res?.data;
 
-    if (data?.status_code === 200) {
-      messageApi.success(data?.message || "Deleted successfully");
-      fetchFAQ();
-    } else {
-      messageApi.error(data?.message || "Failed to delete");
+      if (data?.status_code === 200) {
+        messageApi.success(data?.message || "Deleted successfully");
+        fetchFAQ();
+      } else {
+        messageApi.error(data?.message || "Failed to delete");
+      }
+    } catch (err) {
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong while deleting";
+      messageApi.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    const errorMessage =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Something went wrong while deleting";
-    messageApi.error(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -215,7 +216,13 @@ export default function FQA({ dealerData }) {
                   </p>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 8,
+                  }}
+                >
                   <button
                     style={{
                       backgroundColor: "#E5E7EB",
@@ -232,7 +239,11 @@ export default function FQA({ dealerData }) {
                     }}
                     onClick={() => openEdit(it)}
                   >
-                    <img src={editIcon} alt="edit" style={{ width: "12px", height: "12px" }} />
+                    <img
+                      src={editIcon}
+                      alt="edit"
+                      style={{ width: "12px", height: "12px" }}
+                    />
                     <span>Edit</span>
                   </button>
 
@@ -244,7 +255,13 @@ export default function FQA({ dealerData }) {
                     cancelText="No"
                     okType="danger"
                   >
-                    <Button type="text" icon={<FaTrash />} size="small" danger title="Delete Q&A" />
+                    <Button
+                      type="text"
+                      icon={<FaTrash />}
+                      size="small"
+                      danger
+                      title="Delete Q&A"
+                    />
                   </Popconfirm>
                 </div>
               </div>
@@ -255,7 +272,7 @@ export default function FQA({ dealerData }) {
 
       <Modal
         title={editingId ? "Edit Q&A" : "Add Q&A"}
-        visible={isOpen}
+        open={isOpen}
         onCancel={() => setIsOpen(false)}
         centered
         width={680}
@@ -263,7 +280,13 @@ export default function FQA({ dealerData }) {
           <Button key="cancel" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>,
-          <Button key="submit" type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={loading}>
+          <Button
+            key="submit"
+            type="primary"
+            icon={<SaveOutlined />}
+            onClick={handleSave}
+            loading={loading}
+          >
             {editingId ? "Save" : "Add"}
           </Button>,
         ]}
@@ -289,4 +312,17 @@ export default function FQA({ dealerData }) {
       </Modal>
     </div>
   );
-}
+};
+
+FQA.propTypes = {
+  dealerData: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+  }),
+};
+
+FQA.defaultProps = {
+  dealerData: null,
+};
+
+export default FQA;

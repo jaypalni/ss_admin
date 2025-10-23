@@ -26,7 +26,7 @@ const Individual = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [debouncedSearch, setDebouncedSearch] = useState(searchValue);
+  const [debouncedSearch, ] = useState(searchValue);
 
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -157,67 +157,42 @@ const Individual = () => {
       }
       };
 
-const handleExport = async () => {
-  try {
-    setLoading(true);
-    const apiFilter = statusToApiFilter(statusFilter);
-    const allRows = [];
-    let currentPage = "";
-    const pageSize = ""; 
-    let totalFromApi = null;
-    let keepFetching = true;
+      const handleExport = async () => {
+  const fetchPage = async (page, pageSize, apiFilter, searchValue) => {
+    const body = {
+      user_type: "individual",
+      filter: apiFilter ?? "",
+      search: searchValue ?? "",
+      page,
+      limit: pageSize,
+    };
+    const response = await loginApi.getallusers(body);
+    return handleApiResponse(response);
+  };
 
-    while (keepFetching) {
-      const body = {
-        user_type: "individual",
-        filter: apiFilter ?? "",
-        search: searchValue ?? "",
-        page: currentPage,
-        limit: pageSize,
-      };
-
-      const response = await loginApi.getallusers(body);
-      const result = handleApiResponse(response);
-
-      if (!result || !Array.isArray(result.data) || result.data.length === 0) {
-        if (currentPage === 1) {
-          messageApi.open({ type: "info", content: "No data to export" });
-          setLoading(false);
-          return;
-        }
-        break;
-      }
-
-      allRows.push(...result.data);
-
-      if (result.pagination && typeof result.pagination.total === "number") {
-        totalFromApi = result.pagination.total;
-        const pages = Math.ceil(totalFromApi / (result.pagination.limit || pageSize));
-        if (currentPage >= pages) keepFetching = false;
-        else currentPage += 1;
-      } else {
-        if (result.data.length < pageSize) keepFetching = false;
-        else currentPage += 1;
-      }
-    }
-
-    if (allRows.length === 0) {
-      messageApi.open({ type: "info", content: "No data to export" });
-      return;
-    }
-
-    // Normalize rows into CSV-friendly array
-    const normalized = allRows.map((u) => ({
+  const normalizeRows = (rows = []) =>
+    rows.map((u) => ({
       id: String(u.id),
       fullname: (u.full_name || "").trim() || "-",
       emailaddress: u.email || "-",
       phone: u.phone_number || "-",
-      registered: u.registered_since ? u.registered_since.split(" ").slice(1, 4).join(" ") : "-",
-      listings: typeof u.no_of_listings !== "undefined" ? u.no_of_listings : "-",
+      registered: u.registered_since
+        ? u.registered_since.split(" ").slice(1, 4).join(" ")
+        : "-",
+      listings: u.no_of_listings != null ? u.no_of_listings : "-",
       status: u.status ? String(u.status).toLowerCase() : "-",
     }));
 
-    const headers = ["User ID", "Full Name", "Email Address", "Phone Number", "Registered", "Listings", "Status"];
+  const buildCsv = (normalized) => {
+    const headers = [
+      "User ID",
+      "Full Name",
+      "Email Address",
+      "Phone Number",
+      "Registered",
+      "Listings",
+      "Status",
+    ];
     const rows = normalized.map((r) => [
       r.id,
       r.fullname,
@@ -227,10 +202,54 @@ const handleExport = async () => {
       r.listings,
       r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "-",
     ]);
-
-    const csvContent = [headers, ...rows]
+    return [headers, ...rows]
       .map((e) => e.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\n");
+  };
+
+  try {
+    setLoading(true);
+
+    const apiFilter = statusToApiFilter(statusFilter);
+    const allRows = [];
+    let currentPage = 1;
+    const pageSize = pageSize;
+    let totalFromApi = null;
+
+    while (true) {
+      const result = await fetchPage(currentPage, pageSize, apiFilter, searchValue);
+
+      if (!result || !Array.isArray(result.data) || result.data.length === 0) {
+        if (currentPage === 1) {
+          messageApi.open({ type: "info", content: "No data to export" });
+          return;
+        }
+        break;
+      }
+
+      allRows.push(...result.data);
+
+      const pagination = result.pagination ?? null;
+
+      if (pagination && typeof pagination.total === "number") {
+        totalFromApi = pagination.total;
+        const pages = Math.ceil(totalFromApi / (pagination.limit || pageSize));
+        if (currentPage >= pages) break;
+        currentPage += 1;
+        continue;
+      }
+
+      if (result.data.length < pageSize) break;
+      currentPage += 1;
+    }
+
+    if (allRows.length === 0) {
+      messageApi.open({ type: "info", content: "No data to export" });
+      return;
+    }
+
+    const normalized = normalizeRows(allRows);
+    const csvContent = buildCsv(normalized);
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -249,7 +268,7 @@ const handleExport = async () => {
   } finally {
     setLoading(false);
   }
-};
+      };
 
 
   const columns = [
@@ -312,8 +331,8 @@ const handleExport = async () => {
           bgColor = "#FEE2E2";
           textColor = "#991B1B";
         } else if (s === "flagged") {
-          bgColor = "#FEF9C3";
-          textColor = "#854D0E";
+          bgColor = bgColor;
+          textColor = textColor;
         }
 
         const display = s ? s.charAt(0).toUpperCase() + s.slice(1) : "-";
@@ -344,18 +363,22 @@ const handleExport = async () => {
             style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
             onClick={() => navigate(`/user-management/individual/${record.id}`)}
           />
-          <img
-            src={EditOutlined}
-            onClick={() =>  reporteduser(record.id)}
-            alt="edit"
-            style={{ width: 18, height: 18, cursor: "pointer" }}
-          />
-          <img
-            src={DeleteOutlined}
-            onClick={() =>  bannedDealer(record.id)}
-            alt="delete"
-            style={{ width: 18, height: 18, cursor: "pointer" }}
-          />
+         <button
+  onClick={() => reporteduser(record.id)}
+  style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+  aria-label="Edit"
+>
+  <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18 }} />
+</button>
+
+<button
+  onClick={() => bannedDealer(record.id)}
+  style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+  aria-label="Delete"
+>
+  <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18 }} />
+</button>
+
         </div>
       ),
     },
