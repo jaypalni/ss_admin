@@ -91,13 +91,21 @@ const validateRejectionReason = (rejectionReason, rejectReasonData, comment, mes
   return true;
 };
 
-const ApprovalStatusTag = ({ approval }) => {
-  const style = getApprovalStatusStyle(approval);
-  const text = getApprovalStatusText(approval);
- const formattedText =
+const ApprovalStatusTag = ({ approval, status }) => {
+  let displayValue = approval;
+
+  if (approval?.toLowerCase() === "approved" && status?.toLowerCase() === "sold") {
+    displayValue = "sold";
+  }
+
+  const style = getApprovalStatusStyle(displayValue);
+  const text = getApprovalStatusText(displayValue);
+
+  const formattedText =
     text && typeof text === "string"
       ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
       : text;
+
   return (
     <Tag
       style={{
@@ -112,6 +120,7 @@ const ApprovalStatusTag = ({ approval }) => {
     </Tag>
   );
 };
+
 
 const BoostStatus = ({ isFeatured }) => {
   const style = getBoostStatusStyle(isFeatured);
@@ -435,7 +444,7 @@ const handleRejectSubmit = async () => {
             <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 600, color: "#212529" }}>Listing Details</h1>
           </div>
 
-          <ApprovalStatusTag approval={carDetails?.approval} />
+          <ApprovalStatusTag approval={carDetails?.approval} status={carDetails?.status} />
         </div>
       </div>
 
