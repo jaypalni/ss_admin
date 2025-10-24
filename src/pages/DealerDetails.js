@@ -64,8 +64,8 @@ const BoostStatus = ({ status }) => {
       break;
 
     case "banned":
-      tagColor = "#FEEBCB";
-      textColor = "#B45309";
+      tagColor = "#FEE2E2";
+      textColor = "#991B1B";
       text = "Banned";
       break;
 
@@ -376,14 +376,57 @@ const columns_boost = [
     ),
   },
   {
-    title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Status</span>,
-    dataIndex: "status",
-    key: "status",
-    width: 150,
-    render: (val) => (
-      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
-    ),
+  title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Status</span>,
+  dataIndex: "status",
+  key: "status",
+  width: 150,
+  render: (val, record) => {
+    // record contains the full row data
+    let displayText = "";
+    let bgColor = "";
+    let textColor = "";
+
+    if (record.status?.toLowerCase() === "sold") {
+      displayText = "Sold";
+      bgColor = "#D5F0FF";
+      textColor = "#008AD5";
+    } else if (val === "approved") {
+      displayText = "Active";
+      bgColor = "#A4F4E7";
+      textColor = "#0B7B69";
+    } else if (val === "pending") {
+      displayText = "Pending";
+      bgColor = "#FFEDD5";
+      textColor = "#D67900";
+    } else if (val === "rejected") {
+      displayText = "Rejected";
+      bgColor = "#FEE2E2"; // light red
+      textColor = "red";
+    } else {
+      displayText = val; // fallback
+      bgColor = "#F3F4F6"; // default light gray
+      textColor = "#374151";
+    }
+
+    return (
+      <div
+        style={{
+          fontWeight: 500,
+          fontSize: 14,
+          backgroundColor: bgColor,
+          color: textColor,
+          padding: "4px 8px",
+          borderRadius: 12,
+          display: "inline-block",
+          textAlign: "center",
+        }}
+      >
+        {displayText}
+      </div>
+    );
   },
+},
+
   {
     title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Date Created</span>,
     dataIndex: "date",
@@ -464,6 +507,7 @@ const DealerDetails = () => {
   const [totalSold, setTotalSold] = useState(0);
   const [totalRejected, setTotalRejected] = useState(0);
   const [, setTotalPending] = useState(0);
+  const BASE_URL = process.env.REACT_APP_API_URL;
 
   const fetchDealerDetails = async () => {
     try {
@@ -495,7 +539,7 @@ const DealerDetails = () => {
         listingId: item.car_id ?? item.id ?? `generated-${idx}`,
         title: item.ad_title ?? item.title ?? "-",
         location: item.location ?? "-",
-        status: item.status ?? item.approval ?? "-",
+        status: item.approval ?? item.status ?? "-",
         date: item.created_at ? item.created_at.split(" ").slice(1, 4).join(" ") : "-",
         price: item.price ? Number(item.price).toLocaleString() : "-",
         _raw: item,
@@ -535,7 +579,11 @@ const DealerDetails = () => {
       const res = await loginApi.verificationstatus(body);
        const data = res?.data;
      if (data?.status_code === 200) {
-     messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+    //  messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+     messageApi.open({
+          type: 'success',
+          content: data?.message || 'Approved SuccessFully',
+        });
      setTimeout(() => {
           navigate("/user-management/dealer"); 
         }, 1000);
@@ -787,7 +835,7 @@ const cards = [
             <Col xs={24} md={12}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                 <img
-                  src={dealerData.profile_pic || Dealer}
+                  src={`${BASE_URL}${dealerData.profile_pic}`}
                   alt="Dealer Logo"
                   style={{
                     width: 35,
@@ -855,8 +903,15 @@ const cards = [
                 <div style={{ display: "", alignItems: "center", gap: 8 }}>
                   <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>Account Status</div>
                   <div>
-                    <BoostStatus status={dealerData.is_verified} />
-                  </div>
+  <BoostStatus 
+    status={
+      dealerData?.status === "banned" 
+        ? "banned" 
+        : dealerData?.is_verified
+    } 
+  />
+</div>
+
                 </div>
 
                 <div style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>Verification Submitted On</div>
@@ -942,20 +997,90 @@ const cards = [
       <SubmittedDocumentsCard documents={documents} />
 
       <div style={{ display: "flex", gap: 8, marginTop: "5px" }}>
-        <Button
-          type="primary"
-          icon={<CheckOutlined />}
-          style={{ borderRadius: 8, flex: 1, background: "#16A34A", fontWeight: 500, fontSize: "12px" }}  onClick={() => approveDealer("verified")} loading={loadingApprove}
-        >
-          Approve Dealer
-        </Button>
+       <Button
+  type="primary"
+  icon={<CheckOutlined style={{ color: "#FFFFFF" }} />}
+  style={{
+    borderRadius: 8,
+    flex: 1,
+    background:
+      dealerData?.status === "banned" ||
+      dealerData?.is_verified === "verified" ||
+      dealerData?.is_verified === "rejected"
+        ? "#D1D5DB" // light gray for disabled
+        : "#16A34A", // green active
+    fontWeight: 500,
+    fontSize: "12px",
+    color: "#FFFFFF",
+    cursor:
+      dealerData?.status === "banned" ||
+      dealerData?.is_verified === "verified" ||
+      dealerData?.is_verified === "rejected"
+        ? "not-allowed"
+        : "pointer",
+  }}
+  disabled={
+    dealerData?.status === "banned" ||
+    dealerData?.is_verified === "verified" ||
+    dealerData?.is_verified === "rejected"
+  }
+  onClick={
+    dealerData?.status === "banned" ||
+    dealerData?.is_verified === "verified" ||
+    dealerData?.is_verified === "rejected"
+      ? undefined
+      : () => approveDealer("verified")
+  }
+  loading={loadingApprove}
+>
+  Approve Dealer
+</Button>
 
-        <Button
-           icon={<img src={reject_d} alt="download" style={{ width: 10, height: 10 }} />}
-          style={{ borderRadius: 8, flex: 1, background: "#DC2626", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => approveDealer("rejected")} loading={loadingReject}
-        >
-          Reject Application
-        </Button>
+{/* Reject Application Button */}
+<Button
+  icon={
+    <img
+      src={reject_d}
+      alt="reject"
+      style={{ width: 10, height: 10, filter: "brightness(0) invert(1)" }}
+    />
+  }
+  style={{
+    borderRadius: 8,
+    flex: 1,
+    background:
+      dealerData?.status === "banned" ||
+      dealerData?.is_verified === "verified" ||
+      dealerData?.is_verified === "rejected"
+        ? "#D1D5DB"
+        : "#DC2626",
+    color: "#FFFFFF",
+    fontWeight: 500,
+    fontSize: "12px",
+    cursor:
+      dealerData?.status === "banned" ||
+      dealerData?.is_verified === "verified" ||
+      dealerData?.is_verified === "rejected"
+        ? "not-allowed"
+        : "pointer",
+  }}
+  disabled={
+    dealerData?.status === "banned" ||
+    dealerData?.is_verified === "verified" ||
+    dealerData?.is_verified === "rejected"
+  }
+  onClick={
+    dealerData?.status === "banned" ||
+    dealerData?.is_verified === "verified" ||
+    dealerData?.is_verified === "rejected"
+      ? undefined
+      : () => approveDealer("rejected")
+  }
+  loading={loadingReject}
+>
+  Reject Application
+</Button>
+
 
         <Button
           type="primary"
@@ -966,18 +1091,64 @@ const cards = [
         </Button>
 
         <Button
-          icon={<img src={flag_d} alt="download" style={{ width: 12, height: 12 }} />}
-          style={{ borderRadius: 8, flex: 1, background: "#CA8A04", color: "white", fontWeight: 500, fontSize: "12px" }} onClick={() => reporteduser("")} loading={loadingFlagged}
-        >
-          Flag Account
-        </Button>
+  icon={
+    <img
+      src={flag_d}
+      alt="flag"
+      style={{
+        width: 12,
+        height: 12,
+        filter: "brightness(0) invert(1)", // keeps icon white
+      }}
+    />
+  }
+  style={{
+    borderRadius: 8,
+    flex: 1,
+    background:
+      dealerData?.status === "banned"
+        ? "#D1D5DB" // light gray if banned
+        : "#CA8A04", // yellow if active
+    color: "#FFFFFF",
+    fontWeight: 500,
+    fontSize: "12px",
+    cursor: dealerData?.status === "banned" ? "not-allowed" : "pointer",
+  }}
+  disabled={dealerData?.status === "banned"}
+  onClick={dealerData?.status === "banned" ? undefined : () => reporteduser("")}
+  loading={loadingFlagged}
+>
+  Flag Account
+</Button>
 
         <Button
-          icon={<img src={ban_d} alt="download" style={{ width: 12, height: 12 }} />}
-          style={{ borderRadius: 8, flex: 1, background: "#1F2937", color: "#FFFFFF", fontWeight: 500, fontSize: "12px" }} onClick={() => bannedDealer} loading={loadingBanned}
-        >
-          Ban Dealer
-        </Button>
+  icon={
+    <img
+      src={ban_d}
+      alt="ban"
+      style={{
+        width: 12,
+        height: 12,
+        filter: dealerData?.status === "banned" ? "brightness(0) invert(1)" : "none", // white icon when gray
+      }}
+    />
+  }
+  style={{
+    borderRadius: 8,
+    flex: 1,
+    background: dealerData?.status === "banned" ? "#D1D5DB" : "#1F2937", // light gray if banned
+    color: "#FFFFFF",
+    fontWeight: 500,
+    fontSize: "12px",
+    cursor: dealerData?.status === "banned" ? "not-allowed" : "pointer",
+  }}
+  disabled={dealerData?.status === "banned"}
+  onClick={dealerData?.status === "banned" ? undefined : () => bannedDealer()}
+  loading={loadingBanned}
+>
+  Ban Dealer
+</Button>
+
       </div>
 
       <div

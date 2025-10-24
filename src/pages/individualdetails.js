@@ -42,6 +42,8 @@ const Individualdetails = () => {
   const [totalRejected, setTotalRejected] = useState(0);
 
   const [messageApi, contextHolder] = message.useMessage();
+  const [avatarSrc, setAvatarSrc] = useState(avatarFallback);
+
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -80,6 +82,7 @@ const Individualdetails = () => {
       }
 
       setDealerData(payload);
+      setAvatarSrc(payload.profile_pic || avatarFallback);
 
       const listingsRaw = Array.isArray(payload.listings) ? payload.listings : [];
       const normalized = listingsRaw.map((item, idx) => ({
@@ -291,6 +294,7 @@ const Individualdetails = () => {
   const metaValueStyle = { color: "#111827", fontSize: 13, fontWeight: 500 };
   const pillStyle = { borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 };
   const rightActionsStyle = { marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" };
+  
 
   if (!dealerData) return <div style={{ padding: 16 }}>Loading...</div>;
 
@@ -320,12 +324,18 @@ const Individualdetails = () => {
 
       <div style={containerStyle}>
         <div style={leftStyle}>
-          <Avatar
-            size={64}
-            src={dealerData.profile_pic || avatarFallback}
-            style={{ borderRadius: 12 }}
-            onError={(e) => (e.target.src = avatarFallback)}
-          />
+        
+
+<Avatar
+  size={64}
+  src={avatarSrc}
+  style={{ borderRadius: 12 }}
+  onError={() => {
+    setAvatarSrc(avatarFallback); // fallback image
+    return true; // tell AntD the error is handled
+  }}
+/>
+
         </div>
 
         <div style={{ flex: "1 1 auto", minWidth: 0 }}>
@@ -376,30 +386,42 @@ const Individualdetails = () => {
               </div>
 
               <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-                {dealerData.is_subscribed === 1 && (
-  <Tag
+                <Tag
+  style={{
+    ...pillStyle,
+    background:
+      dealerData.status === "banned"
+        ? "#FECACA" // light red for banned
+        : dealerData.status === "active"
+        ? "#DCFCE7" // light green for active
+        : "#FEF9C3", // light yellow for others
+    color:
+      dealerData.status === "banned"
+        ? "#B91C1C" // red text for banned
+        : dealerData.status === "active"
+        ? "#166534" // green text for active
+        : "#854D0E", // yellow/brown for others
+    paddingLeft: 10,
+  }}
+>
+  <span
     style={{
-      ...pillStyle,
-      background: dealerData.status === "active" ? "#DCFCE7" : "#FEF9C3",
-      color: dealerData.status === "active" ? "#166534" : "#854D0E",
-      paddingLeft: 10,
+      width: 8,
+      height: 8,
+      height: 8,
+      borderRadius: 999,
+      background:
+        dealerData.status === "banned"
+          ? "#B91C1C"
+          : dealerData.status === "active"
+          ? "#166534"
+          : "#854D0E",
+      display: "inline-block",
+      marginRight: 4,
     }}
-  >
-    <span
-      style={{
-        width: 8,
-        height: 8,
-        borderRadius: 999,
-        background: dealerData.status === "active" ? "#166534" : "#854D0E",
-        display: "inline-block",
-        marginRight: 4, 
-      }}
-    />
-    {dealerData.status ?? "Pending"}
-  </Tag>
-)}
-
-
+  />
+  {dealerData.status === "banned" ? "Banned" : dealerData.status === "active" ? "Active" : dealerData.status ?? "Pending"}
+</Tag>
                
                  {dealerData.subscription_details?.plan_name && (
  <Tag style={{ ...pillStyle, background: "#DBEAFE", color: "#1E40AF" }}>

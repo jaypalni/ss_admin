@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import EditOutlined from "../assets/images/flag.svg";
 import DeleteOutlined from "../assets/images/banned.svg";
+import { FaFlag, FaBan } from "react-icons/fa";
 import "../assets/styles/individual.css";
 import { loginApi } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -122,7 +123,10 @@ const Individual = () => {
           const res = await loginApi.reporteduser(body);
            const data = res?.data;
          if (data?.status_code === 200) {
-         messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+         messageApi.open({
+          type: 'success',
+          content: data?.message || "User Flagged Successfully",
+        });
          fetchUsers()
         } else {
           messageApi.error(data.message || "Failed to approve dealer");
@@ -144,7 +148,10 @@ const Individual = () => {
           const res = await loginApi.banneduser(body);
            const data = res?.data;
          if (data?.status_code === 200) {
-         messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+         messageApi.open({
+          type: 'success',
+          content: data?.message || "User Banned Successfully",
+        });
          fetchUsers()
         } else {
           messageApi.error(data.error || "Failed to banned dealer");
@@ -159,6 +166,7 @@ const Individual = () => {
 
       const handleExport = async () => {
   const fetchPage = async (page, pageSize, apiFilter, searchValue) => {
+    console.log('body', pageSize)
     const body = {
       user_type: "individual",
       filter: apiFilter ?? "",
@@ -166,6 +174,7 @@ const Individual = () => {
       page,
       limit: pageSize,
     };
+    
     const response = await loginApi.getallusers(body);
     return handleApiResponse(response);
   };
@@ -213,7 +222,7 @@ const Individual = () => {
     const apiFilter = statusToApiFilter(statusFilter);
     const allRows = [];
     let currentPage = 1;
-    const pageSize = pageSize;
+    const pageSize = '1000';
     let totalFromApi = null;
 
     while (true) {
@@ -363,20 +372,40 @@ const Individual = () => {
             style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
             onClick={() => navigate(`/user-management/individual/${record.id}`)}
           />
-         <button
+         {/* Flag button */}
+<button
   onClick={() => reporteduser(record.id)}
-  style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
-  aria-label="Edit"
+  style={{
+    border: "none",
+    background: "transparent",
+    padding: 0,
+    cursor: record.status === "banned" ? "not-allowed" : "pointer",
+  }}
+  disabled={record.status === "banned"}
+  aria-label="Flag"
 >
-  <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18 }} />
+  <FaFlag
+    size={18}
+    color={record.status === "banned" ? "#D1D5DB" : "#CA8A04"} // light gray if banned, yellow otherwise
+  />
 </button>
 
+{/* Ban button */}
 <button
   onClick={() => bannedDealer(record.id)}
-  style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
-  aria-label="Delete"
+  style={{
+    border: "none",
+    background: "transparent",
+    padding: 0,
+    cursor: record.status === "banned" ? "not-allowed" : "pointer",
+  }}
+  disabled={record.status === "banned"}
+  aria-label="Ban"
 >
-  <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18 }} />
+  <FaBan
+    size={18}
+    color={record.status === "banned" ? "#D1D5DB" : "#DC2626"} // light gray if banned, red otherwise
+  />
 </button>
 
         </div>
