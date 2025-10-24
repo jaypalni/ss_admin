@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Card,
   Row,
@@ -37,6 +37,11 @@ import reject_d from "../assets/images/reject_d.svg";
 import flag_d from "../assets/images/flag_d.svg";
 import {handleApiResponse,handleApiError} from "../utils/apiUtils"
 import PropTypes from "prop-types";
+import { useDealerDetails } from "../hooks/useDealerDetails";
+import { useDealerActions } from "../hooks/useDealerActions";
+import { DealerActionButtons } from "../components/DealerActionButtons";
+import { DealerSummaryCards } from "../components/DealerSummaryCards";
+import { DealerProfileInfo } from "../components/DealerProfileInfo";
 const { Option } = Select;
 
 const BoostStatus = ({ status }) => {
@@ -412,7 +417,7 @@ const columns_boost = [
       <div
         style={{
           fontWeight: 500,
-          fontSize: 14,
+          fontSize: 12,
           backgroundColor: bgColor,
           color: textColor,
           padding: "4px 8px",
@@ -488,188 +493,39 @@ PackageCard.propTypes = {
 const DealerDetails = () => {
   const navigate = useNavigate();
   const { dealerId } = useParams();
-  const [dealerData, setDealerData] = useState(null);
-  const [tableData, setTableData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingApprove, setLoadingApprove] = useState(false);
-  const [loadingReject, setLoadingReject] = useState(false);
-  const [loadingFlagged, setLoadingFlagged] = useState(false);
-  const [loadingBanned, setLoadingBanned] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
   const [listingFilter, setListingFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState("newest");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [totalListings, setTotalListings] = useState(0);
 
-  const [totalActive, setTotalActive] = useState(0);
-  const [, setTotalPercentage] = useState(0);
-  const [totalSold, setTotalSold] = useState(0);
-  const [totalRejected, setTotalRejected] = useState(0);
-  const [, setTotalPending] = useState(0);
-  const BASE_URL = process.env.REACT_APP_API_URL;
+  const {
+    dealerData,
+    tableData,
+    loading,
+    totalListings,
+    totalActive,
+    totalSold,
+    totalRejected,
+    messageApi,
+  } = useDealerDetails(dealerId, listingFilter, sortOrder, page, limit);
 
-  const fetchDealerDetails = async () => {
-    try {
-      setLoading(true);
+  const {
+    loadingApprove,
+    loadingReject,
+    loadingFlagged,
+    loadingBanned,
+    approveDealer,
+    reporteduser,
+    bannedDealer
+  } = useDealerActions(dealerData, navigate);
 
-      const body = {
-        filter: listingFilter.toLowerCase(),
-          sort: sortOrder,
-        page: page,
-        limit: limit,
-      };
-
-      const res = await loginApi.getallusersid(dealerId, body);
-      console.log("12345",res)
-      const payload = handleApiResponse(res.data);
-
-      if (!payload) {
-        messageApi.error(res?.data?.message || "Failed to fetch dealer details");
-        setDealerData(null);
-        setTableData([]);
-        setTotalListings(0);
-        return;
-      }
-
-      setDealerData(payload);
-
-      const listingsRaw = Array.isArray(payload.listings) ? payload.listings : [];
-      const normalized = listingsRaw.map((item, idx) => ({
-        listingId: item.car_id ?? item.id ?? `generated-${idx}`,
-        title: item.ad_title ?? item.title ?? "-",
-        location: item.location ?? "-",
-        status: item.approval ?? item.status ?? "-",
-        date: item.created_at ? item.created_at.split(" ").slice(1, 4).join(" ") : "-",
-        price: item.price ? Number(item.price).toLocaleString() : "-",
-        _raw: item,
-      }));
-      setTableData(normalized);
-
-      const pagination = payload.listings_pagination;
-      if (pagination) {
-        setTotalListings(pagination.total ?? normalized.length);
-        setPage(pagination.page ?? page);
-        setLimit(pagination.limit ?? limit);
-      } else {
-        setTotalListings(normalized.length);
-      }
-
-      setTotalActive(payload.active_cars ?? 0);
-      setTotalSold(payload.sold_cars ?? 0);
-      setTotalRejected(payload.rejected_cars ?? 0);
-      setTotalPending(payload.pending_cars ?? 0);
-      setTotalPercentage(0);
-    } catch (err) {
-      console.error("fetchDealerDetails error:", err);
-      messageApi.error(err?.message || "Something went wrong while fetching dealer details");
-    } finally {
-      setLoading(false);
-    }
+  const handleFilterChange = (status) => {
+    setListingFilter(status);
   };
 
-   const approveDealer = async (status) => {
-    try {
-      if (status === "verified") setLoadingApprove(true);
-      if (status === "rejected") setLoadingReject(true);
-      const body = {
-      user_id: dealerData.user_id,       
-      verification_status: status,
-    };
-      const res = await loginApi.verificationstatus(body);
-       const data = res?.data;
-     if (data?.status_code === 200) {
-    //  messageApi.error(res?.data?.message || "Failed to fetch dealer details");
-     messageApi.open({
-          type: 'success',
-          content: data?.message || 'Approved SuccessFully',
-        });
-     setTimeout(() => {
-          navigate("/user-management/dealer"); 
-        }, 1000);
-    } else {
-      messageApi.error(data.message || data?.error || "Failed to approve dealer");
-    }
-    } catch (err) {
-      const errorMessage =
-    err?.response?.data?.message ||
-    err?.message ||                  
-    err?.response?.data?.error ||          
-    "Something went wrong while fetching dealer details";
-
-  messageApi.error(errorMessage);
-    }finally {
-    if (status === "verified") setLoadingApprove(false);
-    if (status === "rejected") setLoadingReject(false);
-  }
+  const handleSortChange = (value) => {
+    setSortOrder(value);
   };
-
-  const reporteduser = async (status) => {
-    try {
-     setLoadingFlagged(true);
-      const body = {
-      report_id: dealerData.user_id,       
-    };
-      const res = await loginApi.reporteduser(body);
-       const data = res?.data;
-     if (data?.status_code === 200) {
-     messageApi.error(res?.data?.message || "Failed to fetch dealer details");
-     setTimeout(() => {
-          navigate("/user-management/dealer"); 
-        }, 1000);
-    } else {
-      messageApi.error(data.message || data?.error || "Failed to approve dealer");
-    }
-    } catch (err) {
-      const errorMessage =
-    err?.response?.data?.message ||
-    err?.message ||                  
-    err?.response?.data?.error ||          
-    "Something went wrong while fetching dealer details";
-
-  messageApi.error(errorMessage);
-    }finally {
-     setLoadingFlagged(false);
-  }
-  };
-
- const bannedDealer = async () => {
-  try {
-    setLoadingBanned(true);
-
-    const body = {
-      user_id: dealerData.user_id,
-    };
-
-    const res = await loginApi.banneduser(body);
-    const data = res?.data;
-
-    if (data?.status_code === 200) {
-      messageApi.success(data?.message || "Dealer banned successfully");
-      setTimeout(() => {
-        navigate("/user-management/dealer");
-      }, 1000);
-    } else {
-      messageApi.error(data?.message || data?.error || "Failed to ban dealer");
-    }
-  } catch (err) {
-    const errorMessage =
-      err?.response?.data?.message || 
-      err?.response?.data?.error ||   
-      err?.message ||                 
-      "Something went wrong while banning dealer";
-
-    messageApi.error(errorMessage);
-  } finally {
-    setLoadingBanned(false);
-  }
-};
-
-
-  useEffect(() => {
-    if (!dealerId) return;
-    fetchDealerDetails();
-  }, [dealerId, listingFilter, sortOrder, page, limit]);
 
   if (!dealerData) return <div style={{ padding: 16 }}>Loading...</div>;
 
@@ -683,63 +539,11 @@ const DealerDetails = () => {
     });
   }
 
-  const handleFilterChange = (status) => {
-  setListingFilter(status);
-};
 
-const handleSortChange = (value) => {
-  setSortOrder(value);
-};
-
-
-const getCardColors = (title) => {
-  switch (title) {
-    case "Total Listings":
-      return { bgColor: "#EFF6FF", titleColor: "#2563EB",titleNumber:"#1E3A8A" }; 
-    case "Active Listings":
-      return { bgColor: "#F0FDF4", titleColor: "#16A34A",titleNumber:"#14532D" }; 
-    case "Sold Listings":
-      return { bgColor: "#FAF5FF", titleColor: "#581C87",titleNumber:"#581C87" }; 
-    case "Rejected Listings":
-      return { bgColor: "#FEF2F2", titleColor: "#DC2626",titleNumber:"#7F1D1D" }; 
-    default:
-      return { bgColor: "#F3F4F6", titleColor: "#111827",titleNumber:"#1E3A8A" }; 
-  }
-};
-
-
-const cards = [
-  {
-    title: "Total Listings",
-    number: dealerData.total_cars ?? totalListings ?? tableData.length,
-    icon: activeIcon,
-    ...getCardColors("Total Listings"),
-  },
-  {
-    title: "Active Listings",
-    number: dealerData.active_cars ?? totalActive ?? 0,
-    icon: pendingIcon,
-    ...getCardColors("Active Listings"),
-  },
-  {
-    title: "Sold Listings",
-    number: dealerData.sold_cars ?? totalSold ?? 0,
-    icon: soldIcon,
-    ...getCardColors("Sold Listings"),
-  },
-  {
-    title: "Rejected Listings",
-    number: dealerData.rejected_cars ?? totalRejected ?? 0,
-    icon: modelIcon,
-    ...getCardColors("Rejected Listings"),
-  },
-];
 
 
   return (
     <div style={{ padding: 16 }}>
-      {contextHolder}
-
       <Breadcrumb
         separator={<img src={Right} alt="" style={{ height: 12 }} />}
         style={{ marginBottom: 16 }}
@@ -829,327 +633,21 @@ const cards = [
         </Button>
       </div>
 
-      <Row gutter={24}>
-        <Col xs={24} md={16}>
-          <Row gutter={24}>
-            <Col xs={24} md={12}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-                <img
-                  src={`${BASE_URL}${dealerData.profile_pic}`}
-                  alt="Dealer Logo"
-                  style={{
-                    width: 35,
-                    height: 35,
-                    borderRadius: 8,
-                    objectFit: "cover",
-                    flex: "0 0 35px",
-                  }}
-                  onError={(e) => {
-    e.target.onerror = null; 
-    e.target.src = Dealer;  
-  }}
-                />
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "18px",
-                      fontWeight: 600,
-                      color: "#111827",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {dealerData.company_name || "N/A"}
-                  </h3>
-                  <h6 style={{ margin: 0, marginTop: 4, fontSize: "14px", fontWeight: 400, color: "#4B5563" }}>
-                    Dealer ID: #{dealerData.user_id ?? "N/A"}
-                  </h6>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 8, marginTop: 18 }}>
-                <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
-                  Owner's Name
-                </strong>
-                <span>{dealerData.owner_name || "N/A"}</span>
-              </div>
-
-              <div style={{ marginBottom: 8 }}>
-                <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
-                  Email Address
-                </strong>
-                <span style={{ wordBreak: "break-word" }}>{dealerData.email || "N/A"}</span>
-              </div>
-
-              <div style={{ marginBottom: 8 }}>
-                <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
-                  Phone Number
-                </strong>
-                <span>{dealerData.phone_number || "N/A"}</span>
-              </div>
-
-              <div style={{ marginBottom: 8 }}>
-                <strong style={{ display: "block", marginBottom: 4, color: "#374151", fontSize: "14px", fontWeight: 500 }}>
-                  Registered Since
-                </strong>
-                <span>{dealerData.created_at ? dealerData.created_at.split(" ").slice(1, 4).join(" ") : "N/A"}</span>
-              </div>
-            </Col>
-
-            <Col xs={24} md={12}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", gap: 6 }}>
-                <div style={{ display: "", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>Account Status</div>
-                  <div>
-  <BoostStatus 
-    status={
-      dealerData?.status === "banned" 
-        ? "banned" 
-        : dealerData?.is_verified
-    } 
-  />
-</div>
-
-                </div>
-
-                <div style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>Verification Submitted On</div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{dealerData.created_at ? dealerData.created_at.split(" ").slice(1, 4).join(" ") : "N/A"}</div>
-              </div>
-            </Col>
-          </Row>
-        </Col>
-
-        <Col xs={24} md={8} style={{ paddingLeft: 12 }}>
-          <div style={{ position: "sticky", top: 24 }}>
-            <Card style={{ marginBottom: 16, backgroundColor: "#E6F4FC" }}>
-              <h3 style={{ marginBottom: 16, fontSize: "16px", fontWeight: "600" }}>Subscription Package</h3>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 500, color: "#4B5563" }}>Current Plan</span>
-                <Tag
-                  style={{
-                    backgroundColor: "#008AD5",
-                    color: "#FFFFFF",
-                    borderRadius: "22px",
-                    border: "none",
-                    padding: "2px 8px",
-                    fontWeight: 500,
-                  }}
-                >
-                  {dealerData.subscription_details?.plan_name ?? "N/A"}
-                </Tag>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Monthly Fee</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
-                  {dealerData.subscription_details?.price ? `${dealerData.subscription_details.price} ${dealerData.subscription_details.currency ?? ""}` : "N/A"}
-                </span>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Listing Limit</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
-                  {dealerData.subscription_details?.listing_limit ?? "N/A"}
-                </span>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Featured Listings</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
-                  10 per month
-                </span>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Next Payment</span>
-                <span style={{ wordBreak: "break-word", overflowWrap: "anywhere", fontWeight: 500, color: "#111827" }}>
-                  {dealerData.subscription_details?.end_date ? dealerData.subscription_details.end_date.split(" ").slice(0, 4).join(" ") : "N/A"}
-                </span>
-              </div>
-
-              {/* <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ marginRight: 6, fontWeight: 400, color: "#4B5563" }}>Payment Status</span>
-                <Tag
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    backgroundColor: dealerData.subscription_details?.subscription_status ? "#DCFCE7" : "#FEE2E2",
-                    color: dealerData.subscription_details?.subscription_status ? "#166534" : "#991B1B",
-                    borderRadius: "22px",
-                    border: "none",
-                    padding: "2px 10px",
-                    fontWeight: 500,
-                    width: "fit-content",
-                  }}
-                >
-                  {dealerData.subscription_details?.subscription_status ? "Active" : "Inactive"}
-                </Tag>
-              </div> */}
-            </Card>
-          </div>
-        </Col>
-      </Row>
+      <DealerProfileInfo dealerData={dealerData} />
 
       <SubmittedDocumentsCard documents={documents} />
 
-      <div style={{ display: "flex", gap: 8, marginTop: "5px" }}>
-       <Button
-  type="primary"
-  icon={<CheckOutlined style={{ color: "#FFFFFF" }} />}
-  style={{
-    borderRadius: 8,
-    flex: 1,
-    background:
-      dealerData?.status === "banned" ||
-      dealerData?.is_verified === "verified" ||
-      dealerData?.is_verified === "rejected"
-        ? "#D1D5DB" // light gray for disabled
-        : "#16A34A", // green active
-    fontWeight: 500,
-    fontSize: "12px",
-    color: "#FFFFFF",
-    cursor:
-      dealerData?.status === "banned" ||
-      dealerData?.is_verified === "verified" ||
-      dealerData?.is_verified === "rejected"
-        ? "not-allowed"
-        : "pointer",
-  }}
-  disabled={
-    dealerData?.status === "banned" ||
-    dealerData?.is_verified === "verified" ||
-    dealerData?.is_verified === "rejected"
-  }
-  onClick={
-    dealerData?.status === "banned" ||
-    dealerData?.is_verified === "verified" ||
-    dealerData?.is_verified === "rejected"
-      ? undefined
-      : () => approveDealer("verified")
-  }
-  loading={loadingApprove}
->
-  Approve Dealer
-</Button>
-
-{/* Reject Application Button */}
-<Button
-  icon={
-    <img
-      src={reject_d}
-      alt="reject"
-      style={{ width: 10, height: 10, filter: "brightness(0) invert(1)" }}
-    />
-  }
-  style={{
-    borderRadius: 8,
-    flex: 1,
-    background:
-      dealerData?.status === "banned" ||
-      dealerData?.is_verified === "verified" ||
-      dealerData?.is_verified === "rejected"
-        ? "#D1D5DB"
-        : "#DC2626",
-    color: "#FFFFFF",
-    fontWeight: 500,
-    fontSize: "12px",
-    cursor:
-      dealerData?.status === "banned" ||
-      dealerData?.is_verified === "verified" ||
-      dealerData?.is_verified === "rejected"
-        ? "not-allowed"
-        : "pointer",
-  }}
-  disabled={
-    dealerData?.status === "banned" ||
-    dealerData?.is_verified === "verified" ||
-    dealerData?.is_verified === "rejected"
-  }
-  onClick={
-    dealerData?.status === "banned" ||
-    dealerData?.is_verified === "verified" ||
-    dealerData?.is_verified === "rejected"
-      ? undefined
-      : () => approveDealer("rejected")
-  }
-  loading={loadingReject}
->
-  Reject Application
-</Button>
-
-
-        <Button
-          type="primary"
-          icon={<img src={info_d} alt="download" style={{ width: 12, height: 12 }} />}
-          style={{ borderRadius: 8, flex: 1, background: "#EA580C", color: "white", fontWeight: 500, fontSize: "12px" }}
-        >
-          Info Requested
-        </Button>
-
-        <Button
-  icon={
-    <img
-      src={flag_d}
-      alt="flag"
-      style={{
-        width: 12,
-        height: 12,
-        filter: "brightness(0) invert(1)", // keeps icon white
-      }}
-    />
-  }
-  style={{
-    borderRadius: 8,
-    flex: 1,
-    background:
-      dealerData?.status === "banned"
-        ? "#D1D5DB" // light gray if banned
-        : "#CA8A04", // yellow if active
-    color: "#FFFFFF",
-    fontWeight: 500,
-    fontSize: "12px",
-    cursor: dealerData?.status === "banned" ? "not-allowed" : "pointer",
-  }}
-  disabled={dealerData?.status === "banned"}
-  onClick={dealerData?.status === "banned" ? undefined : () => reporteduser("")}
-  loading={loadingFlagged}
->
-  Flag Account
-</Button>
-
-        <Button
-  icon={
-    <img
-      src={ban_d}
-      alt="ban"
-      style={{
-        width: 12,
-        height: 12,
-        filter: dealerData?.status === "banned" ? "brightness(0) invert(1)" : "none", // white icon when gray
-      }}
-    />
-  }
-  style={{
-    borderRadius: 8,
-    flex: 1,
-    background: dealerData?.status === "banned" ? "#D1D5DB" : "#1F2937", // light gray if banned
-    color: "#FFFFFF",
-    fontWeight: 500,
-    fontSize: "12px",
-    cursor: dealerData?.status === "banned" ? "not-allowed" : "pointer",
-  }}
-  disabled={dealerData?.status === "banned"}
-  onClick={dealerData?.status === "banned" ? undefined : () => bannedDealer()}
-  loading={loadingBanned}
->
-  Ban Dealer
-</Button>
-
-      </div>
+      <DealerActionButtons
+        dealerData={dealerData}
+        loadingApprove={loadingApprove}
+        loadingReject={loadingReject}
+        loadingFlagged={loadingFlagged}
+        loadingBanned={loadingBanned}
+        onApprove={approveDealer}
+        onReject={approveDealer}
+        onFlag={reporteduser}
+        onBan={bannedDealer}
+      />
 
       <div
         className="tile-card"
@@ -1167,56 +665,17 @@ const cards = [
           </div>
         </div>
 
-        <div style={{ overflowX: "auto",scrollbarWidth: "none", paddingBottom: 8, marginBottom: 2 }}>
-          <div style={{ display: "flex", gap: 12, flexWrap: "nowrap" }}>
-            {cards.length === 0 ? (
-              <div style={{ color: "#6B7280", padding: 12 }}>No packages to show</div>
-            ) : (
-              cards.map((card, idx) => (
-                <div key={idx} className="col-md-6 col-lg-3 mb-4" style={{ flex: "0 0 auto" }}>
-                 <div>
-  <div
-    className="card-body dashboard-card-body"
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: 12,
-      background: card.bgColor, 
-      borderRadius: 8,
-    }}
-  >
-    <div className="card-text-container">
-      <h5
-        className="card-individual-title"
-        style={{ margin: 0, color: card.titleColor, fontWeight: 500 }}
-      >
-        {card.title}
-      </h5>
-      <p className="card-individual-number" style={{ color: card.titleNumber, fontWeight: 700, margin: 0 }}>
-        {card.number}
-      </p>
-    </div>
-    <div
-      className="card-icon-individual-wrapper"
-      style={{ backgroundColor: card.bgColor, borderRadius: 8, padding: 8 }}
-    >
-      <img src={card.icon} alt={card.title} style={{ width: 20, height: 20 }} />
-    </div>
-  </div>
-              </div>
-
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <DealerSummaryCards
+          dealerData={dealerData}
+          totalListings={totalListings}
+          totalActive={totalActive}
+          totalSold={totalSold}
+          totalRejected={totalRejected}
+        />
 
         <div>
           <Table
-            columns={[
-              ...columns_boost,
-            ]}
+            columns={columns_boost}
             dataSource={tableData}
             loading={loading}
             rowKey="listingId"
@@ -1225,8 +684,6 @@ const cards = [
               current: page,
               pageSize: limit,
               total: totalListings,
-              //showSizeChanger: true,
-              //pageSizeOptions: ["10", "20", "50", "100", "200"],
               onChange: (p, pSize) => {
                 setPage(p);
                 if (pSize && pSize !== limit) setLimit(pSize);
@@ -1235,40 +692,37 @@ const cards = [
             title={() => (
               <Row justify="space-between" align="middle" style={{ background: "#fff" }}>
                 <Col style={{ display: "flex", alignItems: "center", gap: 12 }}>
-  {["All", "Active", "Pending", "Sold","Rejected"].map((status) => (
-    <Button
-      key={status}
-      size="small"
-      style={{
-        minWidth: 50,
-        fontSize: 10,
-        fontWeight: 500,
-        borderRadius: 6,
-        border: "none",
-        backgroundColor: listingFilter === status ? "#008AD5" : "#E5E7EB",
-        color: listingFilter === status ? "#FFFFFF" : "#374151",
-      }}
-      onClick={() => handleFilterChange(status)}
-    >
-      {status}
-    </Button>
-  ))}
-</Col>
+                  {["All", "Active", "Pending", "Sold","Rejected"].map((status) => (
+                    <Button
+                      key={status}
+                      size="small"
+                      style={{
+                        minWidth: 50,
+                        fontSize: 10,
+                        fontWeight: 500,
+                        borderRadius: 6,
+                        border: "none",
+                        backgroundColor: listingFilter === status ? "#008AD5" : "#E5E7EB",
+                        color: listingFilter === status ? "#FFFFFF" : "#374151",
+                      }}
+                      onClick={() => handleFilterChange(status)}
+                    >
+                      {status}
+                    </Button>
+                  ))}
+                </Col>
 
-<Col style={{ display: "flex", alignItems: "center", gap: 12 }}>
-  <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Sort by:</span>
-  <Select
-    value={sortOrder}
-    onChange={handleSortChange}
-    style={{ width: 180, borderRadius: 6, backgroundColor: "#D1D5DB", fontWeight:400,fontSize:"12px",color: "#fff" }}
-  >
-    <Option value="newest">Date Created(Newest)</Option>
-    <Option value="oldest">Oldest</Option>
-    {/* <Option value="PriceHigh">Price: High → Low</Option>
-    <Option value="PriceLow">Price: Low → High</Option> */}
-  </Select>
-</Col>
-
+                <Col style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Sort by:</span>
+                  <Select
+                    value={sortOrder}
+                    onChange={handleSortChange}
+                    style={{ width: 180, borderRadius: 6, backgroundColor: "#D1D5DB", fontWeight:400,fontSize:"12px",color: "#fff" }}
+                  >
+                    <Option value="newest">Date Created(Newest)</Option>
+                    <Option value="oldest">Oldest</Option>
+                  </Select>
+                </Col>
               </Row>
             )}
           />
