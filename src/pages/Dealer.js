@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import EditOutlined from "../assets/images/flag.svg";
 import DeleteOutlined from "../assets/images/banned.svg";
+import { FaFlag, FaBan } from "react-icons/fa";
 import National from "../assets/images/warning.svg";
 import Info from "../assets/images/info_1.svg";
 import Clock from "../assets/images/clock_1.svg";
@@ -46,7 +47,7 @@ const Dealer = () => {
     try {
       const body = {
         user_type: "dealer",
-        filter: filter || "",
+        filter: filter || "All",
         search: search || "",
         page,
         limit,
@@ -93,7 +94,10 @@ const Dealer = () => {
         const res = await loginApi.reporteduser(body);
          const data = res?.data;
        if (data?.status_code === 200) {
-       messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+       messageApi.open({
+          type: 'success',
+          content: data?.message || 'User flagged successfully',
+        });
        fetchDealers()
       } else {
         messageApi.error(data.message || "Failed to approve dealer");
@@ -372,11 +376,15 @@ const handleExport = async () => {
     background: "none",
     border: "none",
     padding: 0,
-    cursor: "pointer",
+    cursor: record.status === "banned" ? "not-allowed" : "pointer",
   }}
-  aria-label="Edit"
+  disabled={record.status === "banned"}
+  aria-label="Flag"
 >
-  <img src={EditOutlined} alt="Edit" style={{ width: 18, height: 18 }} />
+  <FaFlag
+    size={18}
+    color={record.status === "banned" ? "#D1D5DB" : "#CA8A04"} // light gray if banned, yellow otherwise
+  />
 </button>
 <button
   onClick={() => bannedDealer(record.id)}
@@ -384,11 +392,15 @@ const handleExport = async () => {
     background: "none",
     border: "none",
     padding: 0,
-    cursor: "pointer",
+    cursor: record.status === "banned" ? "not-allowed" : "pointer",
   }}
-  aria-label="Edit"
+  disabled={record.status === "banned"}
+  aria-label="Ban"
 >
-  <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18 }} />
+  <FaBan
+    size={18}
+    color={record.status === "banned" ? "#D1D5DB" : "#DC2626"} // light gray if banned, red otherwise
+  />
 </button>
         </div>
       ),

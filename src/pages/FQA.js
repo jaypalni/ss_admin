@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PlusOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Row, Col, Input, Modal, Popconfirm, message } from "antd";
+import { Button, Row, Col, Input, Modal, Popconfirm, message, Spin } from "antd";
 import editIcon from "../assets/images/edit.svg";
 import { FaTrash } from "react-icons/fa";
 import { loginApi } from "../services/api";
@@ -131,8 +131,25 @@ const FQA = ({ dealerData }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
+    <div className="max-w-3xl mx-auto p-4" style={{ position: "relative" }}>
       {contextHolder}
+
+      {/* Loader overlay */}
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(255,255,255,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+        >
+          <Spin size="large" tip="Loading..." />
+        </div>
+      )}
 
       <div
         style={{

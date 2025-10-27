@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import EditOutlined from "../assets/images/flag.svg";
 import DeleteOutlined from "../assets/images/banned.svg";
+import { FaFlag, FaBan } from "react-icons/fa";
 import "../assets/styles/individual.css";
 import { loginApi } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -122,7 +123,10 @@ const Individual = () => {
           const res = await loginApi.reporteduser(body);
            const data = res?.data;
          if (data?.status_code === 200) {
-         messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+         messageApi.open({
+          type: 'success',
+          content: data?.message || "User Flagged Successfully",
+        });
          fetchUsers()
         } else {
           messageApi.error(data.message || "Failed to approve dealer");
@@ -144,7 +148,10 @@ const Individual = () => {
           const res = await loginApi.banneduser(body);
            const data = res?.data;
          if (data?.status_code === 200) {
-         messageApi.error(res?.data?.message || "Failed to fetch dealer details");
+         messageApi.open({
+          type: 'success',
+          content: data?.message || "User Banned Successfully",
+        });
          fetchUsers()
         } else {
           messageApi.error(data.error || "Failed to banned dealer");
@@ -176,12 +183,34 @@ const Individual = () => {
       fullname: (u.full_name || "").trim() || "-",
       emailaddress: u.email || "-",
       phone: u.phone_number || "-",
-      registered: u.registered_since
-        ? u.registered_since.split(" ").slice(1, 4).join(" ")
-        : "-",
-      listings: u.no_of_listings != null ? u.no_of_listings : "-",
-      status: u.status ? String(u.status).toLowerCase() : "-",
+      registered: formatDate(u.registered_since),
+      listings: formatListings(u.no_of_listings),
+      status: formatStatus(u.status),
     }));
+
+  const formatDate = (dateStr) =>
+    dateStr ? dateStr.split(" ").slice(1, 4).join(" ") : "-";
+
+  const formatListings = (num) => (num != null ? num : "-");
+
+  const formatStatus = (status) =>
+    status ? String(status).toLowerCase() : "-";
+
+  const buildCsvRow = (row) => [
+    row.id,
+    row.fullname,
+    row.emailaddress,
+    row.phone,
+    row.registered,
+    row.listings,
+    capitalize(row.status),
+  ];
+
+  const capitalize = (str) =>
+    str && str !== "-" ? str.charAt(0).toUpperCase() + str.slice(1) : "-";
+
+  const escapeCsvCell = (cell) =>
+    `"${String(cell ?? "").replace(/"/g, '""')}"`;
 
   const buildCsv = (normalized) => {
     const headers = [
@@ -193,17 +222,10 @@ const Individual = () => {
       "Listings",
       "Status",
     ];
-    const rows = normalized.map((r) => [
-      r.id,
-      r.fullname,
-      r.emailaddress,
-      r.phone,
-      r.registered,
-      r.listings,
-      r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "-",
-    ]);
+
+    const rows = normalized.map(buildCsvRow);
     return [headers, ...rows]
-      .map((e) => e.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .map((row) => row.map(escapeCsvCell).join(","))
       .join("\n");
   };
 
@@ -212,34 +234,32 @@ const Individual = () => {
 
     const apiFilter = statusToApiFilter(statusFilter);
     const allRows = [];
-    let currentPage = 1;
     const pageSize = 1000;
+    let currentPage = 1;
     let totalFromApi = null;
+
+    const addFetchedData = (data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        allRows.push(...data);
+        return true;
+      }
+      return false;
+    };
 
     while (true) {
       const result = await fetchPage(currentPage, pageSize, apiFilter, searchValue);
+      if (!result) break;
+      const hasData = addFetchedData(result.data);
+      if (!hasData) break;
 
-      if (!result || !Array.isArray(result.data) || result.data.length === 0) {
-        if (currentPage === 1) {
-          messageApi.open({ type: "info", content: "No data to export" });
-          return;
-        }
+      const pagination = result.pagination;
+      if (pagination?.total) {
+        totalFromApi = pagination.total;
+        const totalPages = Math.ceil(totalFromApi / (pagination.limit || pageSize));
+        if (currentPage >= totalPages) break;
+      } else if (result.data.length < pageSize) {
         break;
       }
-
-      allRows.push(...result.data);
-
-      const pagination = result.pagination ?? null;
-
-      if (pagination && typeof pagination.total === "number") {
-        totalFromApi = pagination.total;
-        const pages = Math.ceil(totalFromApi / (pagination.limit || pageSize));
-        if (currentPage >= pages) break;
-        currentPage += 1;
-        continue;
-      }
-
-      if (result.data.length < pageSize) break;
       currentPage += 1;
     }
 
@@ -251,24 +271,34 @@ const Individual = () => {
     const normalized = normalizeRows(allRows);
     const csvContent = buildCsv(normalized);
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `users_export_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-
-    messageApi.open({ type: "success", content: `Export started for ${normalized.length} users` });
+    downloadCsv(csvContent, `users_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    messageApi.open({
+      type: "success",
+      content: `Export started for ${normalized.length} users`,
+    });
   } catch (error) {
     const errorData = handleApiError(error);
-    messageApi.open({ type: "error", content: errorData?.error || "Error exporting users" });
+    messageApi.open({
+      type: "error",
+      content: errorData?.error || "Error exporting users",
+    });
   } finally {
     setLoading(false);
   }
-      };
+};
+
+const downloadCsv = (content, filename) => {
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
 
 
   const columns = [
@@ -363,20 +393,40 @@ const Individual = () => {
             style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
             onClick={() => navigate(`/user-management/individual/${record.id}`)}
           />
-         <button
+         {/* Flag button */}
+<button
   onClick={() => reporteduser(record.id)}
-  style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
-  aria-label="Edit"
+  style={{
+    border: "none",
+    background: "transparent",
+    padding: 0,
+    cursor: record.status === "banned" ? "not-allowed" : "pointer",
+  }}
+  disabled={record.status === "banned"}
+  aria-label="Flag"
 >
-  <img src={EditOutlined} alt="edit" style={{ width: 18, height: 18 }} />
+  <FaFlag
+    size={18}
+    color={record.status === "banned" ? "#D1D5DB" : "#CA8A04"} // light gray if banned, yellow otherwise
+  />
 </button>
 
+{/* Ban button */}
 <button
   onClick={() => bannedDealer(record.id)}
-  style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
-  aria-label="Delete"
+  style={{
+    border: "none",
+    background: "transparent",
+    padding: 0,
+    cursor: record.status === "banned" ? "not-allowed" : "pointer",
+  }}
+  disabled={record.status === "banned"}
+  aria-label="Ban"
 >
-  <img src={DeleteOutlined} alt="delete" style={{ width: 18, height: 18 }} />
+  <FaBan
+    size={18}
+    color={record.status === "banned" ? "#D1D5DB" : "#DC2626"} // light gray if banned, red otherwise
+  />
 </button>
 
         </div>
