@@ -134,7 +134,6 @@ const FQA = ({ dealerData }) => {
     <div className="max-w-3xl mx-auto p-4" style={{ position: "relative" }}>
       {contextHolder}
 
-      {/* Loader overlay */}
       {loading && (
         <div
           style={{
@@ -151,19 +150,9 @@ const FQA = ({ dealerData }) => {
         </div>
       )}
 
-      <div
-        style={{
-          marginBottom: "16px",
-          backgroundColor: "#ffffff",
-          border: "1px solid #e5e7eb",
-          borderRadius: "8px",
-          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-          padding: "12px",
-        }}
-      >
-        <Row align="middle" justify="space-between">
+ <Row align="middle" justify="space-between">
           <Col>
-            <h2 className="text-lg font-semibold">FAQ (Questions & Answers)</h2>
+            <h2 className="text-lg font-bold">FAQ Management</h2>
           </Col>
           <Col>
             <Button
@@ -171,7 +160,7 @@ const FQA = ({ dealerData }) => {
               onClick={openNew}
               icon={<PlusOutlined />}
               style={{
-                padding: "0 25px",
+                padding: "0 10px",
                 height: 36,
                 background: "#008AD5",
                 color: "white",
@@ -182,6 +171,17 @@ const FQA = ({ dealerData }) => {
             </Button>
           </Col>
         </Row>
+
+      <div
+        style={{
+          marginBottom: "16px",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+          padding: "12px",
+        }}
+      >
 
         <div className="mt-5 space-y-4">
           {items.length === 0 && (

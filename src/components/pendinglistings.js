@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Input, Select, DatePicker, Table, Card, Row, Col, message } from "antd";
+import {
+  Input,
+  Select,
+  DatePicker,
+  Table,
+  Card,
+  Row,
+  Col,
+  message,
+} from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -12,23 +21,26 @@ const PendingListings = () => {
   const [searchValue, setSearchValue] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [sellerType, setSellerType] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [dateRange, setDateRange] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [carLocation, setCarLocation] = useState([]);
+  const [activeTab, setActiveTab] = useState("pending"); 
   const headerStyle = { fontSize: "12px", fontWeight: 500, color: "#6B7280" };
-
+  const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
 
+  const [pendingCount, setPendingCount] = useState(0);
+  const [approvedCount, setApprovedCount] = useState(0);
+
   const handleTableChange = (paginationInfo) => {
-    fetchPendingListings(paginationInfo.current, paginationInfo.pageSize);
+    fetchListings(paginationInfo.current, paginationInfo.pageSize);
   };
 
   const fetchRegion = async () => {
@@ -36,40 +48,38 @@ const PendingListings = () => {
       setLoading(true);
       const response = await userAPI.regionslist({});
       const data1 = handleApiResponse(response);
-
-     if (!data1?.data) {
-  message.error("No location data received");
-  setCarLocation([]);
-  return;
-}
-
+      if (!data1?.data) {
+        message.error("No location data received");
+        setCarLocation([]);
+        return;
+      }
       setCarLocation(data1.data);
     } catch (error) {
       const errorData = handleApiError(error);
-            messageApi.open({
-            type: "error",
-            content: errorData?.message || "Error exporting dealers",
-          });
+      messageApi.open({
+        type: "error",
+        content: errorData?.message || "Error fetching regions",
+      });
       setCarLocation([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchPendingListings = async (page = 1, limit = 10) => {
+  const fetchListings = async (page = 1, limit = 10) => {
     try {
       setLoading(true);
-
-      const normalizedFilter = statusFilter?.toString().toLowerCase() ?? "";
 
       const body = {
         search: searchValue ?? "",
         city_filter: cityFilter ?? "",
         date_range:
           dateRange && dateRange.length === 2
-            ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(dateRange[1]).format("DD/MM/YYYY")}`
+            ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(
+                dateRange[1]
+              ).format("DD/MM/YYYY")}`
             : "",
-        status: statusFilter ?? "",
+        status: activeTab === "pending" ? "Pending" : "Approved",
         seller_type: sellerType ?? "",
       };
 
@@ -77,62 +87,35 @@ const PendingListings = () => {
       const data = handleApiResponse(response);
 
       if (data?.data?.cars) {
-  const formattedData = data.data.cars
-    .filter((item) => {
-      if (!normalizedFilter) return true;
+        const formattedData = data.data.cars.map((item) => ({
+          key: item.car_id,
+          car_id: item.car_id,
+          referenceId: item.car_id,
+          dateSubmitted: item.date_submitted
+            ? dayjs(item.date_submitted).format("MMM DD, YYYY")
+            : "",
+          listingTitle: item.ad_title ?? "",
+          sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
+          location: item.location ?? "",
+          type: item.user_type === "dealer" ? "Dealer" : "Individual",
+          status: item.approval?.toString().toLowerCase() ?? "",
+        }));
 
-      const approval = item.approval?.toString().toLowerCase() ?? "";
-      const status = item.status?.toString().toLowerCase() ?? "";
+        setTableData(formattedData);
 
-      if (normalizedFilter === "sold") {
-        return status === "sold";
-      }
+        const p = data.data.pagination ?? {};
+        setPagination({
+          current: p.current_page ?? page,
+          pageSize: p.limit ?? limit,
+          total: p.total_cars ?? 0,
+        });
 
-      if (["pending", "approved", "rejected"].includes(normalizedFilter)) {
-        return (
-          approval === normalizedFilter ||
-          (!approval && status === normalizedFilter)
-        );
-      }
-
-      return status === normalizedFilter || approval === normalizedFilter;
-    })
-    .map((item) => {
-      const approval = item.approval?.toString().toLowerCase() ?? "";
-      const status = item.status?.toString().toLowerCase() ?? "";
-
-      let displayedStatus =
-        normalizedFilter === "sold" ? status || approval : approval || status;
-
-      if (approval === "approved" && status === "sold") {
-        displayedStatus = "sold";
-      }
-
-      return {
-        key: item.car_id,
-        car_id: item.car_id,
-        referenceId: item.car_id,
-        dateSubmitted: item.date_submitted
-          ? dayjs(item.date_submitted).format("MMM DD, YYYY")
-          : "",
-        listingTitle: item.ad_title ?? "",
-        sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
-        location: item.location ?? "",
-        type: item.user_type === "dealer" ? "Dealer" : "Individual",
-        status: displayedStatus,
-      };
-    });
-
-  setTableData(formattedData);
-
-  const p = data.data.pagination ?? {};
-  setPagination({
-    current: p.current_page ?? p.page ?? page,
-    pageSize: p.limit ?? limit,
-    total: p.total_cars ?? p.total ?? 0,
-  });
-}
- else {
+        if (activeTab === "pending") {
+          setPendingCount(p.total_cars ?? 0);
+        } else {
+          setApprovedCount(p.total_cars ?? 0);
+        }
+      } else {
         setTableData([]);
         setPagination((prev) => ({ ...prev, total: 0 }));
       }
@@ -140,7 +123,7 @@ const PendingListings = () => {
       const errorData = handleApiError(error);
       messageApi.open({
         type: "error",
-        content: errorData?.message || "Failed to fetch pending cars",
+        content: errorData?.message || "Failed to fetch listings",
       });
     } finally {
       setLoading(false);
@@ -148,16 +131,18 @@ const PendingListings = () => {
   };
 
   useEffect(() => {
-    fetchPendingListings(1, pagination.pageSize);
+    fetchListings(1, pagination.pageSize);
     fetchRegion();
-  }, [searchValue, cityFilter, sellerType, statusFilter, dateRange]);
+  }, [searchValue, cityFilter, sellerType, dateRange, activeTab]);
 
   const columns = [
     {
       title: <span style={headerStyle}>Reference ID</span>,
       dataIndex: "referenceId",
       key: "referenceId",
-      render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
+      render: (text) => (
+        <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>
+      ),
     },
     {
       title: <span style={headerStyle}>Date Submitted</span>,
@@ -203,21 +188,18 @@ const PendingListings = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const normalizedStatus = (status ?? "").toString().toLowerCase();
-
+        const normalized = (status ?? "").toString().toLowerCase();
         const statusMap = {
           approved: { display: "Active", bg: "#DCFCE7", color: "#166534" },
           rejected: { display: "Rejected", bg: "#FFE4E6", color: "#B91C1C" },
           sold: { display: "Sold", bg: "#DBEAFE", color: "#1E40AF" },
-          pending: { display: "Pending", bg: "#FFF7E6", color: "#FAAD14" },
+          pending: { display: "Pending", bg: "#FEF9C3", color: "#854D0E" },
         };
-
-        const { display, bg, color } = statusMap[normalizedStatus] ?? {
+        const { display, bg, color } = statusMap[normalized] ?? {
           display: status || "Pending",
-          bg: "#FFF7E6",
-          color: "#FAAD14",
+          bg: "#FEF9C3",
+          color: "#854D0E",
         };
-
         return (
           <span
             style={{
@@ -233,7 +215,6 @@ const PendingListings = () => {
         );
       },
     },
-
     {
       title: <span style={headerStyle}>Actions</span>,
       key: "actions",
@@ -259,8 +240,10 @@ const PendingListings = () => {
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
       >
-        {/* Filters Section */}
-        <Row gutter={16} style={{ marginBottom: 20, display: "flex", flexWrap: "wrap" }}>
+        <Row
+          gutter={16}
+          style={{ marginBottom: 20, display: "flex", flexWrap: "wrap" }}
+        >
           {[
             {
               label: "Search",
@@ -294,22 +277,14 @@ const PendingListings = () => {
             {
               label: "Seller Type",
               component: (
-                <Select value={sellerType} onChange={setSellerType} style={{ width: "100%" }}>
+                <Select
+                  value={sellerType}
+                  onChange={setSellerType}
+                  style={{ width: "100%" }}
+                >
                   <Option value="">All Types</Option>
                   <Option value="Individual">Individual</Option>
                   <Option value="Dealer">Dealer</Option>
-                </Select>
-              ),
-            },
-            {
-              label: "Status",
-              component: (
-                <Select value={statusFilter} onChange={setStatusFilter} style={{ width: "100%" }}>
-                  <Option value="">All</Option>
-                  <Option value="Pending">Pending</Option>
-                  <Option value="Approved">Approved</Option>
-                  <Option value="Sold">Sold</Option>
-                  <Option value="Rejected">Rejected</Option>
                 </Select>
               ),
             },
@@ -325,7 +300,11 @@ const PendingListings = () => {
               ),
             },
           ].map((item) => (
-            <Col key={item.label} flex="1" style={{ paddingLeft: 8, paddingRight: 8, marginBottom: 12 }}>
+            <Col
+              key={item.label}
+              flex="1"
+              style={{ paddingLeft: 8, paddingRight: 8, marginBottom: 12 }}
+            >
               <div style={{ marginBottom: 6 }}>
                 <strong>{item.label}</strong>
               </div>
@@ -334,10 +313,41 @@ const PendingListings = () => {
           ))}
         </Row>
 
-        {/* Table Section */}
-        <h3 style={{ marginBottom: 15, fontSize: "18px", fontWeight: "600" }}>
-          {statusFilter ? `${statusFilter} Listings (${pagination.total})` : `All Listings (${pagination.total})`}
-        </h3>
+       <div
+  style={{
+    display: "flex",
+    justifyContent: "start",
+    borderBottom: "1px solid #e0e0e0",
+    marginBottom: 20,
+    gap: 20,
+  }}
+>
+  {["pending", "approved"].map((tab) => (
+    <div
+      key={tab}
+      onClick={() => setActiveTab(tab)}
+      style={{
+        width: 180,
+        textAlign: "center",
+        padding: "12px 0",
+        cursor: "pointer",
+        fontWeight: 500,
+        color: activeTab === tab ? "#008AD5" : "#6B7280",
+        borderBottom:
+          activeTab === tab
+            ? "3px solid #008AD5"
+            : "3px solid transparent",
+        background: activeTab === tab ? "#EFF6FF" : "white",
+        borderRadius: "8px 8px 0 0",
+        transition: "all 0.3s ease",
+      }}
+    >
+      {tab === "pending"
+        ? `Pending Listings (${pendingCount})`
+        : `Approved Listings (${approvedCount})`}
+    </div>
+  ))}
+</div>
 
         <Table
           dataSource={tableData}
@@ -346,7 +356,9 @@ const PendingListings = () => {
             current: pagination.current,
             pageSize: pagination.pageSize,
             total: pagination.total,
-            showSizeChanger: false,
+            showSizeChanger: true,
+            onChange: (p) => setPage(p),
+            showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} results`,
           }}
           loading={loading}
           bordered={false}

@@ -1,7 +1,6 @@
 import React,{useEffect} from 'react';
 import AllCarsDashboard from '../components/allcarsdashboard'; 
 import PendingListings from "../components/pendinglistings";
-import MostPopularModels from "../components/mostpopularmodels";
 import { useNavigate } from 'react-router-dom';
 import {  useSelector } from 'react-redux';
 
@@ -28,7 +27,6 @@ const ListingManagement = () => {
     >
       <AllCarsDashboard /> 
       <PendingListings /> 
-      <MostPopularModels /> 
     </div>
   );
 };
