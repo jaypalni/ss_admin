@@ -152,74 +152,110 @@ const Dealer = () => {
 
 
 const handleExport = async () => {
+  const fetchPage = async (page, pageSize, apiFilter, searchValue) => {
+    const body = {
+      user_type: "individual",
+      filter: apiFilter ?? "",
+      search: searchValue ?? "",
+      page,
+      limit: pageSize,
+    };
+    const response = await loginApi.getallusers(body);
+    return handleApiResponse(response);
+  };
+
+  const normalizeRows = (rows = []) =>
+    rows.map((u) => ({
+      id: String(u.id),
+      fullname: (u.full_name || "").trim() || "-",
+      emailaddress: u.email || "-",
+      phone: u.phone_number || "-",
+      registered: u.registered_since
+        ? u.registered_since.split(" ").slice(1, 4).join(" ")
+        : "-",
+      listings: u.no_of_listings != null ? u.no_of_listings : "-",
+      status: u.status ? String(u.status).toLowerCase() : "-",
+    }));
+
+  const buildCsv = (normalized) => {
+    const headers = ["ID", "Company", "Owner", "Email", "Phone", "Registered", "Listings", "Status"];
+    const rows = normalized.map((r) => [
+      r.id,
+      r.company,
+      r.owner,
+      r.email,
+      r.phone,
+      r.registered,
+      r.listings,
+      r.status,
+    ]);
+    return [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+  };
+
   try {
     setLoading(true);
 
-    const body = {
-      user_type: "dealer",
-      filter: "",   
-      search: "", 
-      page: "",
-      limit: "",
-    };
+    const apiFilter = statusToApiFilter(statusFilter);
+    const allRows = [];
+    let currentPage = 1;
+    const pageSize = 1000;
+    let totalFromApi = null;
 
-    const response = await loginApi.getallusers(body);
-    const result = handleApiResponse(response);
+    while (true) {
+      const result = await fetchPage(currentPage, pageSize, apiFilter, searchValue);
 
-    if (!result?.data || result.data.length === 0) {
-      message.warning("No dealer data available to export");
+      if (!result || !Array.isArray(result.data) || result.data.length === 0) {
+        if (currentPage === 1) {
+          messageApi.open({ type: "info", content: "No data to export" });
+          return;
+        }
+        break;
+      }
+
+      allRows.push(...result.data);
+
+      const pagination = result.pagination ?? null;
+
+      if (pagination && typeof pagination.total === "number") {
+        totalFromApi = pagination.total;
+        const pages = Math.ceil(totalFromApi / (pagination.limit || pageSize));
+        if (currentPage >= pages) break;
+        currentPage += 1;
+        continue;
+      }
+
+      if (result.data.length < pageSize) break;
+      currentPage += 1;
+    }
+
+    if (allRows.length === 0) {
+      messageApi.open({ type: "info", content: "No data to export" });
       return;
     }
 
-    const allDealers = result.data.map((d) => ({
-      id: String(d.id),
-      company: d.company_name || "-",
-      owner: d.owner_name || "-",
-      email: d.email || "-",
-      phone: d.phone_number || "-",
-      registered: d.registered_since ? d.registered_since.split(" ").slice(1, 4).join(" ") : "-",
-      listings: d.no_of_listings || 0,
-      status: d.status || "-",
-    }));
-
-    const headers = ["ID", "Company", "Owner", "Email", "Phone", "Registered", "Listings", "Status"];
-    const rows = allDealers.map((d) => [
-      d.id,
-      d.company,
-      d.owner,
-      d.email,
-      d.phone,
-      d.registered,
-      d.listings,
-      d.status,
-    ]);
-
-    const csvContent = [headers, ...rows]
-      .map((e) => e.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
-      .join("\n");
+    const normalized = normalizeRows(allRows);
+    const csvContent = buildCsv(normalized);
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `dealers_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `users_export_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
 
-    message.success(`Export started for ${allDealers.length} dealers`);
+    messageApi.open({ type: "success", content: `Export started for ${normalized.length} users` });
   } catch (error) {
     const errorData = handleApiError(error);
-    messageApi.open({
-      type: "error",
-      content: errorData?.error || "Error exporting dealers",
-    });
+    messageApi.open({ type: "error", content: errorData?.error || "Error exporting users" });
   } finally {
     setLoading(false);
   }
-};
-
+      };
 
   const columns = [
     {

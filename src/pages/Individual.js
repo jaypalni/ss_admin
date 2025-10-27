@@ -213,7 +213,7 @@ const Individual = () => {
     const apiFilter = statusToApiFilter(statusFilter);
     const allRows = [];
     let currentPage = 1;
-    const pageSize = pageSize;
+    const pageSize = 1000;
     let totalFromApi = null;
 
     while (true) {
