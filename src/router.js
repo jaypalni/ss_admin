@@ -43,6 +43,7 @@ import DealerDetails from "./pages/DealerDetails";
 import FQA from "./pages/FQA";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import EditFaq from "./pages/EditFaq";
 
 
 const AppRouter = () => {
@@ -299,11 +300,19 @@ const AppRouter = () => {
             </AppLayout>
           }
         />
-        <Route
-          path="/FAQ'S"
+         <Route
+          path="/Add/FAQ'S"
           element={
             <AppLayout>
-              <FQA />
+              <EditFaq />
+            </AppLayout>
+          }
+        />
+         <Route
+          path="/FAQ'S/:id"
+          element={
+            <AppLayout>
+              <EditFaq />
             </AppLayout>
           }
         />

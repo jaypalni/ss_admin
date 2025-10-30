@@ -38,7 +38,7 @@ const StatusTag = ({ status }) => {
   );
 };
 
-const ActionButtons = ({ onReportUser, onBanUser, loadingFlagged, loadingBanned }) => (
+const ActionButtons = ({ onReportUser, onBanUser, loadingFlagged, loadingBanned, isFlagged, }) => (
   <div style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
     <Button
       onClick={onReportUser}
@@ -60,7 +60,7 @@ const ActionButtons = ({ onReportUser, onBanUser, loadingFlagged, loadingBanned 
     >
       <FlagOutlined style={{ fontSize: 18 }} />
       <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-        <span style={{ fontSize: 12 }}>Flag</span>
+        <span style={{ fontSize: 12 }}>{isFlagged ? "Unflag" : "Flag"}</span>
         <span style={{ fontSize: 12 }}>User</span>
       </div>
     </Button>
@@ -170,13 +170,39 @@ export const IndividualProfileHeader = ({
         </div>
       </div>
 
-      {dealerData.status !== "banned" && (
-        <ActionButtons
-          onReportUser={onReportUser}
-          onBanUser={onBanUser}
-          loadingFlagged={loadingFlagged}
-          loadingBanned={loadingBanned}
-        />
+      {dealerData.status === "banned" ? (
+ <Button
+      onClick={onBanUser}
+      loading={loadingBanned}
+      style={{
+        background: "#FEE2E2",
+        borderColor: "#FEE2E2",
+        color: "#991B1B",
+        fontWeight: 400,
+        width: 100,
+        height: 60,
+        borderRadius: 8,
+        padding: "8px 12px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+      }}
+    >
+      <StopOutlined style={{ fontSize: 14 }} />
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+        <span style={{ fontSize: 12 }}>Unban</span>
+        <span style={{ fontSize: 12 }}>User</span>
+      </div>
+    </Button>
+      ) : (
+  <ActionButtons
+    onReportUser={onReportUser}
+    onBanUser={onBanUser}
+    loadingFlagged={loadingFlagged}
+    loadingBanned={loadingBanned}
+    isFlagged={dealerData.is_flagged === 1}
+  />
       )}
     </div>
   );

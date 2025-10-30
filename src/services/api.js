@@ -216,14 +216,26 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.REPORTEDFLAG,body),
     banneduser: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.BANNEDUSER,body),
+    unbanneduser: (id) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.UNBANNEDUSER(id)),
+    unflaggeduser: (id) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.UNREPORTEDFLAG(id)),
     savefaq: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.SAVEFAQ,body),
-    getfaq:() =>
-    api.get(API_CONFIG.ENDPOINTS.LOGIN.GETFAQ),
+    getfaq:(body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.GETFAQ,body),
     editfaq: (id,body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.EDITFAQ(id),body),
     deletefaq: (id) =>
     api.delete(API_CONFIG.ENDPOINTS.LOGIN.DELETEFAQ(id)),
+    addfaq: (lang,body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.ADDFAQ(lang),body),
+    updatefaq: (id,body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.UPDATEFAQ(id),body),
+    geteditfaq: (id) =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.EDITFAQ(id)),
+    privacypolicy: (PrivacyPolicy) =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.PRIVACYPOLICY(PrivacyPolicy)),
 };
 export const bestcarAPI = {};
 

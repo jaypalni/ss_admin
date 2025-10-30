@@ -273,7 +273,7 @@ function AppLayout({ children }) {
   },
   "/financials/transactions": {
     title: "Transactions",
-    tagline: "Track all financial transactions",
+    tagline: "Manage all platform financial transactions",
   },
   "/user-management": {
     title: "User Management",
@@ -301,6 +301,10 @@ function AppLayout({ children }) {
     tagline: "Manage your password and security settings",
   },
    "/FAQ'S": {
+    title: "FAQ Management",
+    tagline: "Content / FAQ Management",
+  },
+   "/Add/FAQ'S": {
     title: "FAQ Management",
     tagline: "Content / FAQ Management",
   },
