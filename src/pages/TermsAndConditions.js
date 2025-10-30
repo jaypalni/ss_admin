@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 const PrivacyPolicy = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("arabic");
+  const [lastUpdated, setLastUpdated] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
   const { user,token } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ const tabItems = [ { key: "arabic", label: ( <div style={{ display: "flex", alig
       activeTab === "arabic" ? "ar" : activeTab === "english" ? "en" : "ku";
 
     const body = {
-      type: "privacy_policy",
+      type: "terms_and_conditions",
       lang: langCode,
       is_draft: isDraft,
       message:
@@ -55,11 +56,17 @@ const tabItems = [ { key: "arabic", label: ( <div style={{ display: "flex", alig
     };
 
     try {
-      const res = await loginApi.privacypolicy("PrivacyPolicy", body);
+      const res = await loginApi.termsandcondition(body);
       const data = res?.data;
 
-      if (data?.success) {
+      if (data?.status_code === 201) {
         messageApi.success(data?.message || "Privacy Policy saved successfully");
+        setLastUpdated(data?.data?.last_updated || new Date().toLocaleString());
+        setFaqData({
+        arabic: "",
+        english: "",
+        kurdish: "",
+      });
       } else {
         messageApi.error(data?.message || "Failed to save Privacy Policy");
       }
@@ -96,7 +103,7 @@ const tabItems = [ { key: "arabic", label: ( <div style={{ display: "flex", alig
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <CalendarOutlined style={{ fontSize: "15px", color: "#6B7280" }} />
             <span style={{ fontSize: 14, color: "#6B7280", fontWeight: 400 }}>
-              Last updated: October 15, 2024
+              Last updated: {lastUpdated.last_updated}
             </span>
           </div>
 

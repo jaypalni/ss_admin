@@ -71,6 +71,8 @@ const API_CONFIG = {
       UPDATEFAQ:(id) => `api/admin/faqs/${id}`,
       EDITFAQ:(id) => `api/admin/faqs/${id}`,
       PRIVACYPOLICY:(PrivacyPolicy) => `/api/admin/content?term=${PrivacyPolicy}`,
+      TERMSANDCONDITIONS: "/api/admin/content",
+      GETDATA: "/api/admin/content",
     },
 
     BESTCAR: {},
