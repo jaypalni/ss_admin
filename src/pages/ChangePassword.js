@@ -10,7 +10,7 @@ import {
   Divider,
   Form,
 } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Right from "../assets/images/Right.svg";
 import change from "../assets/images/change.svg";
 import lock from "../assets/images/Lock.svg";
@@ -18,7 +18,7 @@ import bluelogo_icon2 from "../assets/images/Frame.svg";
 import { loginApi } from "../services/api";
 import PropTypes from "prop-types";
 import { handleApiError } from "../utils/apiUtils";
-import { encryptData, decryptData } from "../utils/CryptoJS";
+import { encryptData } from "../utils/CryptoJS";
 
 const validatePasswordRequirements = (password) => {
   const allowedSpecial = "@#$%&";
@@ -246,7 +246,7 @@ const ChangePassword = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div className="logo-wrapper-1">
+            <div className="logo-wrapper-5">
               <img src={lock} alt="logo" />
             </div>
 

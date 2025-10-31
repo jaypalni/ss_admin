@@ -112,8 +112,9 @@ const PendingListings = () => {
 
         if (activeTab === "pending") {
           setPendingCount(p.total_cars ?? 0);
+          setApprovedCount(p.total_approved ?? 0)
         } else {
-          setApprovedCount(p.total_cars ?? 0);
+          setApprovedCount(p.total_cars  ?? 0);
         }
       } else {
         setTableData([]);

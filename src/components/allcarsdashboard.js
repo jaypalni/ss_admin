@@ -18,7 +18,7 @@ function AllCarsDashboard() {
   const dashboardcounts = async () => {
     try {
       setLoading(true);
-      const response = await userAPI.dashboardstats();
+      const response = await userAPI.dashboardstats1();
       const result = handleApiResponse(response);
 
       if (result?.data) {

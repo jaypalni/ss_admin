@@ -149,7 +149,9 @@ export const userAPI = {
       api.get(API_CONFIG.ENDPOINTS.USER.REGIONS_LIST),
     reasonRejection: () =>
     api.get(API_CONFIG.ENDPOINTS.USER.REASON_REJECTIONS),
-    dashboardstats: () => 
+    dashboardstats: (body) => 
+      api.post(API_CONFIG.ENDPOINTS.USER.DASHBOARD_STATS,body),
+    dashboardstats1: () => 
       api.get(API_CONFIG.ENDPOINTS.USER.DASHBOARD_STATS),
     pendingcars: (body, page = 1, limit = 10) => 
   api.post(API_CONFIG.ENDPOINTS.USER.PENDING_CARS(page, limit), body),

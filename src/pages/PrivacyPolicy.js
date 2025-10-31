@@ -179,7 +179,7 @@ const tabItems = [ { key: "arabic", label: ( <div style={{ display: "flex", alig
             modules={modules}
             style={{
               height: "200px",
-              marginBottom: "20px",
+              marginBottom: "40px",
               direction: "rtl",
               textAlign: "right",
               fontStyle: "italic",
@@ -199,7 +199,7 @@ const tabItems = [ { key: "arabic", label: ( <div style={{ display: "flex", alig
             modules={modules}
             style={{
               height: "200px",
-              marginBottom: "20px",
+              marginBottom: "40px",
               direction: "ltr",
               textAlign: "left",
               fontStyle: "italic",
@@ -219,7 +219,7 @@ const tabItems = [ { key: "arabic", label: ( <div style={{ display: "flex", alig
             modules={modules}
             style={{
               height: "200px",
-              marginBottom: "20px",
+              marginBottom: "40px",
               direction: "ltr",
               textAlign: "left",
               fontStyle: "italic",
