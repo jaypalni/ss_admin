@@ -4,12 +4,15 @@ import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "./redux/store";
-import App from "./App";
+import AppRoot from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "antd/dist/reset.css";
+
 import "./index.css";
 import { attachStore } from "./services/api";
 import reportWebVitals from './reportWebVitals';
+
+import { App } from "antd";
 
 attachStore(store);
 
@@ -19,7 +22,9 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+         <App>  
+          <AppRoot />
+        </App>
       </PersistGate>
     </Provider>
   </React.StrictMode>

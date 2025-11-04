@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Input, Select, Table, Card, Row, Col, Button, message } from "antd";
+import { Input, Select, Table, Card, Row, Col, Button, message,Popconfirm  } from "antd";
 import { EyeOutlined, DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -133,26 +133,33 @@ const Dealer = () => {
     };
   
 
-  useEffect(() => {
+useEffect(() => {
   if (debounceRef.current) clearTimeout(debounceRef.current);
 
   debounceRef.current = setTimeout(() => {
     const apiFilter = statusToApiFilter(statusFilter);
 
-    const fetchPage = searchValue ? 1 : page;
+    if (searchValue.length > 1) {
+      fetchDealers({
+        page,  
+        limit,
+        filter: apiFilter,
+        search: searchValue,
+      });
+    } else if (searchValue.length === 0) {
+      fetchDealers({
+        page,
+        limit,
+        filter: apiFilter,
+        search: "",
+      });
+    }
 
-    setPage(fetchPage);
-
-    fetchDealers({
-      page: fetchPage,
-      limit,
-      filter: apiFilter,
-      search: searchValue,
-    });
   }, DEBOUNCE_MS);
 
   return () => clearTimeout(debounceRef.current);
 }, [statusFilter, searchValue, page, limit]);
+
 
 
 const handleExport = async () => {
@@ -268,36 +275,117 @@ const handleExport = async () => {
       key: "id",
       render: (text) => <span style={{ color: "black", cursor: "pointer" }}>{text}</span>,
       width: 80,
+      onCell: (record) => ({
+        style: { cursor: "pointer" },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
+      
     },
     {
-      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Company</span>,
-      dataIndex: "company",
-      key: "company",
-      width: 180,
+  title: (
+    <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>
+      Company
+    </span>
+  ),
+  dataIndex: "company",
+  key: "company",
+  sorter: (a,b) => a.company?.localeCompare(b.company),
+  width: 100,
+  ellipsis: true,
+  render: (text) => (
+    <span
+      style={{
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        display: "block",
+        maxWidth: "180px",
+      }}
+    >
+      {text || "-"}
+    </span>
+  ),
+  onCell: (record) => ({
+    style: {
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
     },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
+},
+
     {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Owner</span>,
       dataIndex: "owner",
       key: "owner",
-      width: 180,
+      width: 120,
+      onCell: (record) => ({
+        style: { cursor: "pointer" },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
     },
-    {
-      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Contact</span>,
-      dataIndex: "contact",
-      key: "contact",
-      width: 300,
-      render: (_, record) => (
-        <div>
-          <div>{record.email}</div>
-          <div>{record.phone}</div>
-        </div>
-      ),
+   {
+  title: (
+    <span
+      style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}
+    >
+      Contact
+    </span>
+  ),
+  dataIndex: "contact",
+  key: "contact",
+  width: 170,
+  onCell: (record) => ({
+    style: {
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
     },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
+  render: (_, record) => (
+    <div style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}>
+      <div
+        style={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        title={record.email}
+      >
+        {record.email || "-"}
+      </div>
+      <div
+        style={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        title={record.phone}
+      >
+        {record.phone || "-"}
+      </div>
+    </div>
+  ),
+},
+
     {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Registered</span>,
       dataIndex: "registered",
       key: "registered",
-      width: 140,
+       sorter: (a,b) => {
+    const da = new Date(a.registered)
+    const db = new Date(b.registered)
+    return da - db
+  },
+      width: 110,
+      onCell: (record) => ({
+        style: { cursor: "pointer" },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
     },
     {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Listings</span>,
@@ -305,12 +393,21 @@ const handleExport = async () => {
       key: "listings",
       align: "center",
       width: 120,
+      onCell: (record) => ({
+        style: { cursor: "pointer" },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
     },
 {
   title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Status</span>,
   dataIndex: "status",
   key: "status",
   width: 160,
+  sorter: (a,b) => a.status?.localeCompare(b.status),
+  onCell: (record) => ({
+    style: { cursor: "pointer" },
+    onClick: () => navigate(`/user-management/dealer/${record.id}`),
+  }),
   render: (status) => {
     if (!status) return null;
 
@@ -328,7 +425,15 @@ const handleExport = async () => {
         bgColor = "#FEF9C3";
         textColor = "#854D0E";
         break;
+      case "flagged":
+        bgColor = "#FEF9C3";
+        textColor = "#854D0E";
+        break;
       case "rejected":
+        bgColor = "#FEE2E2";
+        textColor = "#991B1B";
+        break;
+      case "banned":
         bgColor = "#FEE2E2";
         textColor = "#991B1B";
         break;
@@ -364,46 +469,66 @@ const handleExport = async () => {
       key: "actions",
       align: "center",
       width: 140,
+      onCell: () => ({
+     onClick: (e) => e.stopPropagation(),
+  }),
       render: (_, record) => (
-        <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-          <EyeOutlined
-            style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
-            onClick={() => navigate(`/user-management/dealer/${record.id}`)}
-          />
-          <button
-  onClick={() => reporteduser(record.id)}
-  style={{
-    background: "none",
-    border: "none",
-    padding: 0,
-    cursor: record.status === "banned" ? "not-allowed" : "pointer",
-  }}
-  disabled={record.status === "banned"}
-  aria-label="Flag"
->
-  <FaFlag
-    size={18}
-    color={record.status === "banned" ? "#D1D5DB" : "#CA8A04"} // light gray if banned, yellow otherwise
-  />
-</button>
-<button
-  onClick={() => bannedDealer(record.id)}
-  style={{
-    background: "none",
-    border: "none",
-    padding: 0,
-    cursor: record.status === "banned" ? "not-allowed" : "pointer",
-  }}
-  disabled={record.status === "banned"}
-  aria-label="Ban"
->
-  <FaBan
-    size={18}
-    color={record.status === "banned" ? "#D1D5DB" : "#DC2626"} // light gray if banned, red otherwise
-  />
-</button>
-        </div>
-      ),
+  <div style={{ display: "flex", justifyContent: "center", gap: 12 }} onClick={(e) => e.stopPropagation()}>
+    <EyeOutlined
+      style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+      onClick={() => navigate(`/user-management/dealer/${record.id}`)}
+    />
+
+    <Popconfirm
+      title="Are you sure you want to flag this user?"
+      onConfirm={() => reporteduser(record.id)}
+      okText="Yes"
+      cancelText="No"
+      disabled={record.status === "banned"}
+    >
+      <button
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: record.status === "banned" ? "not-allowed" : "pointer",
+        }}
+        disabled={record.status === "banned"}
+        aria-label="Flag"
+      >
+        <FaFlag
+          size={18}
+          color={record.status === "banned" ? "#D1D5DB" : "#CA8A04"}
+        />
+      </button>
+    </Popconfirm>
+
+    <Popconfirm
+      title="Are you sure you want to ban this user?"
+      onConfirm={() => bannedDealer(record.id)}
+      okText="Yes"
+      cancelText="No"
+      disabled={record.status === "banned"}
+    >
+      <button
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: record.status === "banned" ? "not-allowed" : "pointer",
+        }}
+        disabled={record.status === "banned"}
+        aria-label="Ban"
+      >
+        <FaBan
+          size={18}
+          color={record.status === "banned" ? "#D1D5DB" : "#DC2626"}
+        />
+      </button>
+    </Popconfirm>
+  </div>
+),
+
     },
   ];
 
@@ -414,7 +539,7 @@ const handleExport = async () => {
         <Row justify="space-between" align="middle">
           <Col style={{ display: "flex", gap: 12 }}>
             <Input
-              placeholder="Search dealers by company, owner, email, phone or ID..."
+              placeholder="Search dealers by company, owner, email, or phone..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               style={{ width: 420 }}
@@ -429,7 +554,8 @@ const handleExport = async () => {
               <Option value="pending verification">Pending</Option>
               <Option value="banned">Banned</Option>
               <Option value="flagged">Flagged</Option>
-              {/* <Option value="Info Requested">Info Requested</Option> */}
+              <Option value="rejected">Rejected</Option>
+              <Option value="info requested">Info Requested</Option>
             </Select>
             <Button type="primary" onClick={handleExport} icon={<DownloadOutlined />} style={{ backgroundColor: "#16A34A" }}>
               Export
@@ -446,6 +572,9 @@ const handleExport = async () => {
           rowKey="id"
           bordered={false}
           loading={loading}
+          locale={{
+    emptyText: <span>No users found. Try adjusting your search or filters.</span>
+  }}
           pagination={{
             current: page,
             pageSize: limit,

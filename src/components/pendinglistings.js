@@ -21,13 +21,14 @@ const PendingListings = () => {
   const [searchValue, setSearchValue] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [sellerType, setSellerType] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [dateRange, setDateRange] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [carLocation, setCarLocation] = useState([]);
-  const [activeTab, setActiveTab] = useState("pending"); 
+  const [activeTab, setActiveTab] = useState("pending");
   const headerStyle = { fontSize: "12px", fontWeight: 500, color: "#6B7280" };
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
@@ -79,7 +80,12 @@ const PendingListings = () => {
                 dateRange[1]
               ).format("DD/MM/YYYY")}`
             : "",
-        status: activeTab === "pending" ? "Pending" : "Approved",
+        // use statusFilter if provided, otherwise base on activeTab
+        status: statusFilter
+          ? statusFilter
+          : activeTab === "pending"
+          ? "Pending"
+          : "Approved",
         seller_type: sellerType ?? "",
       };
 
@@ -98,7 +104,9 @@ const PendingListings = () => {
           sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
           location: item.location ?? "",
           type: item.user_type === "dealer" ? "Dealer" : "Individual",
-          status: item.approval?.toString().toLowerCase() ?? "",
+          // keep both fields for column logic
+          approval: (item.approval ?? "").toString().toLowerCase(),
+          status: (item.status ?? "").toString().toLowerCase(),
         }));
 
         setTableData(formattedData);
@@ -112,9 +120,9 @@ const PendingListings = () => {
 
         if (activeTab === "pending") {
           setPendingCount(p.total_cars ?? 0);
-          setApprovedCount(p.total_approved ?? 0)
+          setApprovedCount(p.total_approved ?? 0);
         } else {
-          setApprovedCount(p.total_cars  ?? 0);
+          setApprovedCount(p.total_cars ?? 0);
         }
       } else {
         setTableData([]);
@@ -134,7 +142,8 @@ const PendingListings = () => {
   useEffect(() => {
     fetchListings(1, pagination.pageSize);
     fetchRegion();
-  }, [searchValue, cityFilter, sellerType, dateRange, activeTab]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue, cityFilter, sellerType, statusFilter, dateRange, activeTab]);
 
   const columns = [
     {
@@ -188,19 +197,33 @@ const PendingListings = () => {
       title: <span style={headerStyle}>Status</span>,
       dataIndex: "status",
       key: "status",
-      render: (status) => {
-        const normalized = (status ?? "").toString().toLowerCase();
+      render: (_, record) => {
+        // approval = approved/pending/rejected (from API)
+        // status = sold or empty (from API)
+        const approval = (record.approval ?? "").toString().toLowerCase();
+        const soldFlag = (record.status ?? "").toString().toLowerCase();
+
+        // Priority: if approved AND status === "sold" => show Sold
+        let finalStatus = "";
+        if (approval === "approved" && soldFlag === "sold") {
+          finalStatus = "sold";
+        } else {
+          finalStatus = approval || "pending";
+        }
+
         const statusMap = {
           approved: { display: "Active", bg: "#DCFCE7", color: "#166534" },
           rejected: { display: "Rejected", bg: "#FFE4E6", color: "#B91C1C" },
           sold: { display: "Sold", bg: "#DBEAFE", color: "#1E40AF" },
           pending: { display: "Pending", bg: "#FEF9C3", color: "#854D0E" },
         };
-        const { display, bg, color } = statusMap[normalized] ?? {
-          display: status || "Pending",
+
+        const { display, bg, color } = statusMap[finalStatus] ?? {
+          display: finalStatus || "Pending",
           bg: "#FEF9C3",
           color: "#854D0E",
         };
+
         return (
           <span
             style={{
@@ -290,6 +313,24 @@ const PendingListings = () => {
               ),
             },
             {
+              label: "Status",
+              component: (
+                <Select
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  style={{ width: "100%" }}
+                  placeholder="Select Status"
+                  allowClear
+                >
+                  <Option value="">All</Option>
+                  <Option value="approved">Approved</Option>
+                  <Option value="pending">Pending</Option>
+                  <Option value="rejected">Rejected</Option>
+                  <Option value="sold">Sold</Option>
+                </Select>
+              ),
+            },
+            {
               label: "Date Range",
               component: (
                 <DatePicker.RangePicker
@@ -314,41 +355,44 @@ const PendingListings = () => {
           ))}
         </Row>
 
-       <div
-  style={{
-    display: "flex",
-    justifyContent: "start",
-    borderBottom: "1px solid #e0e0e0",
-    marginBottom: 20,
-    gap: 20,
-  }}
->
-  {["pending", "approved"].map((tab) => (
-    <div
-      key={tab}
-      onClick={() => setActiveTab(tab)}
-      style={{
-        width: 180,
-        textAlign: "center",
-        padding: "12px 0",
-        cursor: "pointer",
-        fontWeight: 500,
-        color: activeTab === tab ? "#008AD5" : "#6B7280",
-        borderBottom:
-          activeTab === tab
-            ? "3px solid #008AD5"
-            : "3px solid transparent",
-        background: activeTab === tab ? "#EFF6FF" : "white",
-        borderRadius: "8px 8px 0 0",
-        transition: "all 0.3s ease",
-      }}
-    >
-      {tab === "pending"
-        ? `Pending Listings (${pendingCount})`
-        : `Approved Listings (${approvedCount})`}
-    </div>
-  ))}
-</div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "start",
+            borderBottom: "1px solid #e0e0e0",
+            marginBottom: 20,
+            gap: 20,
+          }}
+        >
+          {["pending", "approved"].map((tab) => (
+            <div
+              key={tab}
+              onClick={() => {
+                setStatusFilter("");
+                setActiveTab(tab);
+              }}
+              style={{
+                width: 180,
+                textAlign: "center",
+                padding: "12px 0",
+                cursor: "pointer",
+                fontWeight: 500,
+                color: activeTab === tab ? "#008AD5" : "#6B7280",
+                borderBottom:
+                  activeTab === tab
+                    ? "3px solid #008AD5"
+                    : "3px solid transparent",
+                background: activeTab === tab ? "#EFF6FF" : "white",
+                borderRadius: "8px 8px 0 0",
+                transition: "all 0.3s ease",
+              }}
+            >
+              {tab === "pending"
+                ? `Pending Listings (${pendingCount})`
+                : `Approved Listings (${approvedCount})`}
+            </div>
+          ))}
+        </div>
 
         <Table
           dataSource={tableData}
@@ -359,7 +403,8 @@ const PendingListings = () => {
             total: pagination.total,
             showSizeChanger: true,
             onChange: (p) => setPage(p),
-            showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} results`,
+            showTotal: (total, range) =>
+              `Showing ${range[0]} to ${range[1]} of ${total} results`,
           }}
           loading={loading}
           bordered={false}

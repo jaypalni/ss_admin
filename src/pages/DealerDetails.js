@@ -9,7 +9,7 @@ import {
   Empty,
   message,
   Table,
-  Select,
+  Select,Modal
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -102,7 +102,7 @@ const BoostStatus = ({ status }) => {
 
 
 const DocumentCard = ({ doc, onDownload, onCancel }) => {
-  const isApproved = doc.status === "Validated";
+  const isApproved = doc.status === "";
 
   return (
     <Card size="large" style={{ borderRadius: 8 }}>
@@ -127,7 +127,7 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
         >
           {doc.title}
         </div>
-        <div style={{ marginLeft: 12 }}>
+        {/* <div style={{ marginLeft: 12 }}>
           <Tag
             style={{
               display: "inline-flex",
@@ -144,7 +144,7 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
             {isApproved ? <CheckOutlined style={{ color: "#16A34A" }} /> : <img src={warning} alt="Not Approved" style={{ width: 12, height: 12 }} />}
             {doc.status}
           </Tag>
-        </div>
+        </div> */}
       </div>
 
       <img
@@ -636,7 +636,6 @@ const DealerDetails = () => {
       <DealerProfileInfo dealerData={dealerData} />
 
       <SubmittedDocumentsCard documents={documents} />
-
       <DealerActionButtons
         dealerData={dealerData}
         loadingApprove={loadingApprove}

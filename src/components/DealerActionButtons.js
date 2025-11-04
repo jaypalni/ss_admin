@@ -1,5 +1,5 @@
-import React from "react";
-import { Button } from "antd";
+import React, { useState } from "react";
+import { Button, Modal } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
 import reject_d from "../assets/images/reject_d.svg";
 import info_d from "../assets/images/info_d.svg";
@@ -17,6 +17,8 @@ export const DealerActionButtons = ({
   onFlag,
   onBan,
 }) => {
+  const [modalType, setModalType] = useState(null);
+
   const isBanned = dealerData?.status === "banned";
   const isVerified = dealerData?.is_verified === "verified";
   const isRejected = dealerData?.is_verified === "rejected";
@@ -44,13 +46,30 @@ export const DealerActionButtons = ({
     />
   );
 
+  const handleOk = () => {
+    if (modalType === "approve") onApprove("verified");
+    if (modalType === "reject") onReject("rejected");
+    if (modalType === "flag") onFlag("");
+    if (modalType === "ban") onBan();
+
+    setModalType(null);
+  };
+
+  const getModalMessage = () => {
+    if (modalType === "approve") return "Do you want to approve this dealer?";
+    if (modalType === "reject") return "Do you want to reject this application?";
+    if (modalType === "flag") return "Do you want to flag this account?";
+    if (modalType === "ban") return "Do you want to ban this dealer?";
+    return "";
+  };
+
   const buttons = [
     {
       key: "approve",
       text: "Approve Dealer",
       icon: <CheckOutlined style={{ color: "#FFFFFF" }} />,
       style: getCommonButtonStyle("#16A34A"),
-      onClick: () => onApprove("verified"),
+      onClick: () => setModalType("approve"),
       loading: loadingApprove,
       disabled: isDisabled,
     },
@@ -59,7 +78,7 @@ export const DealerActionButtons = ({
       text: "Reject Application",
       icon: getIcon(reject_d, 10, 10, true),
       style: getCommonButtonStyle("#DC2626"),
-      onClick: () => onReject("rejected"),
+      onClick: () => setModalType("reject"),
       loading: loadingReject,
       disabled: isDisabled,
     },
@@ -77,7 +96,7 @@ export const DealerActionButtons = ({
       text: "Flag Account",
       icon: getIcon(flag_d, 12, 12, true),
       style: getCommonButtonStyle("#CA8A04", isBanned),
-      onClick: () => onFlag(""),
+      onClick: () => setModalType("flag"),
       loading: loadingFlagged,
       disabled: isBanned,
     },
@@ -86,28 +105,39 @@ export const DealerActionButtons = ({
       text: "Ban Dealer",
       icon: getIcon(ban_d, 12, 12, isBanned),
       style: getCommonButtonStyle("#1F2937", isBanned),
-      onClick: () => onBan(),
+      onClick: () => setModalType("ban"),
       loading: loadingBanned,
       disabled: isBanned,
     },
   ];
 
   return (
-    <div style={{ display: "flex", gap: 8, marginTop: "5px" }}>
-      {buttons.map(
-        ({ key, text, icon, style, onClick, loading, disabled }) => (
+    <>
+      <div style={{ display: "flex", gap: 8, marginTop: "5px" }}>
+        {buttons.map(({ key, text, icon, style, onClick, loading, disabled }) => (
           <Button
             key={key}
             icon={icon}
             style={style}
             disabled={disabled}
-            onClick={disabled || !onClick ? undefined : onClick}
+            onClick={onClick}
             loading={loading}
           >
             {text}
           </Button>
-        )
-      )}
-    </div>
+        ))}
+      </div>
+
+      <Modal
+        title="Are you sure?"
+        open={!!modalType}
+        onOk={handleOk}
+        onCancel={() => setModalType(null)}
+        okText="Yes"
+        cancelText="No"
+      >
+        {getModalMessage()}
+      </Modal>
+    </>
   );
 };

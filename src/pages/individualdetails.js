@@ -24,7 +24,7 @@ const Individualdetails = () => {
   const [sortOrder, setSortOrder] = useState("Newest"); 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [avatarSrc, setAvatarSrc] = useState(avatarFallback);
+  const [avatarSrc, setAvatarSrc] = useState("");
 
   const {
     dealerData,
@@ -39,6 +39,7 @@ const Individualdetails = () => {
   const {
     loadingFlagged,
     loadingBanned,
+    contextHolder,
     reportedUser,
     bannedDealer
   } = useIndividualActions(dealerData, navigate);
@@ -70,32 +71,54 @@ const Individualdetails = () => {
       render: (text) => <span style={{ color: "#111827" }}>{text}</span>,
     },
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: 10, fontWeight: 600 }}>Status</span>,
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        let bgColor = "#FEF9C3";
-        let textColor = "#854D0E";
-        if (String(status).toLowerCase().includes("approved")) {
-          bgColor = "#DCFCE7";
-          textColor = "#166534";
-        } else if (String(status).toLowerCase().includes("rejected")) {
-          bgColor = "#FEE2E2";
-          textColor = "#991B1B";
-        } else if (String(status).toLowerCase().includes("sold")) {
-          bgColor = "#DBEAFE";
-          textColor = "#1E40AF";
-        }else if (String(status).toLowerCase().includes("pending")) {
-          bgColor = "#FEF9C3";
-          textColor = "#854D0E";
-        }
-        return (
-          <span style={{ backgroundColor: bgColor, color: textColor, padding: "2px 8px", borderRadius: 8, fontSize: 12 }}>
-            {status}
-          </span>
-        );
-      },
-    },
+  title: () => (
+    <span style={{ color: "#6B7280", fontSize: 10, fontWeight: 600 }}>
+      Status
+    </span>
+  ),
+  dataIndex: "status",
+  key: "status",
+  render: (status) => {
+    const text = String(status).toLowerCase();
+
+    let bgColor = "#FEF9C3";
+    let textColor = "#854D0E";
+    let displayText = status;
+
+    if (text.includes("approved")) {
+      bgColor = "#DCFCE7";
+      textColor = "#166534";
+      displayText = "Active"; 
+    } else if (text.includes("rejected")) {
+      bgColor = "#FEE2E2";
+      textColor = "#991B1B";
+      displayText = "Rejected";
+    } else if (text.includes("sold")) {
+      bgColor = "#DBEAFE";
+      textColor = "#1E40AF";
+      displayText = "Sold";
+    } else if (text.includes("pending")) {
+      bgColor = "#FEF9C3";
+      textColor = "#854D0E";
+      displayText = "Pending";
+    }
+
+    return (
+      <span
+        style={{
+          backgroundColor: bgColor,
+          color: textColor,
+          padding: "2px 8px",
+          borderRadius: 8,
+          fontSize: 12,
+        }}
+      >
+        {displayText}
+      </span>
+    );
+  },
+},
+
     {
       title: () => <span style={{ color: "#6B7280", fontSize: 12, fontWeight: 500 }}>Date Created</span>,
       dataIndex: "date",
@@ -114,6 +137,7 @@ const Individualdetails = () => {
 
   return (
     <div className="content-wrapper-allcardashboard">
+      {contextHolder}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 8,marginTop:10 }}>
         <Button
           icon={<ArrowLeftOutlined />}

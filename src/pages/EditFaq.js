@@ -26,6 +26,7 @@ const EditFaq = () => {
   const [activeTab, setActiveTab] = useState("english");
   const [messageApi, contextHolder] = message.useMessage();
   const {user,token} = useSelector((state) => state.auth);
+  const [saving, setSaving] = useState(false);
 
   const isEdit = Boolean(id);
 
@@ -42,15 +43,26 @@ const EditFaq = () => {
     category: "",
   });
 
+  const [errors, setErrors] = useState({
+    question: "",
+    answer: "",
+    category: "",
+  });
+
   const handleChange = (lang, field, value) => {
-    setFaqData((prev) => ({
-      ...prev,
-      [lang]: {
-        ...prev[lang],
-        [field]: value,
-      },
-    }));
-  };
+  setFaqData((prev) => ({
+    ...prev,
+    [lang]: {
+      ...prev[lang],
+      [field]: value,
+    },
+  }));
+
+  setErrors((prev) => ({
+    ...prev,
+    [field]: "",   
+  }));
+};
 useEffect(() => {
   if (!isEdit) return;
 
@@ -101,6 +113,8 @@ useEffect(() => {
 }, [id, isEdit]);
 
   const handleSubmit = async () => {
+    if (!validate()) return;
+    setSaving(true)
     const langCode = activeTab.slice(0, 2);
     const body = {
       question: faqData[activeTab].question,
@@ -136,7 +150,30 @@ useEffect(() => {
     } catch (err) {
       console.error("FAQ save error:", err);
       messageApi.error(err?.message || "Something went wrong while saving FAQ");
+    }finally{
+       setSaving(false)
     }
+  };
+
+const validate = () => {
+    let valid = true;
+    let newErrors = { question: "", answer: "", category: "" };
+
+    if (!faqData[activeTab].question.trim()) {
+      newErrors.question = "Question is required";
+      valid = false;
+    }
+    if (!faqData[activeTab].answer.trim()) {
+      newErrors.answer = "Answer is required";
+      valid = false;
+    }
+    if (!faqData.category) {
+      newErrors.category = "Status is required";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
   };
 
   const tabItems = [
@@ -265,75 +302,49 @@ useEffect(() => {
           items={tabItems}
         />
 
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{
-              fontWeight: 500,
-              fontSize: 14,
-              color: "#374151",
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            {`Question (${activeTab})`}
-          </label>
+       <div style={{ marginBottom: 16 }}>
+          <label style={{ fontWeight: 500, fontSize: 14 }}>Question</label>
           <Input
-            placeholder={`Enter your ${activeTab} question here...`}
+            placeholder="Enter question"
             value={faqData[activeTab].question}
-            onChange={(e) =>
-              handleChange(activeTab, "question", e.target.value)
-            }
-            style={{ borderRadius: 6 }}
+            onChange={(e) => handleChange(activeTab, "question", e.target.value)}
           />
+          {errors.question && (
+            <p style={{ color: "red", marginTop: 4 }}>{errors.question}</p>
+          )}
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label
-            style={{
-              fontWeight: 500,
-              fontSize: 14,
-              color: "#374151",
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            {`Answer (${activeTab})`}
-          </label>
+          <label style={{ fontWeight: 500, fontSize: 14 }}>Answer</label>
           <TextArea
             rows={5}
-            placeholder={`Enter your ${activeTab} answer here...`}
+            placeholder="Enter answer"
             value={faqData[activeTab].answer}
-            onChange={(e) =>
-              handleChange(activeTab, "answer", e.target.value)
-            }
-            style={{ borderRadius: 6 }}
+            onChange={(e) => handleChange(activeTab, "answer", e.target.value)}
           />
+          {errors.answer && (
+            <p style={{ color: "red", marginTop: 4 }}>{errors.answer}</p>
+          )}
         </div>
 
-        <div style={{ marginTop: 20 }}>
-          <label
-            style={{
-              fontWeight: 500,
-              fontSize: 14,
-              color: "#374151",
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            Status
-          </label>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontWeight: 500, fontSize: 14 }}>Status</label>
           <Select
             placeholder="Select a status"
             value={faqData.category}
-            onChange={(value) =>
-              setFaqData({ ...faqData, category: value })
-            }
+            onChange={(value) => {
+              setFaqData({ ...faqData, category: value });
+              setErrors((prev) => ({ ...prev, category: "" }));
+            }}
             style={{ width: "100%" }}
             options={[
               { value: "draft", label: "Draft" },
               { value: "published", label: "Published" },
             ]}
           />
+          {errors.category && (
+            <p style={{ color: "red", marginTop: 4 }}>{errors.category}</p>
+          )}
         </div>
 
         <div
@@ -363,6 +374,8 @@ useEffect(() => {
             type="primary"
             icon={<SaveOutlined />}
             onClick={handleSubmit}
+            loading={saving} 
+            disabled={saving}
             style={{
               backgroundColor: "#008AD5",
               borderColor: "#008AD5",

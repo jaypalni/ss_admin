@@ -5,7 +5,7 @@ import { loginApi } from "../services/api";
 export const useIndividualActions = (dealerData, navigate) => {
   const [loadingFlagged, setLoadingFlagged] = useState(false);
   const [loadingBanned, setLoadingBanned] = useState(false);
-  const [messageApi] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage();
 
 const reportedUser = async () => {
   if (!dealerData) return;
@@ -28,7 +28,7 @@ const reportedUser = async () => {
             ? "User unflagged successfully"
             : "User flagged successfully")
       );
-      setTimeout(() => navigate("/user-management/individual"), 1000);
+      setTimeout(() => navigate("/user-management/individual"), 2000);
     } else {
       messageApi.error(data?.message || data?.error || "Failed to update user flag status");
     }
@@ -89,6 +89,7 @@ const reportedUser = async () => {
   return {
     loadingFlagged,
     loadingBanned,
+    contextHolder,
     messageApi,
     reportedUser,
     bannedDealer,

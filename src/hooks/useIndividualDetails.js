@@ -51,9 +51,12 @@ export const useIndividualDetails = (individualId, listingFilter, sortOrder, pag
         listingId: item.car_id ?? item.id ?? `generated-${idx}`,
         title: item.ad_title ?? item.title ?? "-",
         location: item.location ?? "-",
-        status:
-          (item.approval && String(item.approval).charAt(0).toUpperCase() + String(item.approval).slice(1)) ||
-          "-",
+       status:
+    item.status?.toLowerCase() === "sold" && item.approval?.toLowerCase() === "approved"
+      ? "Sold"
+      : (item.approval
+          ? String(item.approval).charAt(0).toUpperCase() + String(item.approval).slice(1)
+          : "-"),
         date: item.created_at ? item.created_at.split(" ").slice(1, 4).join(" ") : "-",
         price: item.price ? Number(item.price).toLocaleString() : "-",
         _raw: item,
