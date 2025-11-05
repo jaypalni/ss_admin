@@ -242,6 +242,8 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.TERMSANDCONDITIONS,body),
     getdata: () =>
     api.get(API_CONFIG.ENDPOINTS.LOGIN.GETDATA),
+    gettranscations: (body) =>
+    api.post(API_CONFIG.ENDPOINTS.LOGIN.GETTRANSCATIONS,body),
 };
 export const bestcarAPI = {};
 

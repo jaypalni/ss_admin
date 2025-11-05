@@ -73,6 +73,7 @@ const API_CONFIG = {
       PRIVACYPOLICY:(PrivacyPolicy) => `/api/admin/content?term=${PrivacyPolicy}`,
       TERMSANDCONDITIONS: "/api/admin/content",
       GETDATA: "/api/admin/content",
+      GETTRANSCATIONS: "/api/admin/transactions",
     },
 
     BESTCAR: {},
