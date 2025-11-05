@@ -393,23 +393,23 @@ const columns_boost = [
 
     if (record.status?.toLowerCase() === "sold") {
       displayText = "Sold";
-      bgColor = "#D5F0FF";
-      textColor = "#008AD5";
+      bgColor = "#DBEAFE";
+      textColor = "#1E40AF";
     } else if (val === "approved") {
       displayText = "Active";
-      bgColor = "#A4F4E7";
-      textColor = "#0B7B69";
+      bgColor = "#DCFCE7";
+      textColor = "#166534";
     } else if (val === "pending") {
       displayText = "Pending";
-      bgColor = "#FFEDD5";
-      textColor = "#D67900";
+      bgColor = "#FEF9C3";
+      textColor = "#854D0E";
     } else if (val === "rejected") {
       displayText = "Rejected";
-      bgColor = "#FEE2E2"; // light red
-      textColor = "red";
+      bgColor = "#FEE2E2";
+      textColor = "#991B1B";
     } else {
-      displayText = val; // fallback
-      bgColor = "#F3F4F6"; // default light gray
+      displayText = val; 
+      bgColor = "#F3F4F6";
       textColor = "#374151";
     }
 
