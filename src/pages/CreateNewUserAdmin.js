@@ -115,7 +115,10 @@ useEffect(() => {
         const resData =  handleApiResponse(res?.data);;
         if (resData?.status_code === 200) {
           messageApi.success(resData.message || "Admin updated successfully");
+           setTimeout(() => {
           navigate("/Admins");
+        }, 1000);
+         
         } else {
           messageApi.error(resData?.message || "Failed to update admin");
         }

@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { FiClock, FiUser,FiMoreVertical  } from "react-icons/fi"
 import { loginApi } from "../services/api";
 import { handleApiError } from "../utils/apiUtils";
+import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
 const { Option } = Select;
@@ -44,6 +45,11 @@ const FQA = ({ dealerData }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+const isLoggedIn = token && user;
+ const { user,token } = useSelector((state) => state.auth);
+  useEffect(() => {
+        if (!isLoggedIn) navigate("/");
+      }, [isLoggedIn, navigate]);
 
 useEffect(() => {
   fetchFAQ();

@@ -105,14 +105,11 @@ const getErrorMessage = (err) =>
   err?.message ||
   "Something went wrong";
 
-// PackageCard component
 const PackageCard = ({ item, isBoost = false }) => {
   const icon = getPackageIcon(item.name, item.isSummary, isBoost, item.duration);
   const iconBgColor = getIconBackgroundColor(icon, item.duration, isBoost, item.isSummary);
   const percentageData = formatPercentage(item.percentage);
   const displayValue = getCardDisplayValue(item);
-
-  // Extract display title
   const displayTitle = isBoost ? (item.isSummary ? "Total" : `${item.duration}-Day Boost`) : item.name;
 
   return (
@@ -196,7 +193,6 @@ PackageCard.propTypes = {
   isBoost: PropTypes.bool,
 };
 
-// Main Pricing component
 const Pricing = () => {
   const didMountRef = useRef(false);
   const navigate = useNavigate();
@@ -208,6 +204,9 @@ const Pricing = () => {
   const [totalListingPercentage, setTotalListingPercentage] = useState(0);
   const [totalBoostingActive, setTotalBoostingActive] = useState(0);
   const [totalBoostingPercentage, setTotalBoostingPercentage] = useState(0);
+  const [listingPage, setListingPage] = useState(1);
+  const [listingTotal, setListingTotal] = useState(0);
+  const listingLimit = 10;
 
   const { user, token } = useSelector((state) => state.auth);
   const isLoggedIn = token && user;
@@ -219,13 +218,13 @@ const Pricing = () => {
   useEffect(() => {
     if (didMountRef.current) return;
     didMountRef.current = true;
-    fetchAdminData();
+    fetchAdminData(listingPage, listingLimit);
   }, []);
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = async (listingPage = 1, listingLimit = 10) => {
     try {
       setLoading(true);
-      const response = await loginApi.getsubscriptionpackage();
+      const response = await loginApi.getsubscriptionpackage(listingPage, listingLimit);
       const data = handleApiResponse(response);
 
       if (data?.data) {
@@ -240,6 +239,8 @@ const Pricing = () => {
 
         setTotalBoostingActive(parseNumericValue(data.total_boosting_active));
         setTotalBoostingPercentage(parseNumericValue(data.total_boosting_percentage));
+        setListingTotal(data?.pagination?.total || listings.length);
+
       } else {
         setListingData([]);
         setBoostingData([]);
@@ -247,6 +248,7 @@ const Pricing = () => {
         setTotalListingPercentage(0);
         setTotalBoostingActive(0);
         setTotalBoostingPercentage(0);
+        setListingTotal(0);
       }
     } catch (error) {
       const errorData = handleApiError(error);
@@ -319,7 +321,7 @@ const Pricing = () => {
       const data = handleApiResponse(response);
       if (data?.status_code === 200) {
         messageApi.success(data?.message || "Package deleted successfully");
-        fetchAdminData();
+        fetchAdminData(listingPage, listingLimit);
       } else {
         messageApi.error(data?.message || "Failed to delete package");
       }
@@ -334,7 +336,6 @@ const Pricing = () => {
     }
   };
 
-  // Table columns
   const columns = [
     {
       title: "Package Name",
@@ -541,6 +542,16 @@ const Pricing = () => {
           dataSource={listingData}
           loading={loading}
           locale={{ emptyText: <Empty description="No packages found" /> }}
+          pagination={{
+            current: listingPage,
+            pageSize: listingLimit,
+            total: listingTotal,
+            onChange: (p) => {
+              setListingPage(p);
+              fetchAdminData(p, listingLimit);
+            },
+            showSizeChanger: false,
+          }}
         />
       </div>
 
@@ -599,6 +610,7 @@ const Pricing = () => {
           dataSource={boostingData}
           loading={loading}
           locale={{ emptyText: <Empty description="No packages found" /> }}
+          pagination={false} // <-- removed pagination
         />
       </div>
     </div>

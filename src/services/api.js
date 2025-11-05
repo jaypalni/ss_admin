@@ -197,8 +197,8 @@ export const loginApi = {
     api.post(API_CONFIG.ENDPOINTS.LOGIN.BESTCARSPICK,body),
     makedata: () =>
     api.get(API_CONFIG.ENDPOINTS.LOGIN.MAKEDATA),
-    getsubscriptionpackage: () =>
-    api.get(API_CONFIG.ENDPOINTS.LOGIN.SUBSCRIPTIONPACKAGE),
+    getsubscriptionpackage: (page, limit) =>
+    api.get(API_CONFIG.ENDPOINTS.LOGIN.SUBSCRIPTIONPACKAGE(page,limit)),
     editsubscriptionpackage: (body) =>
     api.post(API_CONFIG.ENDPOINTS.LOGIN.EDITSUBSCRIPTIONPACKAGE,body),
     createsubscriptionpackage: (body) =>
