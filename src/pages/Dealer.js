@@ -85,48 +85,75 @@ const Dealer = () => {
     }
   };
 
-  const reporteduser = async (id) => {
+  const reporteduser = async (id,status) => {
       try {
        setLoading(true);
         const body = {
         report_id: id,       
       };
-        const res = await loginApi.reporteduser(body);
+      const isCurrentlyFlagged = status === "flagged"; 
+       const res = isCurrentlyFlagged
+      ? await loginApi.unflaggeduser(id) 
+      : await loginApi.reporteduser(body); 
          const data = res?.data;
        if (data?.status_code === 200) {
        messageApi.open({
           type: 'success',
           content: data?.message || 'User flagged successfully',
         });
-       fetchDealers()
+        fetchDealers({
+        page,
+        limit,
+        filter: statusToApiFilter(statusFilter),
+        search: searchValue,
+      });
       } else {
         messageApi.error(data.message || "Failed to approve dealer");
       }
       } catch (err) {
-         console.error("fetchDealerDetails error:", err);
-        messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+        const errorMsg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Something went wrong";
+
+    messageApi.error(errorMsg);
       }finally {
        setLoading(false);
     }
     };
   
-    const bannedDealer = async (id) => {
+    const bannedDealer = async (id,status) => {
       try {
        setLoading(true);
-        const body = {
-        user_id: id,       
-      };
-        const res = await loginApi.banneduser(body);
+        const isCurrentlyBanned = status === "banned";
+        const body = { user_id: id };
+
+      const res = isCurrentlyBanned
+        ? await loginApi.unbanneduser(id) 
+        : await loginApi.banneduser(body); 
          const data = res?.data;
        if (data?.status_code === 200) {
-       messageApi.error(res?.data?.message || "Failed to fetch dealer details");
-       fetchDealers()
+      messageApi.open({
+          type: 'success',
+          content: data?.message || data.error || "Failed to UnBan"});
+       fetchDealers({
+        page,
+        limit,
+        filter: statusToApiFilter(statusFilter),
+        search: searchValue,
+      });
       } else {
-        messageApi.error(data.message || "Failed to banned dealer");
+        messageApi.error(data.message || data.error || "Failed to banned dealer");
       }
       } catch (err) {
-         console.error("fetchDealerDetails error:", err);
-        messageApi.error(err?.message || "Something went wrong while fetching dealer details");
+        const errorMsg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Something went wrong";
+
+    messageApi.error(errorMsg);
       }finally {
        setLoading(false);
     }
@@ -165,7 +192,7 @@ useEffect(() => {
 const handleExport = async () => {
   const fetchPage = async (page, pageSize, apiFilter, searchValue) => {
     const body = {
-      user_type: "individual",
+      user_type: "dealer",
       filter: apiFilter ?? "",
       search: searchValue ?? "",
       page,
@@ -273,7 +300,21 @@ const handleExport = async () => {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>ID</span>,
       dataIndex: "id",
       key: "id",
-      render: (text) => <span style={{ color: "black", cursor: "pointer" }}>{text}</span>,
+      render: (text) => (
+  <span style={{
+      display: "inline-block",
+      maxWidth: 70,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      color: "#111827",
+      cursor: "pointer",
+      fontWeight: 400,
+      fontSize: "14px",
+  }}>
+    {text}
+  </span>
+),
       width: 80,
       onCell: (record) => ({
         style: { cursor: "pointer" },
@@ -465,71 +506,74 @@ const handleExport = async () => {
   },
 },
     {
-      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Actions</span>,
-      key: "actions",
-      align: "center",
-      width: 140,
-      onCell: () => ({
-     onClick: (e) => e.stopPropagation(),
-  }),
-      render: (_, record) => (
-  <div style={{ display: "flex", justifyContent: "center", gap: 12 }} onClick={(e) => e.stopPropagation()}>
-    <EyeOutlined
-      style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
-      onClick={() => navigate(`/user-management/dealer/${record.id}`)}
-    />
+  title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Actions</span>,
+  key: "actions",
+  align: "center",
+  width: 140,
+  render: (_, record) => {
+    const isFlagged = record.status === "flagged";
+    const isBanned = record.status === "banned";
 
-    <Popconfirm
-      title="Are you sure you want to flag this user?"
-      onConfirm={() => reporteduser(record.id)}
-      okText="Yes"
-      cancelText="No"
-      disabled={record.status === "banned"}
-    >
-      <button
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: record.status === "banned" ? "not-allowed" : "pointer",
-        }}
-        disabled={record.status === "banned"}
-        aria-label="Flag"
-      >
-        <FaFlag
-          size={18}
-          color={record.status === "banned" ? "#D1D5DB" : "#CA8A04"}
+    return (
+      <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+        <EyeOutlined
+          style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/user-management/dealer/${record.id}`);
+          }}
         />
-      </button>
-    </Popconfirm>
 
-    <Popconfirm
-      title="Are you sure you want to ban this user?"
-      onConfirm={() => bannedDealer(record.id)}
-      okText="Yes"
-      cancelText="No"
-      disabled={record.status === "banned"}
-    >
-      <button
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: record.status === "banned" ? "not-allowed" : "pointer",
-        }}
-        disabled={record.status === "banned"}
-        aria-label="Ban"
-      >
-        <FaBan
-          size={18}
-          color={record.status === "banned" ? "#D1D5DB" : "#DC2626"}
-        />
-      </button>
-    </Popconfirm>
-  </div>
-),
+        <Popconfirm
+          title={
+            isFlagged
+              ? "Are you sure you want to unflag this user?"
+              : "Are you sure you want to flag this user?"
+          }
+          okText="Yes"
+          cancelText="No"
+          onConfirm={() => reporteduser(record.id,record.status)} // ONE API
+        >
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FaFlag size={18} color= "#CA8A04"/>
+          </button>
+        </Popconfirm>
 
-    },
+        <Popconfirm
+          title={
+            isBanned
+              ? "Are you sure you want to unban this user?"
+              : "Are you sure you want to ban this user?"
+          }
+          okText="Yes"
+          cancelText="No"
+          onConfirm={() => bannedDealer(record.id,record.status)} // ONE API
+        >
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FaBan size={18} color="#DC2626" />
+          </button>
+        </Popconfirm>
+      </div>
+    );
+  },
+}
+
   ];
 
   return (

@@ -352,15 +352,65 @@ const PackageCard = ({ item }) => {
   );
 };
 
-const columns_boost = [
+BoostStatus.propTypes = {
+  status: PropTypes.string,
+};
+
+DocumentCard.propTypes = {
+  doc: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    title: PropTypes.string,
+    status: PropTypes.string,
+    submittedOn: PropTypes.string,
+  }).isRequired,
+  onDownload: PropTypes.func,
+  onCancel: PropTypes.func,
+};
+
+SubmittedDocumentsCard.propTypes = {
+  documents: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      title: PropTypes.string,
+      status: PropTypes.string,
+      submittedOn: PropTypes.string,
+    })
+  ),
+};
+
+PackageCard.propTypes = {
+  item: PropTypes.shape({
+    key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    isSummary: PropTypes.bool,
+    total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    listings: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }).isRequired,
+};
+
+const DealerDetails = () => {
+  const navigate = useNavigate();
+  const { dealerId } = useParams();
+  const [listingFilter, setListingFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const columns_boost = [
   {
     title:<span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Listing ID</span>,
     dataIndex: "listingId",
     key: "listingId",
     width: 150,
     render: (val) => (
-      <div style={{ fontWeight: 400, color: "#000000", fontSize: 14 }}>{val}</div>
+      <div style={{ fontWeight: 400, color: "#008AD5", fontSize: 14 }}>{val}</div>
     ),
+     onCell: (record) => ({
+        style: { cursor: "pointer" },
+    onClick: () => navigate("/user-management/dealer"),
+  }),
   },
   {
     title: <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Title</span>,
@@ -395,15 +445,15 @@ const columns_boost = [
       displayText = "Sold";
       bgColor = "#DBEAFE";
       textColor = "#1E40AF";
-    } else if (val === "approved") {
+    } else if (val === "Approved") {
       displayText = "Active";
       bgColor = "#DCFCE7";
       textColor = "#166534";
-    } else if (val === "pending") {
+    } else if (val === "Pending") {
       displayText = "Pending";
       bgColor = "#FEF9C3";
       textColor = "#854D0E";
-    } else if (val === "rejected") {
+    } else if (val === "Rejected") {
       displayText = "Rejected";
       bgColor = "#FEE2E2";
       textColor = "#991B1B";
@@ -451,52 +501,6 @@ const columns_boost = [
     ),
   },
 ];
-
-BoostStatus.propTypes = {
-  status: PropTypes.string,
-};
-
-DocumentCard.propTypes = {
-  doc: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    title: PropTypes.string,
-    status: PropTypes.string,
-    submittedOn: PropTypes.string,
-  }).isRequired,
-  onDownload: PropTypes.func,
-  onCancel: PropTypes.func,
-};
-
-SubmittedDocumentsCard.propTypes = {
-  documents: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      title: PropTypes.string,
-      status: PropTypes.string,
-      submittedOn: PropTypes.string,
-    })
-  ),
-};
-
-PackageCard.propTypes = {
-  item: PropTypes.shape({
-    key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    name: PropTypes.string,
-    isSummary: PropTypes.bool,
-    total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    listings: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  }).isRequired,
-};
-
-const DealerDetails = () => {
-  const navigate = useNavigate();
-  const { dealerId } = useParams();
-  const [listingFilter, setListingFilter] = useState("All");
-  const [sortOrder, setSortOrder] = useState("newest");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
 
   const {
     dealerData,

@@ -57,6 +57,10 @@ const Individualdetails = () => {
       dataIndex: "listingId",
       key: "listingId",
       render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
+       onCell: (record) => ({
+        style: { cursor: "pointer" },
+    onClick: () => navigate("/user-management/individual"),
+  }),
     },
     {
       title: () => <span style={{ color: "#6B7280", fontSize: 12, fontWeight: 500 }}>Title</span>,

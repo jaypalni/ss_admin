@@ -13,17 +13,20 @@ export const DealerProfileInfo = ({ dealerData }) => {
             <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
               <img
                 src={`${BASE_URL}${dealerData.profile_pic}`}
-                alt="Dealer Logo"
+                alt=""
                 style={{
                   width: 35,
                   height: 35,
                   borderRadius: 8,
                   objectFit: "cover",
                   flex: "0 0 35px",
+                  backgroundColor: "white",
                 }}
                 onError={(e) => {
-                  e.target.onerror = null; 
-                  e.target.src = Dealer;  
+                 e.target.src = "";
+                 e.target.style.width = "0px";
+e.target.style.height = "0px";
+               e.target.style.backgroundColor = "white";  
                 }}
               />
               <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -81,16 +84,33 @@ export const DealerProfileInfo = ({ dealerData }) => {
                 <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>Account Status</div>
                 <div>
                   <Tag
-                    style={{
-                      background: dealerData?.status === "banned" ? "#FEE2E2" : "#DCFCE7",
-                      color: dealerData?.status === "banned" ? "#991B1B" : "#166534",
-                      borderRadius: 8,
-                      padding: "4px 12px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {dealerData?.status === "banned" ? "Banned" : dealerData?.is_verified === "verified" ? "Verified" : "Pending Verification"}
-                  </Tag>
+  style={{
+    background:
+      dealerData?.status === "banned"
+        ? "#FEE2E2"
+        : dealerData?.is_flagged === 1
+        ? "#FEF9C3"
+        : "#DCFCE7",
+    color:
+      dealerData?.status === "banned"
+        ? "#991B1B"
+        : dealerData?.is_flagged === 1
+        ? "#854D0E"
+        : "#166534",
+    borderRadius: 8,
+    padding: "4px 12px",
+    fontWeight: 500,
+  }}
+>
+  {dealerData?.status === "banned"
+    ? "Banned"
+    : dealerData?.is_flagged === 1
+    ? "Flagged"
+    : dealerData?.is_verified === "verified"
+    ? "Verified"
+    : "Pending Verification"}
+</Tag>
+
                 </div>
               </div>
 

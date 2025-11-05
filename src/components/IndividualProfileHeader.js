@@ -4,13 +4,21 @@ import { FlagOutlined, StopOutlined } from "@ant-design/icons";
 import avatarFallback from "../assets/images/icon_img.svg";
 import premimum_d from "../assets/images/premimum_d.svg";
 
-const StatusTag = ({ status }) => {
+const StatusTag = ({ status, isFlagged }) => {
   const statusColors = {
-    banned: { bg: "#FECACA", color: "#B91C1C" },
-    active: { bg: "#DCFCE7", color: "#166534" },
-    pending: { bg: "#FEF9C3", color: "#854D0E" },
+    banned:   { bg: "#FECACA", color: "#B91C1C" },
+    flagged:  { bg: "#FEF9C3", color: "#854D0E" },
+    active:   { bg: "#DCFCE7", color: "#166534" },
+    pending:  { bg: "#FEF9C3", color: "#854D0E" },
   };
-  const current = statusColors[status] || statusColors.pending;
+
+  // priority: banned → flagged → active → pending
+  let key = "pending";
+  if (status === "banned") key = "banned";
+  else if (isFlagged === 1) key = "flagged";
+  else if (status === "active") key = "active";
+
+  const current = statusColors[key];
 
   return (
     <Tag
@@ -33,10 +41,17 @@ const StatusTag = ({ status }) => {
           marginRight: 4,
         }}
       />
-      {status === "banned" ? "Banned" : status === "active" ? "Active" : "Pending"}
+      {key === "banned"
+        ? "Banned"
+        : key === "flagged"
+        ? "Flagged"
+        : key === "active"
+        ? "Active"
+        : "Pending"}
     </Tag>
   );
 };
+
 
 const ActionButtons = ({ onReportUser, onBanUser, loadingFlagged, loadingBanned, isFlagged }) => (
   <div style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
@@ -199,12 +214,18 @@ export const IndividualProfileHeader = ({
 
           <div style={{ width: 100 }}>
             <span style={metaKeyStyle}>Expires At: </span>
-            <span style={metaValueStyle}>{dealerData.subscription_expires_at || "-"}</span>
+            <span style={metaValueStyle}>{dealerData.subscription_expires_at ? new Date(dealerData.subscription_expires_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "2-digit",
+                    year: "numeric",
+                  })
+                : "-"
+              }</span>
           </div>
         </div>
 
         <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-          <StatusTag status={dealerData.status} />
+          <StatusTag status={dealerData.status} isFlagged={dealerData.is_flagged}  />
 
           {dealerData.subscription_details?.plan_name && (
             <Tag
