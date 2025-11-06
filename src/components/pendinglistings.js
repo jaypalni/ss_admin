@@ -10,7 +10,7 @@ import {
   message,
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation  } from "react-router-dom";
 import dayjs from "dayjs";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -26,6 +26,7 @@ const PendingListings = () => {
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
   const [messageApi, contextHolder] = message.useMessage();
   const [carLocation, setCarLocation] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
@@ -39,10 +40,45 @@ const PendingListings = () => {
 
   const [pendingCount, setPendingCount] = useState(0);
   const [approvedCount, setApprovedCount] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const handleTableChange = (paginationInfo) => {
     fetchListings(paginationInfo.current, paginationInfo.pageSize);
   };
+
+  useEffect(() => {
+    if (location.state?.fromDetails) {
+      const savedTab = localStorage.getItem("activeTab");
+      const savedStatus = localStorage.getItem("statusFilter");
+      if (savedTab) setActiveTab(savedTab);
+      if (savedStatus) setStatusFilter(savedStatus);
+    } else {
+      localStorage.removeItem("activeTab");
+      localStorage.removeItem("statusFilter");
+      setActiveTab("pending");
+      setStatusFilter("");
+    }
+    setIsInitialized(true);
+  }, [location.state]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    fetchListings(1, pagination.pageSize);
+    fetchRegion();
+  }, [
+    searchValue,
+    cityFilter,
+    sellerType,
+    statusFilter,
+    dateRange,
+    activeTab,
+    isInitialized,
+  ]);
+
+  useEffect(() => {
+    localStorage.setItem("activeTab", activeTab);
+    localStorage.setItem("statusFilter", statusFilter);
+  }, [activeTab, statusFilter]);
 
   const fetchRegion = async () => {
     try {
@@ -139,12 +175,6 @@ const PendingListings = () => {
     }
   };
 
-  useEffect(() => {
-    fetchListings(1, pagination.pageSize);
-    fetchRegion();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValue, cityFilter, sellerType, statusFilter, dateRange, activeTab]);
-
   const columns = [
     {
       title: <span style={headerStyle}>Reference ID</span>,
@@ -198,12 +228,10 @@ const PendingListings = () => {
       dataIndex: "status",
       key: "status",
       render: (_, record) => {
-        // approval = approved/pending/rejected (from API)
-        // status = sold or empty (from API)
+        
         const approval = (record.approval ?? "").toString().toLowerCase();
         const soldFlag = (record.status ?? "").toString().toLowerCase();
 
-        // Priority: if approved AND status === "sold" => show Sold
         let finalStatus = "";
         if (approval === "approved" && soldFlag === "sold") {
           finalStatus = "sold";
@@ -246,7 +274,11 @@ const PendingListings = () => {
       render: (_, record) => (
         <EyeOutlined
           style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
-          onClick={() => navigate(`/listingdetails/${record.car_id}`)}
+          onClick={() =>
+            navigate(`/listingdetails/${record.car_id}`, {
+              state: { fromListing: true },
+            })
+          }
         />
       ),
     },

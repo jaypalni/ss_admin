@@ -99,6 +99,7 @@ const validateRejectionReason = (rejectionReason, rejectReasonData, comment, mes
 };
 
 const ApprovalStatusTag = ({ approval, status }) => {
+  if (!approval) return null;
   let displayValue = approval;
 
   if (approval?.toLowerCase() === "approved" && status?.toLowerCase() === "sold") {
@@ -128,14 +129,15 @@ const ApprovalStatusTag = ({ approval, status }) => {
   );
 };
 
-
 const BoostStatus = ({ isFeatured }) => {
   const style = getBoostStatusStyle(isFeatured);
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <Tag style={style}>{isFeatured === 1 ? "Active" : "Not Active"}</Tag>
-      {isFeatured === 1 && <img src={boosticon} alt="Boost Icon" style={{ width: 18, height: 18, marginLeft: 6 }} />}
+      {isFeatured === 1 && (
+        <img src={boosticon} alt="Boost Icon" style={{ width: 18, height: 18, marginLeft: 6 }} />
+      )}
     </div>
   );
 };
@@ -162,10 +164,30 @@ TimelineItem.propTypes = {
 };
 TimelineItem.defaultProps = { isPending: false };
 
-const ActionButtons = ({ approval, isBestCar, setIsBestCar, handleApprove, handleReject, handleMarkAsBest, loading, rejectLoading = false, rejectionReason, comment }) => {
+const ActionButtons = ({
+  approval,
+  isBestCar,
+  setIsBestCar,
+  handleApprove,
+  handleReject,
+  handleMarkAsBest,
+  loading,
+  rejectLoading = false,
+  rejectionReason,
+  comment,
+}) => {
   if (approval === "rejected") {
     return (
-      <div style={{ backgroundColor: "#fff6f6", border: "1px solid #ffa39e", borderRadius: "8px", padding: "12px 16px", color: "#cf1322", lineHeight: "1.6" }}>
+      <div
+        style={{
+          backgroundColor: "#fff6f6",
+          border: "1px solid #ffa39e",
+          borderRadius: "8px",
+          padding: "12px 16px",
+          color: "#cf1322",
+          lineHeight: "1.6",
+        }}
+      >
         <p style={{ marginBottom: "8px", fontWeight: 500 }}>
           <strong>Rejection Reason:</strong> {rejectionReason || "Not specified"}
         </p>
@@ -196,53 +218,52 @@ const ActionButtons = ({ approval, isBestCar, setIsBestCar, handleApprove, handl
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-     <Button
-  type="primary"
-  block
-  onClick={handleApprove}
-  loading={loading}
-  style={{
-    backgroundColor: "#28a745",
-    borderColor: "#28a745",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8, 
-    fontWeight: 500,
-  }}
->
-  <img
-    src={approveIcon}
-    alt="approve"
-    style={{ width: 16, height: 16, display: "inline-block", marginRight: 4 }}
-  />
-  <span>Approve Listing</span>
-</Button>
+      <Button
+        type="primary"
+        block
+        onClick={handleApprove}
+        loading={loading}
+        style={{
+          backgroundColor: "#28a745",
+          borderColor: "#28a745",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          fontWeight: 500,
+        }}
+      >
+        <img
+          src={approveIcon}
+          alt="approve"
+          style={{ width: 16, height: 16, display: "inline-block", marginRight: 4 }}
+        />
+        <span>Approve Listing</span>
+      </Button>
 
-<Button
-  danger
-  block
-  onClick={handleReject}
-  loading={rejectLoading}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#DC2626",
-    borderColor: "#DC2626",
-    color: "#fff",
-    fontWeight: 500,
-  }}
->
-  <img
-    src={rejectIcon}
-    alt="reject"
-    style={{ width: 16, height: 16, display: "inline-block", marginRight: 4 }}
-  />
-  <span>Reject Listing</span>
-</Button>
-
+      <Button
+        danger
+        block
+        onClick={handleReject}
+        loading={rejectLoading}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          backgroundColor: "#DC2626",
+          borderColor: "#DC2626",
+          color: "#fff",
+          fontWeight: 500,
+        }}
+      >
+        <img
+          src={rejectIcon}
+          alt="reject"
+          style={{ width: 16, height: 16, display: "inline-block", marginRight: 4 }}
+        />
+        <span>Reject Listing</span>
+      </Button>
     </div>
   );
 };
@@ -281,12 +302,11 @@ const ListingDetails = () => {
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-
   useEffect(() => {
     if (!isLoggedIn) navigate("/");
   }, [isLoggedIn, navigate]);
 
-  const showRejectModal = async  () => {
+  const showRejectModal = async () => {
     await getReasonRejection();
     setIsRejectModalVisible(true);
   };
@@ -297,61 +317,70 @@ const ListingDetails = () => {
     setComment("");
   };
 
-const handleRejectSubmitConfirm = () => {
-  if (!validateRejectionReason(rejectionReason, rejectReasonData, comment, messageApi)) {
-    return;
-  }
-
-  setIsRejectModalVisible(false);
-  setTimeout(() => setIsConfirmVisible(true), 80);
-};
-
-const handleConfirmCancel = () => {
-  setIsConfirmVisible(false);
-  setRejectionReason(null);
-  setComment("");
-};
-
-const handleRejectSubmit = async () => {
-  if (!validateRejectionReason(rejectionReason, rejectReasonData, comment, messageApi)) {
-    return Promise.reject(new Error("Validation failed"));
-  }
-
-  const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
-
-  try {
-    setConfirmLoading(true);
-    setRejectLoading(true);
-
-    const body = {
-      car_id: listingId,
-      rejection_reason: selectedReason?.rejected_reason,
-      admin_rejection_comment: comment || "",
-    };
-
-    const response = await userAPI.rejectcar(body);
-    const data = handleApiResponse(response);
-
-    if (data.status_code === 200) {
-      messageApi.open({ type: "success", content: data.message });
-      setIsConfirmVisible(false);
-      setRejectionReason(null);
-      setComment("");
-      setTimeout(() => navigate("/listingmanagement"), 1000);
-      return data;
-    } else {
-      messageApi.open({ type: "error", content: data?.message || "Failed to reject car" });
-      return Promise.reject(new Error(data?.message || "Failed to reject car"));
+  const handleRejectSubmitConfirm = () => {
+    if (!validateRejectionReason(rejectionReason, rejectReasonData, comment, messageApi)) {
+      return;
     }
-  } catch (error) {
-    const errorData = handleApiError(error);
-    messageApi.open({ type: "error", content: errorData.message || "Failed to reject car" });
-    return Promise.reject(error);
-  } finally {
-    setConfirmLoading(false);
-    setRejectLoading(false);
-  }
-};
+
+    setIsRejectModalVisible(false);
+    setTimeout(() => setIsConfirmVisible(true), 80);
+  };
+
+  const handleConfirmCancel = () => {
+    setIsConfirmVisible(false);
+    setRejectionReason(null);
+    setComment("");
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!validateRejectionReason(rejectionReason, rejectReasonData, comment, messageApi)) {
+      return Promise.reject(new Error("Validation failed"));
+    }
+
+    const selectedReason = rejectReasonData.find((r) => r.id === rejectionReason);
+
+    try {
+      setConfirmLoading(true);
+      setRejectLoading(true);
+
+      const body = {
+        car_id: listingId,
+        rejection_reason: selectedReason?.rejected_reason,
+        admin_rejection_comment: comment || "",
+      };
+
+      const response = await userAPI.rejectcar(body);
+      const data = handleApiResponse(response);
+
+      if (data.status_code === 200) {
+        messageApi.open({ type: "success", content: data.message });
+
+        // ✅ Update local state immediately to prevent flicker
+        setCarDetails((prev) => ({
+          ...prev,
+          approval: "rejected",
+          rejection_reason: selectedReason?.rejected_reason,
+          admin_rejection_comment: comment || "",
+        }));
+
+        setIsConfirmVisible(false);
+        setRejectionReason(null);
+        setComment("");
+        setTimeout(() => navigate("/listingmanagement", { state: { fromDetails: true } }), 800);
+        return data;
+      } else {
+        messageApi.open({ type: "error", content: data?.message || "Failed to reject car" });
+        return Promise.reject(new Error(data?.message || "Failed to reject car"));
+      }
+    } catch (error) {
+      const errorData = handleApiError(error);
+      messageApi.open({ type: "error", content: errorData.message || "Failed to reject car" });
+      return Promise.reject(error);
+    } finally {
+      setConfirmLoading(false);
+      setRejectLoading(false);
+    }
+  };
 
   const getReasonRejection = async () => {
     try {
@@ -402,7 +431,10 @@ const handleRejectSubmit = async () => {
       if (data.status_code === 200) {
         if (data?.message) {
           messageApi.open({ type: "success", content: data.message });
-          setTimeout(() => navigate("/listingmanagement"), 1000);
+
+          setCarDetails((prev) => ({ ...prev, approval: "approved" }));
+
+          setTimeout(() => navigate("/listingmanagement", { state: { fromDetails: true } }), 1000);
         }
       } else {
         messageApi.open({ type: "error", content: data?.message || "Failed to approve car" });
@@ -467,7 +499,7 @@ const handleRejectSubmit = async () => {
             },
             {
               title: (
-                <span style={{ color: "#6B7280", cursor: "pointer", fontSize: "14px", fontWeight: "400" }} onClick={() => navigate("/listingmanagement")}>
+                <span style={{ color: "#6B7280", cursor: "pointer", fontSize: "14px", fontWeight: "400" }} onClick={() => navigate("/listingmanagement", { state: { fromDetails: true } })}>
                   Listing Management
                 </span>
               ),
@@ -481,7 +513,7 @@ const handleRejectSubmit = async () => {
         />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/listingmanagement")} style={{ backgroundColor: "#f8f9fa", borderColor: "#e9ecef", color: "#495057", borderRadius: 6, fontWeight: 500 }}>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/listingmanagement", { state: { fromDetails: true } })}style={{ backgroundColor: "#f8f9fa", borderColor: "#e9ecef", color: "#495057", borderRadius: 6, fontWeight: 500 }}>
               Back to Listings
             </Button>
 

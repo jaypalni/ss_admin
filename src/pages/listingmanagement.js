@@ -21,7 +21,6 @@ const ListingManagement = () => {
     <div
       style={{
         height: "calc(100vh - 70px)", 
-        overflowY: "auto",
         padding: "20px",
       }}
     >
