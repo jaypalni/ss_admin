@@ -31,10 +31,9 @@ const { Option } = Select;
 
 const FQA = ({ dealerData }) => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const { user,token } = useSelector((state) => state.auth);
+  const isLoggedIn = token && user;
+  
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -45,8 +44,7 @@ const FQA = ({ dealerData }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-const isLoggedIn = token && user;
- const { user,token } = useSelector((state) => state.auth);
+
   useEffect(() => {
         if (!isLoggedIn) navigate("/");
       }, [isLoggedIn, navigate]);
