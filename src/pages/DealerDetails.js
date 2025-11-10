@@ -520,7 +520,6 @@ const DealerDetails = () => {
     totalActive,
     totalSold,
     totalRejected,
-    messageApi,
   } = useDealerDetails(dealerId, listingFilter, sortOrder, page, limit);
 
   const {
@@ -530,7 +529,8 @@ const DealerDetails = () => {
     loadingBanned,
     approveDealer,
     reporteduser,
-    bannedDealer
+    bannedDealer,
+    contextHolder
   } = useDealerActions(dealerData, navigate);
 
   const handleFilterChange = (status) => {
@@ -558,6 +558,7 @@ const DealerDetails = () => {
 
   return (
     <div style={{ padding: 16 }}>
+      {contextHolder}
       <Breadcrumb
         separator={<img src={Right} alt="" style={{ height: 12 }} />}
         style={{ marginBottom: 16 }}

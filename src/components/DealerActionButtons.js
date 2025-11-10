@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, Modal } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
 import reject_d from "../assets/images/reject_d.svg";
@@ -20,9 +20,11 @@ export const DealerActionButtons = ({
   const [modalType, setModalType] = useState(null);
 
   const isBanned = dealerData?.status === "banned";
+  const isFlagged = dealerData?.is_flagged === 1;
   const isVerified = dealerData?.is_verified === "verified";
   const isRejected = dealerData?.is_verified === "rejected";
-  const isDisabled = isBanned || isVerified || isRejected;
+
+  const isDisabled = isVerified || isRejected;
 
   const getCommonButtonStyle = (color, isDisabledOverride = isDisabled) => ({
     borderRadius: 8,
@@ -49,17 +51,22 @@ export const DealerActionButtons = ({
   const handleOk = () => {
     if (modalType === "approve") onApprove("verified");
     if (modalType === "reject") onReject("rejected");
-    if (modalType === "flag") onFlag("");
+    if (modalType === "flag") onFlag();
     if (modalType === "ban") onBan();
-
     setModalType(null);
   };
 
   const getModalMessage = () => {
     if (modalType === "approve") return "Do you want to approve this dealer?";
     if (modalType === "reject") return "Do you want to reject this application?";
-    if (modalType === "flag") return "Do you want to flag this account?";
-    if (modalType === "ban") return "Do you want to ban this dealer?";
+    if (modalType === "flag")
+      return isFlagged
+        ? "Do you want to unflag this account?"
+        : "Do you want to flag this account?";
+    if (modalType === "ban")
+      return isBanned
+        ? "Do you want to unban this dealer?"
+        : "Do you want to ban this dealer?";
     return "";
   };
 
@@ -86,28 +93,28 @@ export const DealerActionButtons = ({
       key: "info",
       text: "Info Requested",
       icon: getIcon(info_d),
-      style: getCommonButtonStyle("#EA580C", false),
+      style: getCommonButtonStyle("#EA580C"),
       onClick: undefined,
       loading: false,
       disabled: false,
     },
     {
       key: "flag",
-      text: "Flag Account",
+      text: isFlagged ? "Unflag Account" : "Flag Account",
       icon: getIcon(flag_d, 12, 12, true),
-      style: getCommonButtonStyle("#CA8A04", isBanned),
+      style: getCommonButtonStyle("#CA8A04",),
       onClick: () => setModalType("flag"),
       loading: loadingFlagged,
-      disabled: isBanned,
+      disabled: false,
     },
     {
       key: "ban",
-      text: "Ban Dealer",
-      icon: getIcon(ban_d, 12, 12, isBanned),
-      style: getCommonButtonStyle("#1F2937", isBanned),
+      text: isBanned ? "Unban Dealer" : "Ban Dealer",
+      icon: getIcon(ban_d, 12, 12, true),
+      style: getCommonButtonStyle("#1F2937"),
       onClick: () => setModalType("ban"),
       loading: loadingBanned,
-      disabled: isBanned,
+      disabled: false,
     },
   ];
 

@@ -7,7 +7,7 @@ export const useDealerActions = (dealerData, navigate) => {
   const [loadingReject, setLoadingReject] = useState(false);
   const [loadingFlagged, setLoadingFlagged] = useState(false);
   const [loadingBanned, setLoadingBanned] = useState(false);
-  const [messageApi] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const approveDealer = async (status) => {
     try {
@@ -47,62 +47,81 @@ export const useDealerActions = (dealerData, navigate) => {
     }
   };
 
-  const reporteduser = async () => {
-    try {
-      setLoadingFlagged(true);
-      const body = {
-        report_id: dealerData.user_id,       
-      };
-      const res = await loginApi.reporteduser(body);
-      const data = res?.data;
-      
-      if (data?.status_code === 200) {
-        messageApi.error(res?.data?.message || "Failed to fetch dealer details");
-        setTimeout(() => {
-          navigate("/user-management/dealer"); 
-        }, 1000);
-      } else {
-        messageApi.error(data.message || data?.error || "Failed to approve dealer");
-      }
-    } catch (err) {
-      const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||                  
-        err?.response?.data?.error ||          
-        "Something went wrong while fetching dealer details";
+const reporteduser = async () => {
+  if (!dealerData) return;
 
-      messageApi.error(errorMessage);
-    } finally {
-      setLoadingFlagged(false);
+  try {
+    setLoadingFlagged(true);
+
+    const isCurrentlyFlagged = dealerData.is_flagged === 1; 
+    const body = { report_id: dealerData.user_id };
+
+    const res = isCurrentlyFlagged
+      ? await loginApi.unflaggeduser(dealerData.user_id) 
+      : await loginApi.reporteduser(body); 
+    const data = res?.data;
+
+    if (data?.status_code === 200) {
+      messageApi.success(
+        data?.message ||
+          (isCurrentlyFlagged
+            ? "User unflagged successfully"
+            : "User flagged successfully")
+      );
+       setTimeout(() => {
+          navigate("/user-management/dealer"); 
+        }, 2000);
+    } else {
+      messageApi.error(data?.message || data?.error || "Failed to update user flag status");
     }
-  };
+  } catch (err) {
+    console.error("reportedUser error:", err);
+    const errorMessage =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Something went wrong while updating user flag status";
+    messageApi.error(errorMessage);
+  } finally {
+    setLoadingFlagged(false);
+  }
+};
+
 
   const bannedDealer = async () => {
+    if (!dealerData) return;
     try {
       setLoadingBanned(true);
 
-      const body = {
-        user_id: dealerData.user_id,
-      };
+      const isCurrentlyBanned = dealerData.status === "banned";
+      const body = { user_id: dealerData.user_id };
 
-      const res = await loginApi.banneduser(body);
+      const res = isCurrentlyBanned
+        ? await loginApi.unbanneduser(dealerData.user_id) 
+        : await loginApi.banneduser(body); 
+
       const data = res?.data;
 
       if (data?.status_code === 200) {
-        messageApi.success(data?.message || "Dealer banned successfully");
-        setTimeout(() => {
-          navigate("/user-management/dealer");
-        }, 1000);
+        messageApi.success(
+          data?.message ||
+            (isCurrentlyBanned
+              ? "User unbanned successfully"
+              : "User banned successfully")
+        );
+         setTimeout(() => {
+          navigate("/user-management/dealer"); 
+        }, 2000);
       } else {
-        messageApi.error(data?.message || data?.error || "Failed to ban dealer");
+        messageApi.error(data?.message || data?.error || "Failed to update user status");
       }
     } catch (err) {
+      console.error("bannedDealer error:", err);
       const errorMessage =
-        err?.response?.data?.message || 
-        err?.response?.data?.error ||   
-        err?.message ||                 
-        "Something went wrong while banning dealer";
-
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Something went wrong while updating user status";
       messageApi.error(errorMessage);
     } finally {
       setLoadingBanned(false);
@@ -114,9 +133,10 @@ export const useDealerActions = (dealerData, navigate) => {
     loadingReject,
     loadingFlagged,
     loadingBanned,
-    messageApi,
     approveDealer,
     reporteduser,
-    bannedDealer
+    bannedDealer,
+    messageApi,
+    contextHolder,
   };
 };
