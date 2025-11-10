@@ -53,14 +53,27 @@ const Individualdetails = () => {
 
   const columns = [
     {
-      title: () => <span style={{ color: "#6B7280", fontSize: 12, fontWeight: 500 }}>Listing ID</span>,
-      dataIndex: "listingId",
-      key: "listingId",
-      render: (text) => <span style={{ color: "#1890ff", cursor: "pointer" }}>{text}</span>,
-       onCell: (record) => ({
-        style: { cursor: "pointer" },
-    onClick: () => navigate("/user-management/individual"),
-  }),
+  title: () => (
+    <span style={{ color: "#6B7280", fontSize: 12, fontWeight: 500 }}>
+      Listing ID
+    </span>
+  ),
+  dataIndex: "listingId",
+  key: "listingId",
+  render: (text, record) => (
+    <span
+  style={{ color: "#1890ff", cursor: "pointer" }}
+  onClick={() =>
+    navigate(`/listingdetails/${record.listingId}`, {
+      state: { from: "individualDetails", individualId: dealerData?.user_id, },
+    })
+  }
+>
+  {text}
+</span>
+
+  ),
+
     },
     {
       title: () => <span style={{ color: "#6B7280", fontSize: 12, fontWeight: 500 }}>Title</span>,

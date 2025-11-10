@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate,useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import {
   Card,
@@ -301,6 +301,20 @@ const ListingDetails = () => {
   const isLoggedIn = token && user;
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const location = useLocation();
+  const fromPage = location.state?.from;
+  console.log(location.state);
+  const handleBack = () => {
+    if (fromPage === "listingManagement") {
+      navigate("/listingmanagement");
+    } else if (fromPage === "individualDetails") {
+     navigate(`/user-management/individual/${location.state?.individualId}`);
+    }else if (fromPage === "dealerDetails") {
+      navigate(`/user-management/dealer/${location.state?.dealerId}`);
+    } else {
+      navigate(-1); 
+    }
+  };
 
   useEffect(() => {
     if (!isLoggedIn) navigate("/");
@@ -513,7 +527,7 @@ const ListingDetails = () => {
         />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/listingmanagement", { state: { fromDetails: true } })}style={{ backgroundColor: "#f8f9fa", borderColor: "#e9ecef", color: "#495057", borderRadius: 6, fontWeight: 500 }}>
+            <Button icon={<ArrowLeftOutlined />}  onClick={handleBack}style={{ backgroundColor: "#f8f9fa", borderColor: "#e9ecef", color: "#495057", borderRadius: 6, fontWeight: 500 }}>
               Back to Listings
             </Button>
 
@@ -698,7 +712,21 @@ const ListingDetails = () => {
             <Card style={{ marginBottom: 16 }}>
               <h3 style={{ marginBottom: 16, fontSize: "18px", fontWeight: "600" }}>Seller Information</h3>
               <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
-                <Avatar size={48} icon={<UserOutlined />} style={{ marginRight: 12 }} />
+                <Avatar
+      size={48}
+      src={
+        carDetails?.seller?.profile_pic
+          ? `${BASE_URL}${carDetails.seller.profile_pic}`
+          : UserOutlined
+      }
+      icon={<UserOutlined />}
+      style={{
+        marginRight: 12,
+        border: "1px solid #E5E7EB",
+        backgroundColor: "#F3F4F6",
+      }}
+    />
+
                 <div>
                   <p style={{ margin: 0, fontWeight: 600 }}>{carDetails?.seller?.first_name} {carDetails?.seller?.last_name}</p>
                   <p style={{ margin: 0, color: "#888" }}>{carDetails?.seller?.is_dealer === "True" ? "Dealer Seller" : "Individual Seller"}</p>

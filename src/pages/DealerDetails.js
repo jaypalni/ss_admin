@@ -404,12 +404,22 @@ const DealerDetails = () => {
     dataIndex: "listingId",
     key: "listingId",
     width: 150,
-    render: (val) => (
-      <div style={{ fontWeight: 400, color: "#008AD5", fontSize: 14 }}>{val}</div>
-    ),
+   render: (text, record) => {
+    return (
+      <span
+        style={{ color: "#1890ff", cursor: "pointer" }}
+        onClick={() =>
+          navigate(`/listingdetails/${record.listingId}`, {
+            state: { from: "dealerDetails", dealerId: dealerData?.user_id, },
+          })
+        }
+      >
+        {text}
+      </span>
+    );
+  },
      onCell: (record) => ({
         style: { cursor: "pointer" },
-    onClick: () => navigate("/user-management/dealer"),
   }),
   },
   {
