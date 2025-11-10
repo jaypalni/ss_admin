@@ -29,7 +29,7 @@ const PendingListings = () => {
   const location = useLocation();
   const [messageApi, contextHolder] = message.useMessage();
   const [carLocation, setCarLocation] = useState([]);
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("");
   const headerStyle = { fontSize: "12px", fontWeight: 500, color: "#6B7280" };
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
@@ -57,7 +57,7 @@ const PendingListings = () => {
     } else {
       localStorage.removeItem("activeTab");
       localStorage.removeItem("statusFilter");
-      setActiveTab("pending");
+      setActiveTab("");
       setStatusFilter("");
     }
     setIsInitialized(true);
