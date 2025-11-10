@@ -355,9 +355,8 @@ const PendingListings = () => {
                   placeholder="Select Status"
                   allowClear
                 >
-                  <Option value="">All</Option>
-                  <Option value="approved">Approved</Option>
                   <Option value="pending">Pending</Option>
+                  <Option value="approved">Approved</Option>
                   <Option value="rejected">Rejected</Option>
                   <Option value="sold">Sold</Option>
                 </Select>
