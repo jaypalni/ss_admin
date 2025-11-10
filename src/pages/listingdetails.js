@@ -302,12 +302,15 @@ const ListingDetails = () => {
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const location = useLocation();
-  const fromPage = location.state?.from;
-  console.log(location.state);
+ const fromPage = location.state?.fromPage;
+const fromDetails = location.state?.fromDetails;
+
+console.log("From Page:", fromPage);
+console.log("From Details:", fromDetails);
   const handleBack = () => {
-    if (fromPage === "listingManagement") {
-      navigate("/listingmanagement");
-    } else if (fromPage === "individualDetails") {
+     if (fromPage === "listingManagement") {
+    navigate("/listingmanagement", { state: { fromDetails: true } });
+  }  else if (fromPage === "individualDetails") {
      navigate(`/user-management/individual/${location.state?.individualId}`);
     }else if (fromPage === "dealerDetails") {
       navigate(`/user-management/dealer/${location.state?.dealerId}`);

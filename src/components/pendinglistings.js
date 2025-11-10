@@ -10,7 +10,7 @@ import {
   message,
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import { useNavigate,useLocation  } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import { userAPI } from "../services/api";
 import { handleApiError, handleApiResponse } from "../utils/apiUtils";
@@ -45,6 +45,8 @@ const PendingListings = () => {
   const handleTableChange = (paginationInfo) => {
     fetchListings(paginationInfo.current, paginationInfo.pageSize);
   };
+
+  console.log(location.state);
 
   useEffect(() => {
     if (location.state?.fromDetails) {
@@ -111,12 +113,13 @@ const PendingListings = () => {
         search: searchValue ?? "",
         city_filter: cityFilter ?? "",
         date_range:
-          dateRange && dateRange.length === 2
-            ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(
-                dateRange[1]
-              ).format("DD/MM/YYYY")}`
+          dateRange && dateRange.length > 0
+            ? dateRange.length === 2
+              ? `${dayjs(dateRange[0]).format("DD/MM/YYYY")}-${dayjs(
+                  dateRange[1]
+                ).format("DD/MM/YYYY")}`
+              : `${dayjs(dateRange[0]).format("DD/MM/YYYY")}`
             : "",
-        // use statusFilter if provided, otherwise base on activeTab
         status: statusFilter
           ? statusFilter
           : activeTab === "pending"
@@ -140,7 +143,6 @@ const PendingListings = () => {
           sellerName: `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
           location: item.location ?? "",
           type: item.user_type === "dealer" ? "Dealer" : "Individual",
-          // keep both fields for column logic
           approval: (item.approval ?? "").toString().toLowerCase(),
           status: (item.status ?? "").toString().toLowerCase(),
         }));
@@ -228,7 +230,6 @@ const PendingListings = () => {
       dataIndex: "status",
       key: "status",
       render: (_, record) => {
-        
         const approval = (record.approval ?? "").toString().toLowerCase();
         const soldFlag = (record.status ?? "").toString().toLowerCase();
 
@@ -276,7 +277,7 @@ const PendingListings = () => {
           style={{ fontSize: "18px", color: "#1890ff", cursor: "pointer" }}
           onClick={() =>
             navigate(`/listingdetails/${record.car_id}`, {
-              state: { fromListing: true },
+              state: { fromPage: "listingManagement", fromDetails: true },
             })
           }
         />
@@ -369,7 +370,10 @@ const PendingListings = () => {
                   style={{ width: "100%" }}
                   format="DD/MM/YYYY"
                   value={dateRange}
-                  onChange={setDateRange}
+                  onCalendarChange={(dates) => {
+                    // ✅ Update state immediately even for single-date selection
+                    setDateRange(dates?.filter(Boolean) || []);
+                  }}
                 />
               ),
             },
