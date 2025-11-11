@@ -41,7 +41,7 @@ const Dashboard = () => {
   const dashboardcounts = async () => {
     try {
       setLoading(true);
-      const body = {filterValue};
+      const body = {filter: filterValue};
       const response = await userAPI.dashboardstats(body); 
       const data = handleApiResponse(response);
 

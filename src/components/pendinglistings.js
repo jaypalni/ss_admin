@@ -21,7 +21,7 @@ const PendingListings = () => {
   const [searchValue, setSearchValue] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [sellerType, setSellerType] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("pending");
   const [dateRange, setDateRange] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -29,7 +29,7 @@ const PendingListings = () => {
   const location = useLocation();
   const [messageApi, contextHolder] = message.useMessage();
   const [carLocation, setCarLocation] = useState([]);
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState("pending");
   const headerStyle = { fontSize: "12px", fontWeight: 500, color: "#6B7280" };
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
@@ -47,22 +47,24 @@ const PendingListings = () => {
   };
 
   console.log(location.state);
+useEffect(() => {
+  const cameFromDetails = location.state?.fromDetails;
 
-  useEffect(() => {
-    if (location.state?.fromDetails) {
-      const savedTab = localStorage.getItem("activeTab");
-      const savedStatus = localStorage.getItem("statusFilter");
-      if (savedTab) setActiveTab(savedTab);
-      if (savedStatus) setStatusFilter(savedStatus);
-    } else {
-      localStorage.removeItem("activeTab");
-      localStorage.removeItem("statusFilter");
-      setActiveTab("");
-      setStatusFilter("");
-    }
-    setIsInitialized(true);
-  }, [location.state]);
+  const savedTab = localStorage.getItem("activeTab");
+  const savedStatus = localStorage.getItem("statusFilter");
 
+  if (cameFromDetails && savedTab && savedStatus) {
+    setActiveTab(savedTab);
+    setStatusFilter(savedStatus);
+  } else {
+    setActiveTab("pending");
+    setStatusFilter("pending");
+    localStorage.setItem("activeTab", "pending");
+    localStorage.setItem("statusFilter", "pending");
+  }
+
+  setIsInitialized(true);
+}, [location.key]); 
   useEffect(() => {
     if (!isInitialized) return;
     fetchListings(1, pagination.pageSize);
@@ -120,11 +122,8 @@ const PendingListings = () => {
                 ).format("DD/MM/YYYY")}`
               : `${dayjs(dateRange[0]).format("DD/MM/YYYY")}`
             : "",
-        status: statusFilter
-          ? statusFilter
-          : activeTab === "pending"
-          ? "Pending"
-          : "Approved",
+        status: statusFilter || activeTab || "pending",
+
         seller_type: sellerType ?? "",
       };
 
@@ -349,11 +348,11 @@ const PendingListings = () => {
               label: "Status",
               component: (
                 <Select
-                  value={statusFilter}
-                  onChange={setStatusFilter}
-                  style={{ width: "100%" }}
-                  placeholder="Select Status"
-                  allowClear
+                  value={statusFilter || "pending"}
+  onChange={setStatusFilter}
+  style={{ width: "100%" }}
+  placeholder="Select Status"
+  allowClear={false}
                 >
                   <Option value="pending">Pending</Option>
                   <Option value="approved">Approved</Option>
@@ -403,8 +402,10 @@ const PendingListings = () => {
             <div
               key={tab}
               onClick={() => {
-                setStatusFilter("");
+                setStatusFilter(tab);
                 setActiveTab(tab);
+                 localStorage.setItem("activeTab", tab);
+  localStorage.setItem("statusFilter", tab);
               }}
               style={{
                 width: 180,

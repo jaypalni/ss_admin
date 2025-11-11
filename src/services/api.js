@@ -77,7 +77,7 @@ api.interceptors.response.use(
         case 401:
           message.warning("Session expired. Redirecting to login...");
           setTimeout(() => {
-            window.location.href = "/";
+            //window.location.href = "/";
           }, 1000);
           break;
         case 403:

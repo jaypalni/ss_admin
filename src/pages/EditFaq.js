@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import bluelogo_icon1 from "../assets/images/globe.svg";
 import { loginApi } from "../services/api";
+import { handleApiError } from "../utils/apiUtils";
 const { TextArea } = Input;
 
 const EditFaq = () => {
@@ -149,7 +150,11 @@ useEffect(() => {
       }
     } catch (err) {
       console.error("FAQ save error:", err);
-      messageApi.error(err?.message || "Something went wrong while saving FAQ");
+     const errorMessage = handleApiError(err);
+           messageApi.open({
+             type: "error",
+             content: errorMessage?.error || "Error fetching FAQs",
+           });
     }finally{
        setSaving(false)
     }

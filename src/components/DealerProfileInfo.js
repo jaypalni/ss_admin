@@ -86,13 +86,15 @@ e.target.style.height = "0px";
                   <Tag
   style={{
     background:
-      dealerData?.status === "banned"
+      dealerData?.status === "banned" ||
+      dealerData?.is_verified === "rejected"
         ? "#FEE2E2"
         : dealerData?.is_flagged === 1
         ? "#FEF9C3"
         : "#DCFCE7",
     color:
-      dealerData?.status === "banned"
+      dealerData?.status === "banned" ||
+      dealerData?.is_verified === "rejected"
         ? "#991B1B"
         : dealerData?.is_flagged === 1
         ? "#854D0E"
@@ -108,8 +110,10 @@ e.target.style.height = "0px";
     ? "Flagged"
     : dealerData?.is_verified === "verified"
     ? "Verified"
+    : dealerData?.is_verified === "rejected"
+    ? "Rejected"
     : "Pending Verification"}
-</Tag>
+                  </Tag>
 
                 </div>
               </div>

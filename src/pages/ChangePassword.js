@@ -21,9 +21,9 @@ import { handleApiError } from "../utils/apiUtils";
 import { encryptData } from "../utils/CryptoJS";
 
 const validatePasswordRequirements = (password) => {
-  const allowedSpecial = "@#$%&";
+  const allowedSpecial = "@#$%&*";
   const hasAllowedSpecial = new RegExp(`[${allowedSpecial}]`).test(password);
-  const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(password);
+  const hasInvalidSpecial = /[^A-Za-z0-9@#$%&*]/.test(password);
 
   return {
     length: password.length >= 8,

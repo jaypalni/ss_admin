@@ -22,11 +22,12 @@ export const DealerActionButtons = ({
   const isBanned = dealerData?.status === "banned";
   const isFlagged = dealerData?.is_flagged === 1;
   const isVerified = dealerData?.is_verified === "verified";
+  const isPending = dealerData?.is_verified === "pending";
   const isRejected = dealerData?.is_verified === "rejected";
 
-  const isDisabled = isVerified || isRejected;
+  const isApproveRejectDisabled = isVerified  || isRejected;
 
-  const getCommonButtonStyle = (color, isDisabledOverride = isDisabled) => ({
+  const getCommonButtonStyle = (color, isDisabledOverride = false) => ({
     borderRadius: 8,
     flex: 1,
     background: isDisabledOverride ? "#D1D5DB" : color,
@@ -75,19 +76,19 @@ export const DealerActionButtons = ({
       key: "approve",
       text: "Approve Dealer",
       icon: <CheckOutlined style={{ color: "#FFFFFF" }} />,
-      style: getCommonButtonStyle("#16A34A"),
+      style: getCommonButtonStyle("#16A34A", isApproveRejectDisabled),
       onClick: () => setModalType("approve"),
       loading: loadingApprove,
-      disabled: isDisabled,
+      disabled: isApproveRejectDisabled,
     },
     {
       key: "reject",
       text: "Reject Application",
       icon: getIcon(reject_d, 10, 10, true),
-      style: getCommonButtonStyle("#DC2626"),
+      style: getCommonButtonStyle("#DC2626", isApproveRejectDisabled),
       onClick: () => setModalType("reject"),
       loading: loadingReject,
-      disabled: isDisabled,
+      disabled: isApproveRejectDisabled,
     },
     {
       key: "info",
@@ -102,7 +103,7 @@ export const DealerActionButtons = ({
       key: "flag",
       text: isFlagged ? "Unflag Account" : "Flag Account",
       icon: getIcon(flag_d, 12, 12, true),
-      style: getCommonButtonStyle("#CA8A04",),
+      style: getCommonButtonStyle("#CA8A04"),
       onClick: () => setModalType("flag"),
       loading: loadingFlagged,
       disabled: false,
