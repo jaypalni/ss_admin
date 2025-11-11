@@ -134,7 +134,7 @@ useEffect(() => {
       navigate("/FAQ'S");
     }, 1000);
         } else {
-          messageApi.error(resData?.message || "Failed to update FAQ");
+          messageApi.success(resData?.message || "Failed to update FAQ");
         }
       } else {
         const res = await loginApi.addfaq(langCode,body);
@@ -145,7 +145,7 @@ useEffect(() => {
       navigate("/FAQ'S");
     }, 1000);
         } else {
-          messageApi.error(resData?.message || "Failed to add FAQ");
+          messageApi.success(resData?.message || "Failed to add FAQ");
         }
       }
     } catch (err) {
