@@ -19,7 +19,7 @@ const validatePasswordRequirements = (password) => {
     upper: /[A-Z]/.test(password),
     lower: /[a-z]/.test(password),
     number: /\d/.test(password),
-    special: /[@#$%&]/.test(password),
+    special: /[@#$%&*]/.test(password),
   };
 };
 
@@ -198,7 +198,7 @@ const CreatePassword = () => {
              onChange={(e) => {
                const value = e.target.value;
                const allowedSpecial = "@#$%&";
-               const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(value);
+               const hasInvalidSpecial = /[^A-Za-z0-9@#$%&*]/.test(value);
            
                setNewPassword(value);
            
