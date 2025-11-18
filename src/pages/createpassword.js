@@ -139,7 +139,7 @@ const CreatePassword = () => {
   }, [newPassword, reenterPassword, passworderrormsg, reenterpassworderrormsg]);
 
   const handleLoginClick = () => {
-    navigate("/");
+    navigate("/OtpScreen");
   };
 
   const handleResetPassword = (e) => {

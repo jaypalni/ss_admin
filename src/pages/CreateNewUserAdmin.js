@@ -165,7 +165,7 @@ useEffect(() => {
       >
         <Card style={{ width: "100%", maxWidth: 600, marginTop: "20px", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
           
-          <Row gutter={16}>
+         <Row gutter={16}>
   <Col span={12}>
     <Form.Item
       label={<RequiredLabel text="First Name" />}
@@ -173,8 +173,8 @@ useEffect(() => {
       rules={[
         { required: true, message: "First name is required" },
         {
-          pattern: /^[A-Za-z\s]+$/,
-          message: "First name cannot contain numbers or special characters.",
+          pattern: /^[A-Za-z\u0600-\u06FF\s]+$/,
+          message: "Only English, Arabic, or Kurdish letters are allowed.",
         },
       ]}
     >
@@ -193,8 +193,8 @@ useEffect(() => {
       rules={[
         { required: true, message: "Last name is required" },
         {
-          pattern: /^[A-Za-z\s]+$/,
-          message: "Last name cannot contain numbers or special characters.",
+          pattern: /^[A-Za-z\u0600-\u06FF\s]+$/,
+          message: "Only English, Arabic, or Kurdish letters are allowed.",
         },
       ]}
     >
@@ -205,8 +205,7 @@ useEffect(() => {
       />
     </Form.Item>
   </Col>
-          </Row>
-
+         </Row>
 
           <Row gutter={16}>
             <Col span={12}>

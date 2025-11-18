@@ -367,7 +367,7 @@ useEffect(() => {
     <div
       className="bestcars-root"
       style={{
-        height: "calc(100vh - 80px)",
+        // height: "88vh",
         display: "flex",
         flexDirection: "column",
         padding: 4,
@@ -445,16 +445,15 @@ useEffect(() => {
       </div>
 
       <div
-        className="list-area"
-        style={{
-          flex: "1 1 auto",
-          overflowY: "auto",
-          padding: "12px 8px",
-          background: "#F8FAFC",
-        }}
+         style={{
+    flex: "1 1 auto",
+    overflowY:"auto",
+    padding: "12px 8px",
+    background: "#F8FAFC",
+  }}
       >
-        <div style={{ width: "90%", margin: "0 auto", padding: 0 }}>
-          <Spin spinning={loading} tip="">
+        <div style={{ width: "100%", margin: "0 auto", padding: 0 }}>
+          <Spin spinning={loading} style={{ width: "100%" }} wrapperClassName="no-scroll-spin">
             <div style={{ marginTop: 8 }}>
             {displayedCars.length === 0 ? (
               <div style={{ padding: 24, textAlign: "center", color: "#6B7280" }}>{loading ? "Loading vehicles..." : "No data found"}</div>

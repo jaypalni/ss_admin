@@ -131,11 +131,11 @@ const ApprovalStatusTag = ({ approval, status }) => {
 
 const BoostStatus = ({ isFeatured }) => {
   const style = getBoostStatusStyle(isFeatured);
-
+  const featured = Number(isFeatured);
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
-      <Tag style={style}>{isFeatured === 1 ? "Active" : "Not Active"}</Tag>
-      {isFeatured === 1 && (
+      <Tag style={style}>{featured === 1 ? "Active" : "Not Active"}</Tag>
+      {featured === 1 && (
         <img src={boosticon} alt="Boost Icon" style={{ width: 18, height: 18, marginLeft: 6 }} />
       )}
     </div>
@@ -554,8 +554,8 @@ console.log("From Details:", fromDetails);
                 <div style={{ marginBottom: 16 }}>
                   <strong style={{ display: "block", marginBottom: 4, color: "#6B7280", fontSize: "14px", fontWeight: 400 }}>Subscription Model:</strong>
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <Tag style={{ backgroundColor: "#DBEAFE", color: "#1E40AF", borderRadius: "22px", border: "none", padding: "2px 10px", fontWeight: 500 }}>Premium Plus</Tag>
-                    <img src={crownicon} alt="Crown Icon" style={{ width: 18, height: 18 }} />
+                    {/* <Tag style={{ backgroundColor: "#DBEAFE", color: "#1E40AF", borderRadius: "22px", border: "none", padding: "2px 10px", fontWeight: 500 }}></Tag>
+                    <img src={crownicon} alt="Crown Icon" style={{ width: 18, height: 18 }} /> */}
                   </div>
                 </div>
               </Col>

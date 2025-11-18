@@ -181,7 +181,7 @@ useEffect(() => {
               fontWeight: 500,
             }}
           >
-            Add New Q&A
+            Add New FAQ
           </Button>
         </Col>
       </Row>

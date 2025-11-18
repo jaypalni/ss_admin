@@ -337,7 +337,8 @@ const Individual = () => {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>User ID</span>,
       dataIndex: "id",
       key: "id",
-      width: 80,
+      width: 90,
+      sorter: (a, b) => a.id.localeCompare(b.id),
      render: (text) => (
   <span style={{
       display: "inline-block",

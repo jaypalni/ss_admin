@@ -25,7 +25,7 @@ export const DealerProfileInfo = ({ dealerData }) => {
                 onError={(e) => {
                  e.target.src = "";
                  e.target.style.width = "0px";
-e.target.style.height = "0px";
+                 e.target.style.height = "0px";
                e.target.style.backgroundColor = "white";  
                 }}
               />

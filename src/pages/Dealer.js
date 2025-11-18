@@ -300,6 +300,7 @@ const handleExport = async () => {
       title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>ID</span>,
       dataIndex: "id",
       key: "id",
+       sorter: (a,b) => a.id?.localeCompare(b.id),
       render: (text) => (
   <span style={{
       display: "inline-block",
@@ -357,16 +358,38 @@ const handleExport = async () => {
   }),
 },
 
-    {
-      title: <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>Owner</span>,
-      dataIndex: "owner",
-      key: "owner",
-      width: 120,
-      onCell: (record) => ({
-        style: { cursor: "pointer" },
+   {
+  title: (
+    <span style={{ color: "#6B7280", fontSize: "12px", fontWeight: "500" }}>
+      Owner
+    </span>
+  ),
+  dataIndex: "owner",
+  key: "owner",
+  width: 120,
+
+  onCell: (record) => ({
+    style: {
+      cursor: "pointer",
+     
+    },
     onClick: () => navigate(`/user-management/dealer/${record.id}`),
   }),
-    },
+
+  render: (text) => (
+    <span
+      style={{
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        display: "inline-block",
+         maxWidth: "100px",
+      }}
+    >
+      {text}
+    </span>
+  ),
+},
    {
   title: (
     <span
@@ -434,6 +457,7 @@ const handleExport = async () => {
       key: "listings",
       align: "center",
       width: 120,
+       sorter: (a,b) => Number(a.listings) - Number(b.listings),
       onCell: (record) => ({
         style: { cursor: "pointer" },
     onClick: () => navigate(`/user-management/dealer/${record.id}`),

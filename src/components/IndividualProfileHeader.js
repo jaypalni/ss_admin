@@ -12,7 +12,6 @@ const StatusTag = ({ status, isFlagged }) => {
     pending:  { bg: "#FEF9C3", color: "#854D0E" },
   };
 
-  // priority: banned → flagged → active → pending
   let key = "pending";
   if (status === "banned") key = "banned";
   else if (isFlagged === 1) key = "flagged";
@@ -133,7 +132,7 @@ export const IndividualProfileHeader = ({
   const nameStyle = { margin: 0, fontSize: 20, fontWeight: 700, color: "#0F172A", lineHeight: 1 };
   const metaKeyStyle = { color: "#6B7280", fontSize: 13, marginRight: 8 };
   const metaValueStyle = { color: "#111827", fontSize: 13, fontWeight: 500 };
-
+   const BASE_URL = process.env.REACT_APP_API_URL;
   return (
     <div
       style={{
@@ -157,18 +156,25 @@ export const IndividualProfileHeader = ({
           background: "white" 
         }}
       >
-        {avatarSrc && (
-          <Avatar
-            size={64}
-            src={avatarSrc}
-            shape="square"
-            onError={() => {
-              setAvatarSrc(""); 
-              return false;
-            }}
-            style={{ width: "100%", height: "100%" }}
-          />
-        )}
+       
+           <img
+                src={`${BASE_URL}${dealerData.profile_pic}`}
+                alt=""
+                style={{
+                  width: 100,
+                  height: 85,
+                  borderRadius: 8,
+                  objectFit: "cover",
+                  flex: "0 0 35px",
+                  backgroundColor: "white",
+                }}
+                onError={(e) => {
+                 e.target.src = "";
+                 e.target.style.width = "0px";
+                 e.target.style.height = "0px";
+               e.target.style.backgroundColor = "white";  
+                }}
+              />
       </div>
 
       <div style={{flex:"1 1 auto", minWidth: 0 }}>
@@ -181,12 +187,12 @@ export const IndividualProfileHeader = ({
             <div style={metaValueStyle}>{dealerData.email || "-"}</div>
           </div>
 
-          <div style={{ width: 150 }}>
+          <div style={{ width: 200 }}>
             <div style={metaKeyStyle}>Phone:</div>
             <div style={metaValueStyle}>{dealerData.phone_number || "-"}</div>
           </div>
 
-          <div style={{ width: 100 }}>
+          <div style={{ width: 200 }}>
             <div style={metaKeyStyle}>User Id:</div>
             <div style={metaValueStyle}>#{dealerData.user_id ?? "-"}</div>
           </div>
@@ -207,12 +213,12 @@ export const IndividualProfileHeader = ({
             </span>
           </div>
 
-          <div style={{ width: 150 }}>
+          <div style={{ width: 200 }}>
             <span style={metaKeyStyle}>Subscription Plan: </span>
             <span style={metaValueStyle}>{dealerData.subscription_plan_name || "-"}</span>
           </div>
 
-          <div style={{ width: 100 }}>
+          <div style={{ width: 200 }}>
             <span style={metaKeyStyle}>Expires At: </span>
             <span style={metaValueStyle}>{dealerData.subscription_expires_at ? new Date(dealerData.subscription_expires_at).toLocaleDateString("en-US", {
                     month: "short",

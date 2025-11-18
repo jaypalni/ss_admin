@@ -102,7 +102,7 @@ const BoostStatus = ({ status }) => {
 
 
 const DocumentCard = ({ doc, onDownload, onCancel }) => {
-  const isApproved = doc.status === "";
+  const isApproved = doc.status === "Validated";
 
   return (
     <Card size="large" style={{ borderRadius: 8 }}>
@@ -127,14 +127,14 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
         >
           {doc.title}
         </div>
-        {/* <div style={{ marginLeft: 12 }}>
+        <div style={{ marginLeft: 12 }}>
           <Tag
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              backgroundColor: isApproved ? "#DCFCE7" : "#FEE2E2",
-              color: isApproved ? "#166534" : "#991B1B",
+              backgroundColor: isApproved ? "#DCFCE7" : "#FEF9C3",
+              color: isApproved ? "#166534" : "#854D0E",
               borderRadius: 8,
               padding: "2px 5px",
               fontWeight: 500,
@@ -144,7 +144,7 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
             {isApproved ? <CheckOutlined style={{ color: "#16A34A" }} /> : <img src={warning} alt="Not Approved" style={{ width: 12, height: 12 }} />}
             {doc.status}
           </Tag>
-        </div> */}
+        </div>
       </div>
 
       <img
@@ -159,9 +159,21 @@ const DocumentCard = ({ doc, onDownload, onCancel }) => {
         }}
       />
 
-      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 12 }}>
-        {doc.submittedOn ? doc.submittedOn.split("/").slice(3).join("/") : ""}
-      </div>
+     <div
+  style={{
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 12,
+    maxWidth: "100%",          
+    whiteSpace: "nowrap",       
+    overflow: "hidden",         
+    textOverflow: "ellipsis", 
+  }}
+  title={doc.submittedOn}       
+>
+  {doc.submittedOn ? doc.submittedOn : ""}
+</div>
+
 
       <div style={{ display: "flex", gap: 8 }}>
         <Button
@@ -545,10 +557,14 @@ const DealerDetails = () => {
 
   const documents = [];
   if (dealerData.document) {
+    const documentStatus =
+    String(dealerData.is_verified).toLowerCase() === "verified"
+      ? "Validated"
+      : "Pending";
     documents.push({
       id: "doc-1",
       title: "Trade License",
-      status: "Validated",
+      status: documentStatus,
       submittedOn: dealerData.document,
     });
   }

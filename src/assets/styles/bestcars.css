@@ -23,3 +23,11 @@
   border: none !important;  
 }
 
+.no-scroll-spin {
+  overflow: visible !important; 
+}
+
+.list-area .row {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
