@@ -209,26 +209,52 @@ const SubmittedDocumentsCard = ({ documents }) => {
   const BASE_URL = process.env.REACT_APP_API_URL
 
 
-const handleDownload = (doc) => {
-  if (doc.submittedOn) {
-    let url = doc.submittedOn;
+const handleDownload = async (doc) => {
+  if (!doc.submittedOn) {
+    message.warning("No document available to download");
+    return;
+  }
 
-    if (!/^https?:\/\//i.test(url)) {
-      url = `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+  let url = doc.submittedOn;
+
+  if (!/^https?:\/\//i.test(url)) {
+    url = `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch file");
     }
 
+    const blob = await response.blob();
+    const fileURL = window.URL.createObjectURL(blob);
+
+    const fileName = url.split("/").pop() || "download";
+
     const link = document.createElement("a");
-    link.href = url;
-    link.download = url.split("/").pop();
+    link.href = fileURL;
+    link.download = fileName;
+
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
 
-    message.success(`Download started for ${doc.title ?? "document"}`);
-  } else {
-    message.warning("No document available to download");
+    window.URL.revokeObjectURL(fileURL);
+
+    message.success("Download started");
+  } catch (error) {
+    console.error("Download error:", error);
+    message.error("Failed to download document");
   }
 };
+
 
  const handleView = (doc) => {
   if (doc.submittedOn) {

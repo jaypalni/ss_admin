@@ -438,7 +438,7 @@ useEffect(() => {
                     />
                   </Popconfirm>
 
-                 <FiMoreVertical 
+                 {/* <FiMoreVertical 
                   style={{
                     width: "14px",
                     height: "14px",
@@ -446,7 +446,7 @@ useEffect(() => {
                     cursor: "pointer",
                     marginTop: 5,
                   }}
-                />
+                /> */}
 
                 </div>
               </div>

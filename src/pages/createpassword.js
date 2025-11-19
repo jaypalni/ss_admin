@@ -236,7 +236,7 @@ const CreatePassword = () => {
               onChange={(e) => {
                 const value = e.target.value;
                 const allowedSpecial = "@#$%&";
-                const hasInvalidSpecial = /[^A-Za-z0-9@#$%&]/.test(value);
+                const hasInvalidSpecial = /[^A-Za-z0-9@#$%&*]/.test(value);
             
                 setReenterPassword(value);
             

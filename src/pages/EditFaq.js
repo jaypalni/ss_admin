@@ -37,18 +37,39 @@ const EditFaq = () => {
         if (!isLoggedIn) navigate("/");
       }, [isLoggedIn, navigate]);
 
-  const [faqData, setFaqData] = useState({
+   const emptyFaqState = {
     english: { question: "", answer: "" },
     arabic: { question: "", answer: "" },
     kurdish: { question: "", answer: "" },
     category: "",
-  });
+  };
+
+  const [faqData, setFaqData] = useState(emptyFaqState);
+
+  useEffect(() => {
+    return () => {
+      setFaqData(emptyFaqState); 
+    };
+  }, []);
 
   const [errors, setErrors] = useState({
     question: "",
     answer: "",
     category: "",
   });
+
+   const handleTabChange = (key) => {
+    setActiveTab(key);
+
+    if (!isEdit) {
+      setFaqData((prev) => ({
+        ...prev,
+        [key]: { question: "", answer: "" },
+      }));
+    }
+
+    setErrors({ question: "", answer: "", category: "" });
+  };
 
   const handleChange = (lang, field, value) => {
   setFaqData((prev) => ({

@@ -362,7 +362,7 @@ let currentHeader =
       setLogoutModalOpen(true);
       return;
     }
-    if (key === "profile") navigate("/profile");
+    if (key === "profile") navigate("");
     if (key === "subadmin") navigate("/createNewAdmin");
     if (key === "settings") navigate("/accountsettings/changepassword");
   };
