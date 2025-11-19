@@ -585,7 +585,10 @@ const Individual = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               style={{ width: 400 }}
             />
-            <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 160 }}>
+            <Select value={statusFilter} onChange={(val) => {
+    setStatusFilter(val);
+    setPage(1); 
+  }} style={{ width: 160 }}>
               <Option value="all">All</Option>
               <Option value="Active">Active</Option>
               <Option value="Flagged">Flagged</Option>

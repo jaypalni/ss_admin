@@ -323,7 +323,7 @@ const validate = () => {
       <Card bordered style={{ borderRadius: "10px", marginTop: 20 }}>
         <Tabs
           activeKey={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
           tabBarStyle={{ marginBottom: 20 }}
           items={tabItems}
         />

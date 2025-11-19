@@ -616,7 +616,10 @@ const handleExport = async () => {
             />
           </Col>
           <Col>
-            <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 200, marginRight: 8 }}>
+            <Select value={statusFilter} onChange={(val) => {
+    setStatusFilter(val);
+    setPage(1); 
+  }} style={{ width: 200, marginRight: 8 }}>
               <Option value="all">All</Option>
               <Option value="active">Active</Option>
               <Option value="pending verification">Pending</Option>

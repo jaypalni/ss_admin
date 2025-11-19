@@ -6,12 +6,12 @@ import {  useSelector } from 'react-redux';
 
 const ListingManagement = () => {
   const navigate = useNavigate();
-  const { user,token } = useSelector(state => state.auth);
+  const { user,token,need_password } = useSelector(state => state.auth);
   const isLoggedIn = token && user
    useEffect(() => {
     console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
     
-    if (!isLoggedIn) {
+    if (isLoggedIn && need_password === 1) {
       navigate('/');
     } else {
       console.log('User not logged in or coming from login flow, staying on OTP screen');

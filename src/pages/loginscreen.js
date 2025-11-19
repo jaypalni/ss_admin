@@ -22,69 +22,61 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const handleLogin = (e) => {
-    if (e) {
-      e.preventDefault();
-    }
-    
-    console.log("handleLogin called");
-    let hasError = false;
-    setEmailErrorMsg("");
-    setPasswordErrorMsg("");
-    if (email.trim() === "") {
-      setEmailErrorMsg("Please Enter Email Address");
-      hasError = true;
-    }
-    if (password.trim() === "") {
-      setPasswordErrorMsg("Please Enter Password");
-      hasError = true;
-    }
-    if (hasError) return;
-   const encryptedPassword = encryptData(password);
+const handleLogin = async (e) => {
+  if (e) e.preventDefault();
 
-    const body = {
-      email: email,
-      password: encryptedPassword,
-    };
-    setLoading(true);
-     userloginAPI(body); 
-  };
+  setEmailErrorMsg("");
+  setPasswordErrorMsg("");
 
-  const userloginAPI = async (body) => {
-    try {
-      const response = await loginApi.login(body);
-      const userData = handleApiResponse(response);
-      console.log('userdata',userData)
-      if (userData.status_code === 200) {
-        messageApi.open({ 
-          type: 'success', 
-          content: userData.message || 'Login successful!' 
-        });
-        dispatch(loginSuccess(userData?.data?.firstname, userData?.data?.access_token,
-           userData?.data?.email,userData?.data?.role,userData?.data?.needs_password_update));
-        setLoading(false);
-        
-        if (userData?.data?.needs_password_update === 1) {
-          navigate("/CreatePassword");
-        } else {
-          navigate("/dashboard");
-        }
+  if (!email.trim()) {
+    setEmailErrorMsg("Please Enter Email Address");
+    return;
+  }
+
+  if (!password.trim()) {
+    setPasswordErrorMsg("Please Enter Password");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const encryptedPassword = encryptData(password);
+
+    const body = { email, password: encryptedPassword };
+
+    const response = await loginApi.login(body);
+    const userData = response.data; 
+
+    if (userData.status_code === 200) {
+      messageApi.success(userData.message || "Login successful!");
+
+      dispatch(
+        loginSuccess(
+          userData.data.firstname,
+          userData.data.access_token,
+          userData.data.email,
+          userData.data.role,
+          userData.data.needs_password_update
+        )
+      );
+
+      if (userData.data.needs_password_update === 1) {
+        navigate("/CreatePassword");
       } else {
-        messageApi.open({ 
-          type: 'error', 
-          content: userData.error || userData.message || 'Login failed. Please try again.' 
-        });
-        setLoading(false);
+        navigate("/dashboard");
       }
-    } catch (error) {
-      const errorData = handleApiError(error);
-            messageApi.open({
-              type: "error",
-              content: errorData?.error || "Error fetching users",
-            });
-      setLoading(false);
+    } else {
+      messageApi.error(userData.error || userData.message || "Login failed");
     }
-  };
+  } catch (error) {
+    const errorData = handleApiError(error);
+    messageApi.error(errorData?.error || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="login-page-wrapper1">

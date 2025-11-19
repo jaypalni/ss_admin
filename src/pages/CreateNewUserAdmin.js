@@ -112,7 +112,7 @@ useEffect(() => {
 
       if (isEdit) {
         const res = await loginApi.admindata(id, body1);
-        const resData =  handleApiResponse(res?.data);;
+        const resData =  handleApiResponse(res);;
         if (resData?.status_code === 200) {
           messageApi.success(resData.message || "Admin updated successfully");
            setTimeout(() => {
@@ -129,7 +129,9 @@ useEffect(() => {
           messageApi.success(resData.message || "Admin created successfully");
           form.resetFields();
           setStatusFlag(null);
+          setTimeout(() => {
           navigate("/Admins");
+        }, 1000);
         } else {
           messageApi.error(resData?.message || "Failed to create admin");
         }

@@ -44,7 +44,7 @@ const validatePasswordForm = (newPassword, reenterPassword, allRequirementsMet) 
   return null;
 };
 
-const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate) => {
+const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate,redirectPath = "/") => {
   try {
     const response = await apiCall(body);
     const userData = response.data;
@@ -53,7 +53,7 @@ const handleApiResponse = async (apiCall, body, messageApi, setLoading, navigate
       messageApi.open({ type: 'success', content: userData.message });
       setLoading(false);
       setTimeout(() => {
-          navigate("/");
+          navigate(redirectPath);
         }, 1000);
     } else {
       messageApi.open({ type: 'error', content: userData.error });
@@ -122,6 +122,7 @@ const CreatePassword = () => {
   const passwordsMatch = newPassword !== "" && newPassword === reenterPassword;
 
   const isLoggedIn = email;
+  const isPassword = need_password;
   
   useEffect(() => {
     console.log('OTP Screen useEffect - isLoggedIn:', isLoggedIn);
@@ -166,10 +167,10 @@ const CreatePassword = () => {
     
     if (need_password === 1) {
       const body = { email: email, new_password: encryptedPassword };
-      handleApiResponse(loginApi.createnewpassword, body, messageApi, setLoading, navigate);
+      handleApiResponse(loginApi.createnewpassword, body, messageApi, setLoading, navigate,"/dashboard");
     } else {
       const body = { new_password: encryptedPassword };
-      handleApiResponse(loginApi.resetpassword, body, messageApi, setLoading, navigate);
+      handleApiResponse(loginApi.resetpassword, body, messageApi, setLoading, navigate,"/");
     }
   };
 

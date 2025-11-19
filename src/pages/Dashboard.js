@@ -19,16 +19,16 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
-  const { user, token } = useSelector((state) => state.auth);
+  const { user, token,need_password } = useSelector((state) => state.auth);
   const [messageApi, contextHolder] = message.useMessage();
 
   const [filterValue, setFilterValue] = useState("week"); 
 
-  const isLoggedIn = token && user;
+  const isLoggedIn = Boolean(token && user);
 
   useEffect(() => {
-    if (!isLoggedIn) navigate("/");
-  }, [isLoggedIn]);
+    if (isLoggedIn && need_password === 1) navigate("/");
+  }, [isLoggedIn,need_password,navigate]);
 
  useEffect(() => {
   if (!didMountRef.current) {

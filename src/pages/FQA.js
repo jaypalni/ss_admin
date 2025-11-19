@@ -400,7 +400,7 @@ useEffect(() => {
 
     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
       <FiUser size={12} />
-      <span style={{fontSize:14,fontWeight:400,color:"#6B7280"}}>Created by: {it.created_by ?? "-"}</span>
+      <span style={{fontSize:14,fontWeight:400,color:"#6B7280"}}>By: {it.created_by ?? "-"}</span>
     </div>
   </div>
 </div>
